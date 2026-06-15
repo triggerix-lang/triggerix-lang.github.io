@@ -1,14 +1,28 @@
-catalog:
-  vite: npm:@voidzero-dev/vite-plus-core@latest
-  vitest: npm:@voidzero-dev/vite-plus-test@latest
-  vite-plus: latest
+minimumReleaseAgeExclude:
+  - '@triggerix/core'
+  - '@triggerix/editor'
+  - triggerix-editor-vue
+
+shellEmulator: true
+
+trustPolicy: no-downgrade
+
 overrides:
-  vite: "catalog:"
-  vitest: "catalog:"
+  vite: 'catalog:'
+  vitest: 'catalog:'
+catalog:
+  '@vitejs/plugin-vue': ^5.2.0
+  triggerix-editor-vue: ^0.0.2
+  typescript: ~6.0.2
+  vite: npm:@voidzero-dev/vite-plus-core@latest
+  vite-plus: latest
+  vitest: npm:@voidzero-dev/vite-plus-test@latest
+  vue: ^3.5.0
+  vue-router: ^5.1.0
 peerDependencyRules:
   allowAny:
     - vite
     - vitest
   allowedVersions:
-    vite: "*"
-    vitest: "*"
+    vite: '*'
+    vitest: '*'

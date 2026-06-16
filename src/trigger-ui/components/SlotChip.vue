@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import type { SlotValueEntry, ToolDescriptor, War3Editor } from 'triggerix-ui-preset-war3'
+import { resolveSlotDisplayText } from 'triggerix-ui-preset-war3'
 import { computed } from 'vue'
 import type { SlotSegment } from '../composables/useTriggerEditor'
-import { resolveSlotDisplayText } from '../composables/slotDisplay'
 
 const props = defineProps<{
   segment: SlotSegment
@@ -40,7 +40,7 @@ const displayText = computed<string>(() => {
   // editor — this correctly renders composite-tool fills (e.g.
   // "玩家 1 的 单位").
   if (entry?.tool && props.editor) {
-    return resolveSlotDisplayText(entry, props.editor, props.segment.label)
+    return resolveSlotDisplayText(entry, props.editor.getRegistry(), props.segment.label)
   }
 
   // Without an entry, the segment is unfilled or only carries a primitive

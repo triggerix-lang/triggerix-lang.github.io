@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { Segment, SlotValueEntry, ToolDescriptor, War3Editor } from 'triggerix-ui-preset-war3'
+import { resolveSlotDisplayText } from 'triggerix-ui-preset-war3'
 import type { SlotSegment } from '../composables/useTriggerEditor'
-import { resolveSlotDisplayText } from '../composables/slotDisplay'
 import SlotChip from './SlotChip.vue'
 
 const props = defineProps<{
@@ -72,7 +72,9 @@ function renderReadonlySlot(seg: SlotSegment): string {
   if (!entry?.tool) {
     return seg.label
   }
-  return props.editor ? resolveSlotDisplayText(entry, props.editor, seg.label) : seg.label
+  return props.editor
+    ? resolveSlotDisplayText(entry, props.editor.getRegistry(), seg.label)
+    : seg.label
 }
 </script>
 

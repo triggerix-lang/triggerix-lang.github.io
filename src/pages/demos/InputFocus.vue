@@ -1,11 +1,13 @@
 <script setup lang="ts">
-import { onMounted, ref, useTemplateRef } from 'vue'
+import { computed, ref, useTemplateRef } from 'vue'
 import DemoToast from '../../components/DemoToast.vue'
 import PlayInput from '../../components/playground/PlayInput.vue'
+import type { TriggerDef } from '../../composables/useDemoRuntime'
 import { useDemoRuntime } from '../../composables/useDemoRuntime'
 import { createHandlers, setup } from '../../definitions/input-focus'
 import DemoLayout from '../../layouts/DemoLayout.vue'
 import TriggerEditor from '../../trigger-ui/components/TriggerEditor.vue'
+import TriggerTabs from '../../trigger-ui/components/TriggerTabs.vue'
 
 const toastRef = useTemplateRef<InstanceType<typeof DemoToast>>('toast')
 
@@ -24,26 +26,53 @@ const handlers = createHandlers({
   }
 })
 
-const { war3Editor, state, ruleJson, emit } = useDemoRuntime({ setup, handlers })
+const triggerDefs: TriggerDef[] = [
+  {
+    id: 'focus-trigger',
+    name: '获焦提示',
+    initialState: {
+      event: {
+        type: 'input_focus',
+        slotValues: {
+          input: { tool: 'input_picker', value: 'username_input', subSlots: undefined }
+        }
+      },
+      actions: [
+        {
+          type: 'show_tip',
+          slotValues: {
+            message: { tool: 'text_input', value: '请输入用户名', subSlots: undefined }
+          }
+        }
+      ]
+    }
+  },
+  {
+    id: 'blur-trigger',
+    name: '失焦隐藏',
+    initialState: {
+      event: {
+        type: 'input_blur',
+        slotValues: {
+          input: { tool: 'input_picker', value: 'username_input', subSlots: undefined }
+        }
+      },
+      actions: [{ type: 'hide_tip', slotValues: {} }]
+    }
+  }
+]
+
+const { triggers, rulesJson, emit } = useDemoRuntime({
+  setup,
+  handlers,
+  triggers: triggerDefs
+})
+
+const activeTab = ref(0)
+const activeTrigger = computed(() => triggers[activeTab.value])
 
 const username = ref('')
 const password = ref('')
-
-onMounted(() => {
-  // Predefined: focus on username → show tip "请输入用户名"
-  war3Editor.setEvent('input_focus')
-  war3Editor.setEventSlot('input', {
-    tool: 'input_picker',
-    value: 'username_input',
-    subSlots: undefined
-  })
-  war3Editor.addAction('show_tip')
-  war3Editor.setActionSlot(0, 'message', {
-    tool: 'text_input',
-    value: '请输入用户名',
-    subSlots: undefined
-  })
-})
 
 function onTrigger(eventType: string, payload: Record<string, unknown>) {
   emit(eventType, payload)
@@ -51,7 +80,7 @@ function onTrigger(eventType: string, payload: Record<string, unknown>) {
 </script>
 
 <template>
-  <DemoLayout title="输入框焦点 · Input Focus" :rule-json="ruleJson">
+  <DemoLayout title="输入框焦点 · Input Focus" :rules-json="rulesJson">
     <template #playground>
       <div class="flex flex-col gap-6">
         <div class="rounded-md border border-#1f2735 bg-#0c0e14/60 p-4">
@@ -90,13 +119,20 @@ function onTrigger(eventType: string, payload: Record<string, unknown>) {
         >
           <span class="text-#5fb3a1">// hint</span>
           <br />
-          聚焦「用户名」输入框 → 触发 show_tip。试着切换到密码框，规则不会命中。
+          聚焦「用户名」输入框 → 弹出提示；移开焦点 → 隐藏提示。两条触发器分别监听 focus / blur。
         </div>
       </div>
     </template>
 
     <template #editor>
-      <TriggerEditor :editor="war3Editor" :state="state" />
+      <div class="flex flex-col gap-3">
+        <TriggerTabs :tabs="triggers" v-model:active="activeTab" />
+        <TriggerEditor
+          :key="activeTrigger.id"
+          :editor="activeTrigger.editor"
+          :state="activeTrigger.state.value"
+        />
+      </div>
     </template>
   </DemoLayout>
 

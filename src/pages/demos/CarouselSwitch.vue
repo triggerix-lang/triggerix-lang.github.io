@@ -1,11 +1,13 @@
 <script setup lang="ts">
-import { onMounted, ref, useTemplateRef } from 'vue'
+import { computed, ref, useTemplateRef } from 'vue'
 import DemoToast from '../../components/DemoToast.vue'
 import PlayCarousel from '../../components/playground/PlayCarousel.vue'
+import type { TriggerDef } from '../../composables/useDemoRuntime'
 import { useDemoRuntime } from '../../composables/useDemoRuntime'
 import { createHandlers, setup } from '../../definitions/carousel-switch'
 import DemoLayout from '../../layouts/DemoLayout.vue'
 import TriggerEditor from '../../trigger-ui/components/TriggerEditor.vue'
+import TriggerTabs from '../../trigger-ui/components/TriggerTabs.vue'
 
 const toastRef = useTemplateRef<InstanceType<typeof DemoToast>>('toast')
 
@@ -20,40 +22,63 @@ const handlers = createHandlers({
 
 // Override show_message so it surfaces via toast instead of window.alert.
 handlers.show_message = (params) => {
-  toastRef.value?.push(String(params?.message ?? ''), 'success')
+  toastRef.value?.push(String((params?.message as string) ?? ''), 'success')
 }
 
-const { war3Editor, state, ruleJson, emit } = useDemoRuntime({ setup, handlers })
+const triggerDefs: TriggerDef[] = [
+  {
+    id: 'switch-message-trigger',
+    name: '切换消息',
+    initialState: {
+      event: {
+        type: 'carousel_switch',
+        slotValues: {
+          carousel: { tool: 'carousel_picker', value: 'main_carousel', subSlots: undefined }
+        }
+      },
+      actions: [
+        {
+          type: 'show_message',
+          slotValues: {
+            message: { tool: 'text_input', value: '轮播已切换', subSlots: undefined }
+          }
+        }
+      ]
+    }
+  },
+  {
+    id: 'switch-color-trigger',
+    name: '切换变色',
+    initialState: {
+      event: {
+        type: 'carousel_switch',
+        slotValues: {
+          carousel: { tool: 'carousel_picker', value: 'main_carousel', subSlots: undefined }
+        }
+      },
+      actions: [
+        {
+          type: 'change_bg_color',
+          slotValues: {
+            color: { tool: 'color_picker', value: '#5fb3a1', subSlots: undefined }
+          }
+        }
+      ]
+    }
+  }
+]
+
+const { triggers, rulesJson, emit } = useDemoRuntime({
+  setup,
+  handlers,
+  triggers: triggerDefs
+})
+
+const activeTab = ref(0)
+const activeTrigger = computed(() => triggers[activeTab.value])
 
 const slides = ['⚔  第 1 张  起手式', '🔥  第 2 张  推进中', '🏁  第 3 张  最后一张']
 const currentIndex = ref(0)
-
-onMounted(() => {
-  // Predefined: switch to last (index = 2) → toast "最后一张了!" + dark red bg
-  war3Editor.setEvent('carousel_switch')
-  war3Editor.setEventSlot('carousel', {
-    tool: 'carousel_picker',
-    value: 'main',
-    subSlots: undefined
-  })
-  war3Editor.setEventSlot('index', {
-    tool: 'number_input',
-    value: 2,
-    subSlots: undefined
-  })
-  war3Editor.addAction('show_message')
-  war3Editor.setActionSlot(0, 'message', {
-    tool: 'text_input',
-    value: '最后一张了!',
-    subSlots: undefined
-  })
-  war3Editor.addAction('change_bg_color')
-  war3Editor.setActionSlot(1, 'color', {
-    tool: 'color_picker',
-    value: '#7f1d1d',
-    subSlots: undefined
-  })
-})
 
 function onTrigger(eventType: string, payload: Record<string, unknown>) {
   // PlayCarousel emits "carousel_change", but the registered event is "carousel_switch".
@@ -66,7 +91,7 @@ function onTrigger(eventType: string, payload: Record<string, unknown>) {
 </script>
 
 <template>
-  <DemoLayout title="轮播切换 · Carousel Switch" :rule-json="ruleJson">
+  <DemoLayout title="轮播切换 · Carousel Switch" :rules-json="rulesJson">
     <template #playground>
       <div class="flex flex-col gap-6">
         <div
@@ -77,7 +102,12 @@ function onTrigger(eventType: string, payload: Record<string, unknown>) {
             scene · single carousel
           </div>
           <div class="flex justify-center">
-            <PlayCarousel id="main" v-model="currentIndex" :items="slides" @trigger="onTrigger" />
+            <PlayCarousel
+              id="main_carousel"
+              v-model="currentIndex"
+              :items="slides"
+              @trigger="onTrigger"
+            />
           </div>
         </div>
 
@@ -86,15 +116,22 @@ function onTrigger(eventType: string, payload: Record<string, unknown>) {
         >
           <span class="text-#5fb3a1">// hint</span>
           <br />
-          切到第 3 张（index=2）→ 同时触发两个动作：弹 Toast + 区域背景变红。
+          切换轮播 → 同时触发两条规则：弹 Toast + 区域背景变色。
           <br />
-          回到 1/2 张 → 规则不命中，背景保持当前色。
+          可以在编辑器里调整任一触发器的动作内容，立刻看到 JSON 抽屉里规则同步更新。
         </div>
       </div>
     </template>
 
     <template #editor>
-      <TriggerEditor :editor="war3Editor" :state="state" />
+      <div class="flex flex-col gap-3">
+        <TriggerTabs :tabs="triggers" v-model:active="activeTab" />
+        <TriggerEditor
+          :key="activeTrigger.id"
+          :editor="activeTrigger.editor"
+          :state="activeTrigger.state.value"
+        />
+      </div>
     </template>
   </DemoLayout>
 

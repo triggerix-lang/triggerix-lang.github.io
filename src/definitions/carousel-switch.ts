@@ -3,13 +3,16 @@ import type { DemoActionHandler } from '../composables/useDemoRuntime'
 import { defineAction, defineEvent } from './helpers'
 import { registerSharedTools } from './shared-tools'
 
-const carouselOptions = [{ value: 'main', label: '主轮播' }] satisfies LeafToolInput['options']
+const carouselOptions = [
+  { value: 'main_carousel', label: '主轮播' }
+] satisfies LeafToolInput['options']
 
 const colorOptions = [
   { value: '#1a1a1a', label: '深灰' },
   { value: '#1e3a8a', label: '深蓝' },
   { value: '#7f1d1d', label: '深红' },
-  { value: '#064e3b', label: '深绿' }
+  { value: '#064e3b', label: '深绿' },
+  { value: '#5fb3a1', label: '青绿' }
 ] satisfies LeafToolInput['options']
 
 export function setup(editor: War3Editor) {
@@ -68,10 +71,10 @@ interface CarouselController {
 export function createHandlers(controller: CarouselController): Record<string, DemoActionHandler> {
   return {
     show_message: (params) => {
-      window.alert(String(params?.message ?? ''))
+      window.alert(String((params?.message as string) ?? ''))
     },
     change_bg_color: (params) => {
-      controller.setBackground(String(params?.color ?? ''))
+      controller.setBackground(String((params?.color as string) ?? ''))
     }
   }
 }

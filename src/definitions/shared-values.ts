@@ -6,12 +6,12 @@ import type { LeafToolInput, War3Editor } from 'triggerix-ui-preset-war3'
  * without writing custom code.
  */
 export function registerValueTools(editor: War3Editor) {
-  const options = [
+  const options: LeafToolInput['options'] = [
     { value: { $ref: 'document.title' }, label: '网站标题' },
     { value: { $ref: 'window.innerHeight' }, label: '页面高度' },
     { value: { $ref: 'window.innerWidth' }, label: '页面宽度' },
     { value: { $ref: 'location.href' }, label: '当前网址' }
-  ] as unknown as LeafToolInput['options']
+  ]
 
   editor.registerTool('value_source', {
     label: '选择值来源',

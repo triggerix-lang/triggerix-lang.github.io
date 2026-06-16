@@ -1,62 +1,102 @@
 <script setup lang="ts">
-import type { ToolDescriptor } from 'triggerix-ui-preset-war3'
-import { ref } from 'vue'
+import type { SlotValueEntry, ToolDescriptor, War3Editor } from 'triggerix-ui-preset-war3'
+import { computed } from 'vue'
 import type { SlotSegment } from '../composables/useTriggerEditor'
-import SlotPopover from './SlotPopover.vue'
+import { resolveSlotDisplayText } from '../composables/slotDisplay'
 
 const props = defineProps<{
   segment: SlotSegment
-  toolDescriptors: ToolDescriptor[]
+  /**
+   * The structured value entry bound to this slot. Provided separately
+   * because `Segment` from `triggerix-ui-preset-war3` only carries the
+   * primitive `value`, not the full `SlotValueEntry` tree.
+   */
+  entry?: SlotValueEntry | null
+  toolDescriptors?: ToolDescriptor[]
+  /**
+   * Optional editor instance — when provided, the chip can resolve
+   * composite-tool entries into a fully expanded preview using
+   * `resolveSlotDisplayText`. Without an editor, the chip falls back to
+   * the leaf-only logic driven by `toolDescriptors`.
+   */
+  editor?: War3Editor | null
 }>()
 
 const emit = defineEmits<{
-  fill: [tool: string, value: unknown]
+  clickSlot: [segment: SlotSegment]
 }>()
 
-const popoverRef = ref<InstanceType<typeof SlotPopover> | null>(null)
-
-function isFilled(): boolean {
+const filled = computed(() => {
+  if (props.entry?.tool) return true
   const v = props.segment.value
   return v !== null && v !== undefined && v !== ''
-}
+})
 
-function getDisplayText(): string {
+const displayText = computed<string>(() => {
+  const entry = props.entry
   const v = props.segment.value
+
+  // Prefer the registry-aware resolver when we have both an entry and an
+  // editor — this correctly renders composite-tool fills (e.g.
+  // "玩家 1 的 单位").
+  if (entry?.tool && props.editor) {
+    return resolveSlotDisplayText(entry, props.editor, props.segment.label)
+  }
+
+  // Without an entry, the segment is unfilled or only carries a primitive
+  // `value` — fall back to the legacy logic.
   if (v === null || v === undefined || v === '') return props.segment.label
-  if (typeof v === 'string') return v
-  if (typeof v === 'number') return String(v)
-  return String(v)
+
+  // Try to find a matching option label across leaf-select tools. Use a
+  // deep-equality check so object-shaped option values (e.g. `{ $ref: ... }`)
+  // still resolve when the stored entry value is a freshly constructed
+  // literal that is not reference-equal to the registered option.
+  if (props.toolDescriptors) {
+    for (const d of props.toolDescriptors) {
+      if (d.type !== 'leaf') continue
+      if (d.input.type !== 'select') continue
+      const opt = d.input.options?.find((o) => optionValueEquals(o.value, v))
+      if (opt) return opt.label
+    }
+  }
+
+  if (typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean') return String(v)
+  try {
+    return JSON.stringify(v)
+  } catch {
+    return String(v)
+  }
+})
+
+function optionValueEquals(a: unknown, b: unknown): boolean {
+  if (a === b) return true
+  if (a == null || b == null) return false
+  if (typeof a !== 'object' || typeof b !== 'object') return false
+  try {
+    return JSON.stringify(a) === JSON.stringify(b)
+  } catch {
+    return false
+  }
 }
 
 function handleClick() {
-  popoverRef.value?.open()
-}
-
-function handleFill(tool: string, value: unknown) {
-  emit('fill', tool, value)
+  emit('clickSlot', props.segment)
 }
 </script>
 
 <template>
-  <span class="relative inline-block">
-    <span
-      class="inline-flex items-center px-1.5 py-0.5 mx-0.5 rounded-sm font-mono text-[0.82rem] cursor-pointer border transition-all duration-150"
-      :class="
-        isFilled()
-          ? 'text-#80cbc4 bg-#80cbc4/8 border-#80cbc4/15 hover:bg-#80cbc4/14 hover:border-#80cbc4/30 hover:shadow-[0_0_8px_rgba(128,203,196,0.12)]'
-          : 'text-#4fc3f7 bg-#4fc3f7/8 border-#4fc3f7/15 border-dashed hover:bg-#4fc3f7/14 hover:border-#4fc3f7/30 hover:shadow-[0_0_8px_rgba(79,195,247,0.12)]'
-      "
-      @click="handleClick"
-    >
-      <span v-if="!isFilled()" class="opacity-50">[</span>
-      {{ getDisplayText() }}
-      <span v-if="!isFilled()" class="opacity-50">]</span>
-    </span>
-    <SlotPopover
-      ref="popoverRef"
-      :segment="segment"
-      :tool-descriptors="toolDescriptors"
-      @fill="handleFill"
-    />
-  </span>
+  <button
+    type="button"
+    class="inline-flex items-baseline mx-0.5 px-0.5 bg-transparent border-0 font-mono text-[0.82rem] cursor-pointer underline decoration-dashed underline-offset-[3px] transition-colors duration-150 outline-none"
+    :class="
+      filled
+        ? 'text-#80cbc4 decoration-#80cbc4/40 hover:decoration-#80cbc4 hover:text-#a8e0d6 decoration-solid'
+        : 'text-#4fc3f7 decoration-#4fc3f7/45 hover:decoration-#4fc3f7 hover:text-#7fd5fb'
+    "
+    @click="handleClick"
+  >
+    <span v-if="!filled" class="opacity-60">[</span>
+    <span>{{ displayText }}</span>
+    <span v-if="!filled" class="opacity-60">]</span>
+  </button>
 </template>

@@ -6,6 +6,7 @@ import { registerValueTools } from './shared-values'
 
 const buttonOptions = [
   { value: 'fill_title', label: '填入标题按钮' },
+  { value: 'fill_width', label: '填入宽度按钮' },
   { value: 'fill_url', label: '填入网址按钮' }
 ] satisfies LeafToolInput['options']
 
@@ -55,10 +56,31 @@ interface InputController {
   setValue: (target: string, value: string) => void
 }
 
+function resolveRefPath(path: string): unknown {
+  const parts = path.split('.')
+  let cur: unknown = globalThis as unknown
+  for (const p of parts) {
+    if (cur == null) return undefined
+    cur = (cur as Record<string, unknown>)[p]
+  }
+  return cur
+}
+
+function resolveValueParam(raw: unknown): string {
+  if (raw && typeof raw === 'object' && '$ref' in (raw as Record<string, unknown>)) {
+    const ref = (raw as { $ref: unknown }).$ref
+    if (typeof ref === 'string') {
+      const v = resolveRefPath(ref)
+      return v == null ? '' : String(v as string | number)
+    }
+  }
+  return raw == null ? '' : String(raw as string | number)
+}
+
 export function createHandlers(controller: InputController): Record<string, DemoActionHandler> {
   return {
     set_input_value: (params) => {
-      controller.setValue(String(params?.input ?? ''), String(params?.value ?? ''))
+      controller.setValue(String((params?.input as string) ?? ''), resolveValueParam(params?.value))
     }
   }
 }

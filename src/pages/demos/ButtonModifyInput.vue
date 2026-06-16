@@ -1,12 +1,14 @@
 <script setup lang="ts">
-import { onMounted, ref, useTemplateRef } from 'vue'
+import { computed, ref, useTemplateRef } from 'vue'
 import DemoToast from '../../components/DemoToast.vue'
 import PlayButton from '../../components/playground/PlayButton.vue'
 import PlayInput from '../../components/playground/PlayInput.vue'
+import type { TriggerDef } from '../../composables/useDemoRuntime'
 import { useDemoRuntime } from '../../composables/useDemoRuntime'
 import { createHandlers, setup } from '../../definitions/button-modify-input'
 import DemoLayout from '../../layouts/DemoLayout.vue'
 import TriggerEditor from '../../trigger-ui/components/TriggerEditor.vue'
+import TriggerTabs from '../../trigger-ui/components/TriggerTabs.vue'
 
 const toastRef = useTemplateRef<InstanceType<typeof DemoToast>>('toast')
 const inputRef = useTemplateRef<InstanceType<typeof PlayInput>>('input')
@@ -22,28 +24,67 @@ const handlers = createHandlers({
   }
 })
 
-const { war3Editor, state, ruleJson, emit } = useDemoRuntime({ setup, handlers })
+const triggerDefs: TriggerDef[] = [
+  {
+    id: 'fill-title-trigger',
+    name: '填入标题',
+    initialState: {
+      event: {
+        type: 'button_click',
+        slotValues: {
+          button: { tool: 'button_picker', value: 'fill_title', subSlots: undefined }
+        }
+      },
+      actions: [
+        {
+          type: 'set_input_value',
+          slotValues: {
+            input: { tool: 'input_picker', value: 'target', subSlots: undefined },
+            value: {
+              tool: 'value_source',
+              value: { $ref: 'document.title' },
+              subSlots: undefined
+            }
+          }
+        }
+      ]
+    }
+  },
+  {
+    id: 'fill-width-trigger',
+    name: '填入宽度',
+    initialState: {
+      event: {
+        type: 'button_click',
+        slotValues: {
+          button: { tool: 'button_picker', value: 'fill_width', subSlots: undefined }
+        }
+      },
+      actions: [
+        {
+          type: 'set_input_value',
+          slotValues: {
+            input: { tool: 'input_picker', value: 'target', subSlots: undefined },
+            value: {
+              tool: 'value_source',
+              value: { $ref: 'window.innerWidth' },
+              subSlots: undefined
+            }
+          }
+        }
+      ]
+    }
+  }
+]
 
-onMounted(() => {
-  // Predefined: fill_title button → set target input to document.title via $ref
-  war3Editor.setEvent('button_click')
-  war3Editor.setEventSlot('button', {
-    tool: 'button_picker',
-    value: 'fill_title',
-    subSlots: undefined
-  })
-  war3Editor.addAction('set_input_value')
-  war3Editor.setActionSlot(0, 'input', {
-    tool: 'input_picker',
-    value: 'target',
-    subSlots: undefined
-  })
-  war3Editor.setActionSlot(0, 'value', {
-    tool: 'value_source',
-    value: { $ref: 'document.title' },
-    subSlots: undefined
-  })
+const { triggers, rulesJson, emit } = useDemoRuntime({
+  setup,
+  handlers,
+  triggers: triggerDefs
 })
+
+const activeTab = ref(0)
+const activeTrigger = computed(() => triggers[activeTab.value])
 
 function onTrigger(eventType: string, payload: Record<string, unknown>) {
   emit(eventType, payload)
@@ -51,7 +92,7 @@ function onTrigger(eventType: string, payload: Record<string, unknown>) {
 </script>
 
 <template>
-  <DemoLayout title="按钮修改输入框 · Patch Input" :rule-json="ruleJson">
+  <DemoLayout title="按钮修改输入框 · Patch Input" :rules-json="rulesJson">
     <template #playground>
       <div class="flex flex-col gap-6">
         <div class="rounded-md border border-#1f2735 bg-#0c0e14/60 p-4">
@@ -60,6 +101,7 @@ function onTrigger(eventType: string, payload: Record<string, unknown>) {
           </div>
           <div class="flex flex-wrap gap-3">
             <PlayButton id="fill_title" label="填入标题" @trigger="onTrigger" />
+            <PlayButton id="fill_width" label="填入宽度" @trigger="onTrigger" />
             <PlayButton id="fill_url" label="填入网址" @trigger="onTrigger" />
           </div>
         </div>
@@ -82,16 +124,23 @@ function onTrigger(eventType: string, payload: Record<string, unknown>) {
         >
           <span class="text-#5fb3a1">// hint</span>
           <br />
-          点击「填入标题」按钮 → 规则用
-          <span class="text-#c9a84c">$ref: document.title</span> 解析当前页面标题，写入 input。
+          点击按钮 → 触发器命中 → 通过
+          <span class="text-#c9a84c">$ref</span> 拉取页面信息写入 input。
           <br />
-          编辑器里也可以把 value 切换到「文本输入」直接写常量。
+          「填入网址」按钮没有配置触发器，可在右侧自行新建一条规则。
         </div>
       </div>
     </template>
 
     <template #editor>
-      <TriggerEditor :editor="war3Editor" :state="state" />
+      <div class="flex flex-col gap-3">
+        <TriggerTabs :tabs="triggers" v-model:active="activeTab" />
+        <TriggerEditor
+          :key="activeTrigger.id"
+          :editor="activeTrigger.editor"
+          :state="activeTrigger.state.value"
+        />
+      </div>
     </template>
   </DemoLayout>
 

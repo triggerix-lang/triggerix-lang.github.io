@@ -41,7 +41,7 @@ export function setup(editor: War3Editor) {
 
 export const handlers: Record<string, DemoActionHandler> = {
   show_message: (params) => {
-    const message = String(params?.message ?? '')
+    const message = String((params?.message as string) ?? '')
     window.alert(message || '（空消息）')
   }
 }

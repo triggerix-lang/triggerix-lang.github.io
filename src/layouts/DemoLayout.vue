@@ -3,7 +3,7 @@ import JsonDrawer from '../components/JsonDrawer.vue'
 
 defineProps<{
   title: string
-  ruleJson?: object | null
+  rulesJson?: unknown[] | null
 }>()
 </script>
 
@@ -24,6 +24,6 @@ defineProps<{
         <slot name="editor" />
       </section>
     </div>
-    <JsonDrawer :json="ruleJson ?? null" />
+    <JsonDrawer :json="rulesJson ?? null" />
   </div>
 </template>

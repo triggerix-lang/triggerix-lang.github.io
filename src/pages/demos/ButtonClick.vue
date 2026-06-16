@@ -1,38 +1,73 @@
 <script setup lang="ts">
-import { onMounted, useTemplateRef } from 'vue'
+import { computed, ref, useTemplateRef } from 'vue'
 import DemoToast from '../../components/DemoToast.vue'
 import PlayButton from '../../components/playground/PlayButton.vue'
-import type { DemoActionHandler } from '../../composables/useDemoRuntime'
+import type { DemoActionHandler, TriggerDef } from '../../composables/useDemoRuntime'
 import { useDemoRuntime } from '../../composables/useDemoRuntime'
 import { setup } from '../../definitions/button-click'
 import DemoLayout from '../../layouts/DemoLayout.vue'
 import TriggerEditor from '../../trigger-ui/components/TriggerEditor.vue'
+import TriggerTabs from '../../trigger-ui/components/TriggerTabs.vue'
 
 const toastRef = useTemplateRef<InstanceType<typeof DemoToast>>('toast')
 
 const handlers: Record<string, DemoActionHandler> = {
   show_message: (params) => {
-    toastRef.value?.push(String(params?.message ?? '（空消息）'), 'success')
+    toastRef.value?.push(String((params?.message as string) ?? '（空消息）'), 'success')
   }
 }
 
-const { war3Editor, state, ruleJson, emit } = useDemoRuntime({ setup, handlers })
+const triggerDefs: TriggerDef[] = [
+  {
+    id: 'confirm-trigger',
+    name: '确认按钮',
+    initialState: {
+      event: {
+        type: 'button_click',
+        slotValues: {
+          button: { tool: 'button_picker', value: 'confirm_btn', subSlots: undefined }
+        }
+      },
+      actions: [
+        {
+          type: 'show_message',
+          slotValues: {
+            message: { tool: 'text_input', value: 'Hello Triggerix!', subSlots: undefined }
+          }
+        }
+      ]
+    }
+  },
+  {
+    id: 'cancel-trigger',
+    name: '取消按钮',
+    initialState: {
+      event: {
+        type: 'button_click',
+        slotValues: {
+          button: { tool: 'button_picker', value: 'cancel_btn', subSlots: undefined }
+        }
+      },
+      actions: [
+        {
+          type: 'show_message',
+          slotValues: {
+            message: { tool: 'text_input', value: '已取消', subSlots: undefined }
+          }
+        }
+      ]
+    }
+  }
+]
 
-onMounted(() => {
-  // Predefined rule: confirm button click → show "Hello Triggerix!"
-  war3Editor.setEvent('button_click')
-  war3Editor.setEventSlot('button', {
-    tool: 'button_picker',
-    value: 'confirm_btn',
-    subSlots: undefined
-  })
-  war3Editor.addAction('show_message')
-  war3Editor.setActionSlot(0, 'message', {
-    tool: 'text_input',
-    value: 'Hello Triggerix!',
-    subSlots: undefined
-  })
+const { triggers, rulesJson, emit } = useDemoRuntime({
+  setup,
+  handlers,
+  triggers: triggerDefs
 })
+
+const activeTab = ref(0)
+const activeTrigger = computed(() => triggers[activeTab.value])
 
 function onTrigger(eventType: string, payload: Record<string, unknown>) {
   emit(eventType, payload)
@@ -40,7 +75,7 @@ function onTrigger(eventType: string, payload: Record<string, unknown>) {
 </script>
 
 <template>
-  <DemoLayout title="按钮点击 · Button Click" :rule-json="ruleJson">
+  <DemoLayout title="按钮点击 · Button Click" :rules-json="rulesJson">
     <template #playground>
       <div class="flex flex-col gap-6">
         <div class="rounded-md border border-#1f2735 bg-#0c0e14/60 p-4">
@@ -58,15 +93,22 @@ function onTrigger(eventType: string, payload: Record<string, unknown>) {
         >
           <span class="text-#5fb3a1">// hint</span>
           <br />
-          点击「确认」按钮 → 触发器命中 → 顶部 Toast 显示消息。
+          两个按钮各自配有一条触发器：「确认」弹出问候，「取消」弹出取消提示。
           <br />
-          点击「取消」按钮 → 事件 source 不匹配 → 规则不会执行。
+          切换右侧 tab 可分别查看 / 编辑两条规则。
         </div>
       </div>
     </template>
 
     <template #editor>
-      <TriggerEditor :editor="war3Editor" :state="state" />
+      <div class="flex flex-col gap-3">
+        <TriggerTabs :tabs="triggers" v-model:active="activeTab" />
+        <TriggerEditor
+          :key="activeTrigger.id"
+          :editor="activeTrigger.editor"
+          :state="activeTrigger.state.value"
+        />
+      </div>
     </template>
   </DemoLayout>
 

@@ -1,26 +1,42 @@
 <script setup lang="ts">
-import type { ItemDescriptor, ToolDescriptor } from 'triggerix-ui-preset-war3'
-import { ref } from 'vue'
+import type {
+  ItemDescriptor,
+  SlotValueEntry,
+  ToolDescriptor,
+  War3Editor
+} from 'triggerix-ui-preset-war3'
+import { computed } from 'vue'
 import type { SlotSegment } from '../composables/useTriggerEditor'
 import TriggerItem from './TriggerItem.vue'
+
+interface AvailableType {
+  type: string
+  label: string
+}
 
 const props = defineProps<{
   title: string
   type: 'event' | 'condition' | 'action'
   items: (ItemDescriptor | null)[]
-  getAvailableTypes: () => { type: string; template: string }[]
+  /**
+   * Parallel array of slot value maps for each item. `slotEntriesList[i]`
+   * corresponds to `items[i]`. Forwarded to each `TriggerItem` so it can
+   * resolve composite-tool display text via `resolveSlotDisplayText`.
+   */
+  slotEntriesList?: (Record<string, SlotValueEntry> | undefined)[]
+  availableTypes: AvailableType[]
   maxItems?: number
   getToolDescriptors: (segment: SlotSegment) => ToolDescriptor[]
+  editor?: War3Editor | null
+  readonly?: boolean
 }>()
 
 const emit = defineEmits<{
-  add: [type: string]
+  add: [type: 'event' | 'condition' | 'action']
   delete: [index: number]
-  slotFill: [index: number, slotKey: string, tool: string, value: unknown]
+  slotClick: [itemIndex: number, segment: SlotSegment]
+  editItem: [index: number]
 }>()
-
-const showTypePicker = ref(false)
-const typeOptions = ref<{ type: string; template: string }[]>([])
 
 const sectionMeta = {
   event: {
@@ -43,22 +59,13 @@ const sectionMeta = {
   }
 } as const
 
-function toggleTypePicker() {
-  if (props.maxItems && props.items.length >= props.maxItems) return
-  if (!showTypePicker.value) {
-    typeOptions.value = props.getAvailableTypes()
-  }
-  showTypePicker.value = !showTypePicker.value
-}
-
-function pickType(type: string) {
-  emit('add', type)
-  showTypePicker.value = false
-}
-
-function canAdd() {
+const canAdd = computed(() => {
   if (props.maxItems && props.items.length >= props.maxItems) return false
-  return true
+  return props.availableTypes.length > 0
+})
+
+function handleAdd() {
+  emit('add', props.type)
 }
 </script>
 
@@ -88,39 +95,26 @@ function canAdd() {
         v-else
         :key="i"
         :segments="item?.segments ?? []"
+        :slot-entries="slotEntriesList?.[i]"
         :index="i"
         :type="type"
         :get-tool-descriptors="getToolDescriptors"
+        :editor="editor"
+        :readonly="readonly"
         @delete="(idx: number) => emit('delete', idx)"
-        @slot-fill="
-          (key: string, tool: string, val: unknown) => emit('slotFill', i, key, tool, val)
-        "
+        @slot-click="(seg: SlotSegment) => emit('slotClick', i, seg)"
+        @click="() => emit('editItem', i)"
       />
     </div>
 
     <button
-      v-if="canAdd()"
+      v-if="canAdd"
       type="button"
       class="inline-flex items-center gap-1.5 mt-1.5 px-2.5 py-1 rounded bg-transparent border border-dashed border-#3d4f6a text-xs text-#7a8599 hover:border-#7a8599 hover:text-#c9d1d9 hover:bg-#222b3d transition-all duration-150 cursor-pointer"
-      @click="toggleTypePicker"
+      @click="handleAdd"
     >
       <span class="text-sm leading-none">+</span>
       添加
     </button>
-
-    <div
-      v-if="showTypePicker"
-      class="mt-1.5 rounded overflow-hidden bg-#222b3d border border-#3d4f6a"
-    >
-      <button
-        v-for="t in typeOptions"
-        :key="t.type"
-        type="button"
-        class="block w-full px-3 py-1.5 bg-transparent border-none text-#c9d1d9 text-xs text-left cursor-pointer hover:bg-#4fc3f7/8 transition-colors duration-150"
-        @click="pickType(t.type)"
-      >
-        {{ t.template.replace(/\$\{[^}]+\}/g, '___') }}
-      </button>
-    </div>
   </div>
 </template>

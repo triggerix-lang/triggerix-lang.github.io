@@ -4,8 +4,8 @@ import { defineAction, defineEvent } from './helpers'
 import { registerSharedTools } from './shared-tools'
 
 const carouselOptions = [
-  { value: 'left', label: '左侧轮播' },
-  { value: 'right', label: '右侧轮播' }
+  { value: 'left_carousel', label: '左侧轮播' },
+  { value: 'right_carousel', label: '右侧轮播' }
 ] satisfies LeafToolInput['options']
 
 export function setup(editor: War3Editor) {
@@ -16,6 +16,18 @@ export function setup(editor: War3Editor) {
     type: 'leaf',
     input: { type: 'select', options: carouselOptions },
     resolve: (input: unknown) => input
+  })
+
+  editor.registerTool('carousel_index_ref', {
+    label: '轮播组件的当前索引',
+    type: 'composite',
+    template: '${carousel}当前的索引值',
+    slots: {
+      carousel: { label: '轮播组件', tools: ['carousel_picker'] }
+    },
+    resolve: (slotValues: Record<string, unknown>) => ({
+      $ref: `carousel.${String((slotValues.carousel as string) ?? '')}.index`
+    })
   })
 
   editor.registerEvent(
@@ -35,7 +47,7 @@ export function setup(editor: War3Editor) {
       template: '设置${carousel}切换到第${index}张',
       slots: {
         carousel: { label: '轮播', tools: ['carousel_picker'] },
-        index: { label: '索引', tools: ['number_input'] }
+        index: { label: '索引', tools: ['number_input', 'carousel_index_ref'] }
       }
     })
   )
@@ -45,10 +57,46 @@ interface LinkageController {
   setIndex: (carousel: string, index: number) => void
 }
 
-export function createHandlers(controller: LinkageController): Record<string, DemoActionHandler> {
+/**
+ * Resolve a `$ref` like `carousel.left_carousel.index` against the live
+ * carousel index map provided by the page.
+ */
+function resolveIndexParam(
+  raw: unknown,
+  indexMap: Record<string, number>,
+  fallbackPayloadIndex: unknown
+): number {
+  if (raw && typeof raw === 'object' && '$ref' in (raw as Record<string, unknown>)) {
+    const ref = (raw as { $ref: unknown }).$ref
+    if (typeof ref === 'string') {
+      const parts = ref.split('.')
+      // carousel.<id>.index
+      if (parts.length >= 3 && parts[0] === 'carousel' && parts[2] === 'index') {
+        const id = parts[1]
+        if (id in indexMap) return indexMap[id]
+      }
+      // Fallback to the just-emitted payload index when the live map is unaware.
+      const fb = Number(fallbackPayloadIndex ?? 0)
+      return Number.isFinite(fb) ? fb : 0
+    }
+  }
+  const n = Number(raw ?? 0)
+  return Number.isFinite(n) ? n : 0
+}
+
+export function createHandlers(
+  controller: LinkageController,
+  context: { indexMap: Record<string, number>; lastEmittedIndex: { value: unknown } }
+): Record<string, DemoActionHandler> {
   return {
     set_carousel_index: (params) => {
-      controller.setIndex(String(params?.carousel ?? ''), Number(params?.index ?? 0))
+      const carousel = String((params?.carousel as string) ?? '')
+      const index = resolveIndexParam(
+        params?.index,
+        context.indexMap,
+        context.lastEmittedIndex.value
+      )
+      controller.setIndex(carousel, index)
     }
   }
 }

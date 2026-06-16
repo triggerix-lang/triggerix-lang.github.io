@@ -2,7 +2,7 @@
 import { ref } from 'vue'
 
 defineProps<{
-  json: object | null
+  json: unknown[] | null
 }>()
 
 const open = ref(false)
@@ -21,7 +21,7 @@ function toggle() {
         @click="toggle"
       >
         <span class="i-mdi-code-json text-base" />
-        Rule JSON
+        Rules JSON
         <span :class="open ? 'i-mdi-chevron-down' : 'i-mdi-chevron-up'" class="text-base" />
       </button>
     </div>
@@ -37,7 +37,7 @@ function toggle() {
       >
         <pre
           class="p-4 text-xs leading-relaxed text-#e0e0e0 font-mono whitespace-pre-wrap break-all"
-          >{{ json ? JSON.stringify(json, null, 2) : '// 暂无规则' }}</pre
+          >{{ json && json.length > 0 ? JSON.stringify(json, null, 2) : '// 暂无规则' }}</pre
         >
       </div>
     </transition>

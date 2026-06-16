@@ -64,7 +64,7 @@ interface TipController {
 export function createHandlers(controller: TipController): Record<string, DemoActionHandler> {
   return {
     show_tip: (params) => {
-      controller.show(String(params?.message ?? ''))
+      controller.show(String((params?.message as string) ?? ''))
     },
     hide_tip: () => {
       controller.hide()

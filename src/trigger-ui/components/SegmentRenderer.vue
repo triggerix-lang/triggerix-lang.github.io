@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import type { Segment, SlotSegment, ToolDescriptor } from 'triggerix-editor-vue'
+import type { Segment, ToolDescriptor } from 'triggerix-ui-preset-war3'
+import type { SlotSegment } from '../composables/useTriggerEditor'
 import SlotChip from './SlotChip.vue'
 
 defineProps<{
@@ -17,9 +18,11 @@ function handleSlotFill(slotKey: string, tool: string, value: unknown) {
 </script>
 
 <template>
-  <span class="segment-renderer">
+  <span class="inline">
     <template v-for="(seg, i) in segments" :key="i">
-      <span v-if="seg.type === 'text'" class="segment-text">{{ seg.content }}</span>
+      <span v-if="seg.type === 'text'" class="text-#c9d1d9 whitespace-pre-wrap">{{
+        seg.content
+      }}</span>
       <SlotChip
         v-else-if="seg.type === 'slot'"
         :segment="seg as SlotSegment"

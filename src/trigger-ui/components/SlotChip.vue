@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import type { SlotSegment, ToolDescriptor } from 'triggerix-editor-vue'
+import type { ToolDescriptor } from 'triggerix-ui-preset-war3'
 import { ref } from 'vue'
+import type { SlotSegment } from '../composables/useTriggerEditor'
 import SlotPopover from './SlotPopover.vue'
 
-defineProps<{
+const props = defineProps<{
   segment: SlotSegment
   toolDescriptors: ToolDescriptor[]
 }>()
@@ -14,14 +15,17 @@ const emit = defineEmits<{
 
 const popoverRef = ref<InstanceType<typeof SlotPopover> | null>(null)
 
-const isFilled = (segment: SlotSegment) => segment.value != null && segment.value !== ''
+function isFilled(): boolean {
+  const v = props.segment.value
+  return v !== null && v !== undefined && v !== ''
+}
 
-function getDisplayText(segment: SlotSegment): string {
-  const val = segment.value
-  if (val == null || val === '') return segment.label
-  if (typeof val === 'string') return val
-  if (typeof val === 'number') return String(val)
-  return String(val)
+function getDisplayText(): string {
+  const v = props.segment.value
+  if (v === null || v === undefined || v === '') return props.segment.label
+  if (typeof v === 'string') return v
+  if (typeof v === 'number') return String(v)
+  return String(v)
 }
 
 function handleClick() {
@@ -34,18 +38,19 @@ function handleFill(tool: string, value: unknown) {
 </script>
 
 <template>
-  <span class="slot-chip-wrapper" style="position: relative; display: inline-block">
+  <span class="relative inline-block">
     <span
-      class="slot-chip"
-      :class="{
-        'slot-chip--empty': !isFilled(segment),
-        'slot-chip--filled': isFilled(segment)
-      }"
+      class="inline-flex items-center px-1.5 py-0.5 mx-0.5 rounded-sm font-mono text-[0.82rem] cursor-pointer border transition-all duration-150"
+      :class="
+        isFilled()
+          ? 'text-#80cbc4 bg-#80cbc4/8 border-#80cbc4/15 hover:bg-#80cbc4/14 hover:border-#80cbc4/30 hover:shadow-[0_0_8px_rgba(128,203,196,0.12)]'
+          : 'text-#4fc3f7 bg-#4fc3f7/8 border-#4fc3f7/15 border-dashed hover:bg-#4fc3f7/14 hover:border-#4fc3f7/30 hover:shadow-[0_0_8px_rgba(79,195,247,0.12)]'
+      "
       @click="handleClick"
     >
-      <span v-if="!isFilled(segment)" class="slot-chip__bracket">[</span>
-      {{ getDisplayText(segment) }}
-      <span v-if="!isFilled(segment)" class="slot-chip__bracket">]</span>
+      <span v-if="!isFilled()" class="opacity-50">[</span>
+      {{ getDisplayText() }}
+      <span v-if="!isFilled()" class="opacity-50">]</span>
     </span>
     <SlotPopover
       ref="popoverRef"

@@ -1,95 +1,80 @@
 <script setup lang="ts">
-import type { SlotValueEntry } from 'triggerix-editor-vue'
-import { computed } from 'vue'
+import type { SlotValueEntry, War3Editor, War3EditorState } from 'triggerix-ui-preset-war3'
+import { toRef } from 'vue'
 import { useTriggerEditor } from '../composables/useTriggerEditor'
 import TriggerSection from './TriggerSection.vue'
-import '../styles/trigger.css'
 
-const {
-  editor,
-  eventDescriptor,
-  actionDescriptors,
-  conditionDescriptors,
-  getSlotToolDescriptors,
-  setEvent,
-  clearEvent,
-  setEventSlot,
-  addAction,
-  removeAction,
-  setActionSlot,
-  addCondition,
-  removeCondition,
-  setConditionSlot
-} = useTriggerEditor()
+const props = defineProps<{
+  editor: War3Editor
+  state: War3EditorState
+}>()
 
-// Expose editor for parent to register definitions
-defineExpose({ editor })
+const stateRef = toRef(() => props.state)
 
-// Available types (read on-demand to avoid stale computed values when registries
-// are populated after this component mounts)
+const { eventDescriptor, actionDescriptors, conditionDescriptors, getSlotToolDescriptors } =
+  useTriggerEditor(props.editor, stateRef)
+
 function getAvailableEvents() {
-  return editor.getAvailableEvents().map((e) => ({ type: e.type, template: e.template }))
+  return props.editor.getAvailableEvents().map((e) => ({ type: e.type, template: e.template }))
 }
+
 function getAvailableActions() {
-  return editor.getAvailableActions().map((a) => ({ type: a.type, template: a.template }))
+  return props.editor.getAvailableActions().map((a) => ({ type: a.type, template: a.template }))
 }
+
 function getAvailableConditions() {
-  return editor.getAvailableConditions().map((c) => ({ type: c.type, template: c.template }))
+  return props.editor.getAvailableConditions().map((c) => ({ type: c.type, template: c.template }))
 }
 
-// Event items (array of 0 or 1)
-const eventItems = computed(() => {
-  if (!eventDescriptor.value) return []
-  return [eventDescriptor.value]
-})
-
-// Handlers
 function handleAddEvent(type: string) {
-  setEvent(type)
+  props.editor.setEvent(type)
 }
 
 function handleDeleteEvent() {
-  clearEvent()
+  props.editor.clearEvent()
 }
 
 function handleEventSlotFill(_index: number, slotKey: string, tool: string, value: unknown) {
   const entry: SlotValueEntry = { tool, value }
-  setEventSlot(slotKey, entry)
+  props.editor.setEventSlot(slotKey, entry)
 }
 
 function handleAddAction(type: string) {
-  addAction(type)
+  props.editor.addAction(type)
 }
 
 function handleDeleteAction(index: number) {
-  removeAction(index)
+  props.editor.removeAction(index)
 }
 
 function handleActionSlotFill(index: number, slotKey: string, tool: string, value: unknown) {
   const entry: SlotValueEntry = { tool, value }
-  setActionSlot(index, slotKey, entry)
+  props.editor.setActionSlot(index, slotKey, entry)
 }
 
 function handleAddCondition(type: string) {
-  addCondition(type)
+  props.editor.addCondition(type)
 }
 
 function handleDeleteCondition(index: number) {
-  removeCondition(index)
+  props.editor.removeCondition(index)
 }
 
 function handleConditionSlotFill(index: number, slotKey: string, tool: string, value: unknown) {
   const entry: SlotValueEntry = { tool, value }
-  setConditionSlot(index, slotKey, entry)
+  props.editor.setConditionSlot(index, slotKey, entry)
 }
 </script>
 
 <template>
-  <div class="trigger-editor">
+  <div
+    class="relative rounded-md overflow-hidden bg-#131722 border border-#2a3348 shadow-[0_1px_0_#3d4f6a_inset,0_4px_24px_rgba(0,0,0,0.4)]"
+  >
+    <div class="h-[3px] opacity-60 bg-gradient-to-r from-transparent via-#c9a84c to-transparent" />
     <TriggerSection
       title="事件"
       type="event"
-      :items="eventItems"
+      :items="eventDescriptor ? [eventDescriptor] : []"
       :get-available-types="getAvailableEvents"
       :max-items="1"
       :get-tool-descriptors="getSlotToolDescriptors"

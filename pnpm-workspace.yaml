@@ -1,7 +1,9 @@
 minimumReleaseAgeExclude:
   - '@triggerix/core'
   - '@triggerix/editor'
+  - '@triggerix/runtime'
   - triggerix-editor-vue
+  - triggerix-ui-preset-war3
 
 shellEmulator: true
 
@@ -11,9 +13,13 @@ overrides:
   vite: 'catalog:'
   vitest: 'catalog:'
 catalog:
+  '@triggerix/runtime': ^0.0.4
+  '@unocss/reset': latest
   '@vitejs/plugin-vue': ^5.2.0
-  triggerix-editor-vue: ^0.0.2
+  triggerix-editor-vue: ^0.0.5
+  triggerix-ui-preset-war3: ^0.0.1
   typescript: ~6.0.2
+  unocss: latest
   vite: npm:@voidzero-dev/vite-plus-core@latest
   vite-plus: latest
   vitest: npm:@voidzero-dev/vite-plus-test@latest

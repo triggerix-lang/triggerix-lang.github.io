@@ -1,10 +1,5 @@
 <script setup lang="ts">
-import type {
-  LeafToolDescriptor,
-  SelectOption,
-  SlotContext,
-  ToolDescriptor
-} from 'triggerix-editor-vue'
+import type { LeafToolDescriptor, LeafToolInput, ToolDescriptor } from 'triggerix-ui-preset-war3'
 import { computed, ref } from 'vue'
 
 const props = defineProps<{
@@ -19,20 +14,17 @@ const textValue = ref('')
 const numberValue = ref<number | undefined>(undefined)
 const selectedValue = ref<unknown>(null)
 
-const leafDescriptor = computed(() =>
-  props.descriptor.type === 'leaf' ? (props.descriptor as LeafToolDescriptor) : null
+const leafDescriptor = computed<LeafToolDescriptor | null>(() =>
+  props.descriptor.type === 'leaf' ? props.descriptor : null
 )
 
-const inputType = computed(() => leafDescriptor.value?.input.type)
+const leafInput = computed<LeafToolInput | null>(() => leafDescriptor.value?.input ?? null)
 
-const selectOptions = computed<SelectOption[]>(() => {
-  if (!leafDescriptor.value || leafDescriptor.value.input.type !== 'select') return []
-  const opts = leafDescriptor.value.input.options
-  if (typeof opts === 'function') {
-    const ctx: SlotContext = { slots: {} }
-    return opts(ctx)
-  }
-  return opts
+const inputType = computed(() => leafInput.value?.type)
+
+const selectOptions = computed(() => {
+  if (!leafInput.value || leafInput.value.type !== 'select') return []
+  return leafInput.value.options ?? []
 })
 
 function confirmText() {
@@ -43,46 +35,59 @@ function confirmNumber() {
   emit('confirm', numberValue.value ?? 0)
 }
 
-function selectOption(opt: SelectOption) {
-  selectedValue.value = opt.value
-  emit('confirm', opt.value)
+function selectOption(value: string) {
+  selectedValue.value = value
+  emit('confirm', value)
 }
 </script>
 
 <template>
-  <div class="tool-input">
+  <div class="py-1">
     <template v-if="inputType === 'text'">
       <input
         v-model="textValue"
-        class="tool-input__field"
         type="text"
-        :placeholder="(leafDescriptor!.input as any).placeholder || '输入...'"
+        class="w-full px-2.5 py-1.5 rounded bg-#0c0e14 border border-#3d4f6a text-#e6edf3 font-mono text-xs outline-none transition-colors duration-150 placeholder:text-#7a8599 focus:border-#4fc3f7 focus:shadow-[0_0_0_2px_rgba(79,195,247,0.1)]"
+        :placeholder="leafInput?.placeholder || '输入...'"
         @keydown.enter="confirmText"
       />
-      <button class="tool-input__confirm" @click="confirmText">确认</button>
+      <button
+        type="button"
+        class="block w-full mt-1.5 py-1.5 rounded bg-#4fc3f7/10 border border-#4fc3f7/25 text-#4fc3f7 text-[0.75rem] cursor-pointer hover:bg-#4fc3f7/18 hover:border-#4fc3f7/40 transition-all duration-150"
+        @click="confirmText"
+      >
+        确认
+      </button>
     </template>
 
     <template v-else-if="inputType === 'number'">
       <input
         v-model.number="numberValue"
-        class="tool-input__field"
         type="number"
-        :placeholder="(leafDescriptor!.input as any).placeholder || '输入数字...'"
-        :min="(leafDescriptor!.input as any).min"
-        :max="(leafDescriptor!.input as any).max"
+        class="w-full px-2.5 py-1.5 rounded bg-#0c0e14 border border-#3d4f6a text-#e6edf3 font-mono text-xs outline-none transition-colors duration-150 placeholder:text-#7a8599 focus:border-#4fc3f7 focus:shadow-[0_0_0_2px_rgba(79,195,247,0.1)]"
+        :placeholder="leafInput?.placeholder || '输入数字...'"
         @keydown.enter="confirmNumber"
       />
-      <button class="tool-input__confirm" @click="confirmNumber">确认</button>
+      <button
+        type="button"
+        class="block w-full mt-1.5 py-1.5 rounded bg-#4fc3f7/10 border border-#4fc3f7/25 text-#4fc3f7 text-[0.75rem] cursor-pointer hover:bg-#4fc3f7/18 hover:border-#4fc3f7/40 transition-all duration-150"
+        @click="confirmNumber"
+      >
+        确认
+      </button>
     </template>
 
     <template v-else-if="inputType === 'select'">
-      <div class="tool-input__options">
+      <div class="flex flex-col gap-0.5">
         <button
           v-for="opt in selectOptions"
-          :key="String(opt.value)"
-          class="tool-input__option"
-          :class="{ 'tool-input__option--selected': selectedValue === opt.value }"
-          @click="selectOption(opt)"
+          :key="opt.value"
+          type="button"
+          class="block w-full px-2.5 py-1.5 rounded bg-transparent border border-transparent text-#c9d1d9 text-xs text-left cursor-pointer hover:bg-#222b3d hover:border-#3d4f6a transition-all duration-150"
+          :class="{
+            'bg-#222b3d border-#80cbc4 text-#80cbc4': selectedValue === opt.value
+          }"
+          @click="selectOption(opt.value)"
         >
           {{ opt.label }}
         </button>

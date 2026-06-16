@@ -11,13 +11,17 @@
     "lint": "vp check"
   },
   "dependencies": {
+    "@triggerix/runtime": "catalog:",
     "triggerix-editor-vue": "catalog:",
+    "triggerix-ui-preset-war3": "catalog:",
     "vue": "catalog:",
     "vue-router": "catalog:"
   },
   "devDependencies": {
+    "@unocss/reset": "catalog:",
     "@vitejs/plugin-vue": "catalog:",
     "typescript": "catalog:",
+    "unocss": "catalog:",
     "vite": "catalog:",
     "vite-plus": "catalog:"
   },

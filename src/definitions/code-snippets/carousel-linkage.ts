@@ -102,7 +102,7 @@ export function createHandlers(
   {
     filename: 'Demo.vue',
     content: `<script setup lang="ts">
-import { reactive, ref } from 'vue'
+import { reactive, ref, useTemplateRef } from 'vue'
 import { useDemoRuntime } from '../composables/useDemoRuntime'
 import { createHandlers, setup } from '../definitions/carousel-linkage'
 
@@ -114,10 +114,17 @@ const indexMap = reactive<Record<string, number>>({
 })
 const lastEmittedIndex = ref<unknown>(0)
 
+// 为每个轮播组件准备一个 ref，供 handler 按 id 调度。
+const leftRef = useTemplateRef<{ setIndex: (n: number) => void }>('left')
+const rightRef = useTemplateRef<{ setIndex: (n: number) => void }>('right')
+
+// controller 必须 id-driven，不能写死某一侧：
+// 用户在编辑器里改完事件源 / 动作目标的方向后，handler 会按实际传来的 id 派发。
 const handlers = createHandlers(
   {
     setIndex: (carousel, index) => {
-      if (carousel === 'right_carousel') rightRef.value?.setIndex(index)
+      if (carousel === 'left_carousel') leftRef.value?.setIndex(index)
+      else if (carousel === 'right_carousel') rightRef.value?.setIndex(index)
     }
   },
   { indexMap, lastEmittedIndex }

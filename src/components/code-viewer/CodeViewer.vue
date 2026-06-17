@@ -31,7 +31,7 @@ function formatJson(json: unknown[] | null | undefined): string {
 // workspace 与 monaco-editor 实例在整个会话中持续有效。
 // 延迟初始化：等待 files 第一次非空时才创建 workspace。
 let workspace: Workspace | null = null
-let lazyReady: Promise<void> | null = null
+let lazyDone = false
 
 async function initWorkspace(codeFiles: CodeFile[], json: unknown[] | null | undefined) {
   const initialFiles: Record<string, string> = {}
@@ -40,11 +40,8 @@ async function initWorkspace(codeFiles: CodeFile[], json: unknown[] | null | und
   }
   initialFiles[JSON_FILENAME] = formatJson(json)
   const entryFile = codeFiles[0]?.filename
-  console.log(
-    '[CV] initWorkspace files=' + codeFiles.map((f) => f.filename).join(',') + ' entry=' + entryFile
-  )
   workspace = new Workspace({ initialFiles, entryFile })
-  lazyReady = lazy({
+  lazy({
     workspace,
     defaultTheme: 'vitesse-dark',
     langs: ['typescript', 'vue', 'json'],
@@ -56,26 +53,18 @@ async function initWorkspace(codeFiles: CodeFile[], json: unknown[] | null | und
       }
     }
   })
-  await lazyReady
-  console.log('[CV] initWorkspace done')
+  lazyDone = true
 }
 
 async function safeOpen(filename: string, content?: string) {
-  if (!workspace || !lazyReady) {
-    console.log('[CV] safeOpen SKIP no workspace file=' + filename)
-    return
-  }
-  await lazyReady
-  console.log('[CV] safeOpen start file=' + filename + ' hasContent=' + (content !== undefined))
+  if (!workspace || !lazyDone) return
   try {
     if (content !== undefined) {
       await workspace.openTextDocument(filename, content)
     } else {
       await workspace.openTextDocument(filename)
     }
-    console.log('[CV] safeOpen done file=' + filename)
   } catch (e: any) {
-    console.log('[CV] safeOpen error file=' + filename + ' msg=' + (e?.message ?? e))
     if (e?.message !== 'Canceled' && e?.name !== 'Canceled') throw e
   }
 }
@@ -84,18 +73,14 @@ async function safeOpen(filename: string, content?: string) {
 let skipJsonWatch = false
 
 watch(active, async (i) => {
-  console.log('[CV] watch:active i=' + i + ' jsonActive=' + jsonActive.value)
   if (jsonActive.value) return
   const file = props.files[i]
   if (file) {
     await safeOpen(file.filename)
-  } else {
-    console.log('[CV] watch:active NO file at index=' + i + ' files.length=' + props.files.length)
   }
 })
 
 watch(jsonActive, async (next) => {
-  console.log('[CV] watch:jsonActive next=' + next + ' skip=' + skipJsonWatch)
   if (skipJsonWatch) {
     skipJsonWatch = false
     return
@@ -123,25 +108,19 @@ watch(
 watch(
   () => props.files,
   async (newFiles) => {
-    console.log(
-      '[CV] watch:files len=' +
-        newFiles.length +
-        ' names=' +
-        newFiles.map((f) => f.filename).join(',')
-    )
     if (!newFiles.length) return
 
     if (!workspace) {
       // 首次有文件时初始化 workspace
       await initWorkspace(newFiles, props.rulesJson)
     } else {
-      // 后续导航：复用已有 workspace，更新文件内容
-      console.log('[CV] watch:files reuse workspace')
-      await lazyReady
+      // 后续导航：复用已有 workspace，仅更新文件系统
+      // 已有 model 通过 __OB__ FS watcher 自动同步新内容，无需手动逐一打开
       for (const file of newFiles) {
-        await safeOpen(file.filename, file.content)
+        await workspace.fs.writeFile(file.filename, file.content)
       }
-      await safeOpen(JSON_FILENAME, formatJson(props.rulesJson))
+      await workspace.fs.writeFile(JSON_FILENAME, formatJson(props.rulesJson))
+      // 只打开入口文件（单次 model 切换，避免 rapid setModel 导致 Canceled 错误）
       const entry = newFiles[0]?.filename
       if (entry) {
         await safeOpen(entry)
@@ -161,6 +140,12 @@ function handleUpdateActive(i: number) {
   if (jsonActive.value) {
     skipJsonWatch = true
     jsonActive.value = false
+    if (active.value === i) {
+      // active 值不变，watcher 不会触发，手动打开文件
+      const file = props.files[i]
+      if (file) safeOpen(file.filename)
+      return
+    }
   }
   active.value = i
 }

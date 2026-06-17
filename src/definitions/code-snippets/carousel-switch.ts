@@ -29,13 +29,13 @@ export function setup(editor: War3Editor) {
     resolve: (input) => input
   })
 
-  // 事件：轮播切到第 N 张
+  // 事件：轮播切换
   editor.registerEvent({
     type: 'carousel_switch',
-    template: '\${carousel}切换到第\${index}张',
+    label: '轮播组件切换',
+    template: '\${carousel}切换',
     slots: {
-      carousel: { label: '轮播', tools: ['carousel_picker'] },
-      index: { label: '索引', tools: ['number_input'] }
+      carousel: { label: '轮播', tools: ['carousel_picker'] }
     }
   })
 

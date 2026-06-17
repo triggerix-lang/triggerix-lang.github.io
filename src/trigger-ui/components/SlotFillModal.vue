@@ -99,11 +99,17 @@ function reset() {
   subSlotValues.value = { ...props.currentValue?.subSlots }
 }
 
+// `immediate: true` covers the nested SlotFillModal case (rendered via
+// `v-if="editor && nestedOpen"`): the component is created with `open` already
+// at `true` (the parent sets `nestedOpen.value = true` *before* the child
+// mounts), so a lazy watch would never fire `reset()` and `selectedTool`
+// would stay `null`, falling through to the "没有可用的填充方式" branch.
 watch(
   () => props.open,
   (v) => {
     if (v) reset()
-  }
+  },
+  { immediate: true }
 )
 
 function backToToolList() {

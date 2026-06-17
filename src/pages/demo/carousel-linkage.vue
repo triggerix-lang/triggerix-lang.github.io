@@ -12,6 +12,7 @@ import TriggerEditor from '../../trigger-ui/components/TriggerEditor.vue'
 import TriggerTabs from '../../trigger-ui/components/TriggerTabs.vue'
 
 const toastRef = useTemplateRef<InstanceType<typeof DemoToast>>('toast')
+const leftRef = useTemplateRef<InstanceType<typeof PlayCarousel>>('left')
 const rightRef = useTemplateRef<InstanceType<typeof PlayCarousel>>('right')
 
 // Live state used to resolve `$ref: carousel.<id>.index` from the
@@ -27,14 +28,26 @@ const indexMap = reactive<Record<string, number>>({
 // next tick, after emit() returns).
 const lastEmittedIndex = ref<unknown>(0)
 
+// Dispatch the linkage target to whichever carousel the rule picked.
+// The rule decides the direction (e.g. event=right → action=left), so
+// the controller must be id-driven, not hard-coded to one side.
+function setCarouselIndex(carousel: string, index: number) {
+  if (carousel === 'left_carousel') {
+    leftRef.value?.setIndex(index)
+  } else if (carousel === 'right_carousel') {
+    rightRef.value?.setIndex(index)
+  }
+  const side = carousel.startsWith('left')
+    ? 'left'
+    : carousel.startsWith('right')
+      ? 'right'
+      : carousel
+  toastRef.value?.push(`linkage → ${side} [${index}]`, 'success', 1400)
+}
+
 const handlers = createHandlers(
   {
-    setIndex: (carousel, index) => {
-      if (carousel === 'right_carousel') {
-        rightRef.value?.setIndex(index)
-        toastRef.value?.push(`linkage → right [${index}]`, 'success', 1400)
-      }
-    }
+    setIndex: setCarouselIndex
   },
   { indexMap, lastEmittedIndex }
 )
@@ -130,6 +143,7 @@ function onTrigger(eventType: string, payload: Record<string, unknown>) {
               </div>
               <PlayCarousel
                 id="left_carousel"
+                ref="left"
                 :model-value="leftIndex"
                 :items="leftSlides"
                 @update:model-value="syncLeft"

@@ -2,7 +2,6 @@
 import { useLocalStorage } from '@vueuse/core'
 import { computed, onBeforeUnmount, useTemplateRef } from 'vue'
 import CodeViewer from '../components/code-viewer/CodeViewer.vue'
-import JsonDrawer from '../components/JsonDrawer.vue'
 import type { CodeFile } from '../definitions/code-snippets/types'
 
 const props = defineProps<{
@@ -102,10 +101,8 @@ onBeforeUnmount(() => {
       </div>
       <!-- CodeViewer 占满剩余空间 -->
       <div class="flex-1 min-h-0">
-        <CodeViewer :files="codeFiles!" />
+        <CodeViewer :files="codeFiles!" :rules-json="rulesJson" />
       </div>
     </div>
-
-    <JsonDrawer :json="rulesJson ?? null" />
   </div>
 </template>

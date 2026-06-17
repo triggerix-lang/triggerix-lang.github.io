@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { computed, reactive, ref, useTemplateRef } from 'vue'
+import { computed, reactive, ref, useTemplateRef, watchEffect } from 'vue'
 import DemoToast from '../../components/DemoToast.vue'
 import PlayCarousel from '../../components/playground/PlayCarousel.vue'
 import type { TriggerDef } from '../../composables/useDemoRuntime'
 import { useDemoRuntime } from '../../composables/useDemoRuntime'
+import { useCodePanel } from '../../composables/useCodePanel'
 import { createHandlers, setup } from '../../definitions/carousel-linkage'
 import { codeFiles } from '../../definitions/code-snippets/carousel-linkage'
 import DemoLayout from '../../layouts/DemoLayout.vue'
@@ -91,6 +92,11 @@ function syncRight(v: number) {
   indexMap.right_carousel = v
 }
 
+const { setPanel } = useCodePanel()
+watchEffect(() => {
+  setPanel(codeFiles, rulesJson.value)
+})
+
 function onTrigger(eventType: string, payload: Record<string, unknown>) {
   if (eventType === 'carousel_change') {
     const source = String(payload.source ?? '')
@@ -106,7 +112,7 @@ function onTrigger(eventType: string, payload: Record<string, unknown>) {
 </script>
 
 <template>
-  <DemoLayout title="轮播联动 · Linkage" :rules-json="rulesJson" :code-files="codeFiles">
+  <DemoLayout title="轮播联动 · Linkage">
     <template #playground>
       <div class="flex flex-col gap-6">
         <div class="rounded-md border border-#1f2735 bg-#0c0e14/60 p-4">

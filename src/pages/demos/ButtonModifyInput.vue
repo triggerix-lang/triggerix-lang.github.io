@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { computed, ref, useTemplateRef } from 'vue'
+import { computed, ref, useTemplateRef, watchEffect } from 'vue'
 import DemoToast from '../../components/DemoToast.vue'
 import PlayButton from '../../components/playground/PlayButton.vue'
 import PlayInput from '../../components/playground/PlayInput.vue'
 import type { TriggerDef } from '../../composables/useDemoRuntime'
 import { useDemoRuntime } from '../../composables/useDemoRuntime'
+import { useCodePanel } from '../../composables/useCodePanel'
 import { createHandlers, setup } from '../../definitions/button-modify-input'
 import { codeFiles } from '../../definitions/code-snippets/button-modify-input'
 import DemoLayout from '../../layouts/DemoLayout.vue'
@@ -87,13 +88,18 @@ const { triggers, rulesJson, emit } = useDemoRuntime({
 const activeTab = ref(0)
 const activeTrigger = computed(() => triggers[activeTab.value])
 
+const { setPanel } = useCodePanel()
+watchEffect(() => {
+  setPanel(codeFiles, rulesJson.value)
+})
+
 function onTrigger(eventType: string, payload: Record<string, unknown>) {
   emit(eventType, payload)
 }
 </script>
 
 <template>
-  <DemoLayout title="按钮修改输入框 · Patch Input" :rules-json="rulesJson" :code-files="codeFiles">
+  <DemoLayout title="按钮修改输入框 · Patch Input">
     <template #playground>
       <div class="flex flex-col gap-6">
         <div class="rounded-md border border-#1f2735 bg-#0c0e14/60 p-4">

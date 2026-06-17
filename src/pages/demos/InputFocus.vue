@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { computed, ref, useTemplateRef } from 'vue'
+import { computed, ref, useTemplateRef, watchEffect } from 'vue'
 import DemoToast from '../../components/DemoToast.vue'
 import PlayInput from '../../components/playground/PlayInput.vue'
 import type { TriggerDef } from '../../composables/useDemoRuntime'
 import { useDemoRuntime } from '../../composables/useDemoRuntime'
+import { useCodePanel } from '../../composables/useCodePanel'
 import { createHandlers, setup } from '../../definitions/input-focus'
 import { codeFiles } from '../../definitions/code-snippets/input-focus'
 import DemoLayout from '../../layouts/DemoLayout.vue'
@@ -75,13 +76,18 @@ const activeTrigger = computed(() => triggers[activeTab.value])
 const username = ref('')
 const password = ref('')
 
+const { setPanel } = useCodePanel()
+watchEffect(() => {
+  setPanel(codeFiles, rulesJson.value)
+})
+
 function onTrigger(eventType: string, payload: Record<string, unknown>) {
   emit(eventType, payload)
 }
 </script>
 
 <template>
-  <DemoLayout title="输入框焦点 · Input Focus" :rules-json="rulesJson" :code-files="codeFiles">
+  <DemoLayout title="输入框焦点 · Input Focus">
     <template #playground>
       <div class="flex flex-col gap-6">
         <div class="rounded-md border border-#1f2735 bg-#0c0e14/60 p-4">

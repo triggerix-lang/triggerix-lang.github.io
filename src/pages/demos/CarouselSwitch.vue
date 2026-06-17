@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { computed, ref, useTemplateRef } from 'vue'
+import { computed, ref, useTemplateRef, watchEffect } from 'vue'
 import DemoToast from '../../components/DemoToast.vue'
 import PlayCarousel from '../../components/playground/PlayCarousel.vue'
 import type { TriggerDef } from '../../composables/useDemoRuntime'
 import { useDemoRuntime } from '../../composables/useDemoRuntime'
+import { useCodePanel } from '../../composables/useCodePanel'
 import { createHandlers, setup } from '../../definitions/carousel-switch'
 import { codeFiles } from '../../definitions/code-snippets/carousel-switch'
 import DemoLayout from '../../layouts/DemoLayout.vue'
@@ -81,6 +82,11 @@ const activeTrigger = computed(() => triggers[activeTab.value])
 const slides = ['⚔  第 1 张  起手式', '🔥  第 2 张  推进中', '🏁  第 3 张  最后一张']
 const currentIndex = ref(0)
 
+const { setPanel } = useCodePanel()
+watchEffect(() => {
+  setPanel(codeFiles, rulesJson.value)
+})
+
 function onTrigger(eventType: string, payload: Record<string, unknown>) {
   // PlayCarousel emits "carousel_change", but the registered event is "carousel_switch".
   if (eventType === 'carousel_change') {
@@ -92,7 +98,7 @@ function onTrigger(eventType: string, payload: Record<string, unknown>) {
 </script>
 
 <template>
-  <DemoLayout title="轮播切换 · Carousel Switch" :rules-json="rulesJson" :code-files="codeFiles">
+  <DemoLayout title="轮播切换 · Carousel Switch">
     <template #playground>
       <div class="flex flex-col gap-6">
         <div

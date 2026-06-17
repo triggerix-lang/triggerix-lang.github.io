@@ -6,8 +6,14 @@ import {
   transformerDirectives,
   transformerVariantGroup
 } from 'unocss'
+import { unoColors } from 'uno-colors'
 
 export default defineConfig({
+  theme: {
+    colors: unoColors({
+      primary: '#4fc3f7'
+    })
+  },
   shortcuts: [
     {
       'surface-base': 'bg-white dark:bg-neutral-900',

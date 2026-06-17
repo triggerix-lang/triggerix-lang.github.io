@@ -76,6 +76,9 @@ importers:
       typescript:
         specifier: 'catalog:'
         version: 6.0.3
+      uno-colors:
+        specifier: ^0.1.0
+        version: 0.1.0
       unocss:
         specifier: 'catalog:'
         version: 66.7.2(@voidzero-dev/vite-plus-core@0.1.24(jiti@2.7.0)(typescript@6.0.3)(yaml@2.9.0))
@@ -1283,6 +1286,9 @@ packages:
   unconfig@7.5.0:
     resolution: {integrity: sha512-oi8Qy2JV4D3UQ0PsopR28CzdQ3S/5A1zwsUwp/rosSbfhJ5z7b90bIyTwi/F7hCLD4SGcZVjDzd4XoUQcEanvA==}
 
+  uno-colors@0.1.0:
+    resolution: {integrity: sha512-dySg3gSe4NwiRPhnUQdrhZZnoNqG1/NSHR/2SLy86q0gv1ClV0A8YYabtJYy50xZr+jy7WenKQaFPqWeA4Di+g==}
+
   unocss@66.7.2:
     resolution: {integrity: sha512-yB0yOpJTtlyGH/HAe4QdnjgjSP6z9ItTdrObvagc8ZEwRY1D2GbfUABwDKyZzXs19gXebqThMG9f+W0hPhDIPA==}
     peerDependencies:
@@ -2359,6 +2365,8 @@ snapshots:
       jiti: 2.7.0
       quansync: 1.0.0
       unconfig-core: 7.5.0
+
+  uno-colors@0.1.0: {}
 
   unocss@66.7.2(@voidzero-dev/vite-plus-core@0.1.24(jiti@2.7.0)(typescript@6.0.3)(yaml@2.9.0)):
     dependencies:

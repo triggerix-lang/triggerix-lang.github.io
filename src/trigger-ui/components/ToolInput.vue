@@ -24,7 +24,10 @@ const inputType = computed(() => leafInput.value?.type)
 
 const selectOptions = computed(() => {
   if (!leafInput.value || leafInput.value.type !== 'select') return []
-  return leafInput.value.options ?? []
+  return (leafInput.value.options ?? []).map((opt) => ({
+    value: String(opt.value),
+    label: opt.label
+  }))
 })
 
 function confirmText() {

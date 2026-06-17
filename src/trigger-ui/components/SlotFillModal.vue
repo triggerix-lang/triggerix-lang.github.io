@@ -58,7 +58,10 @@ const inputType = computed(() => isLeaf.value?.input.type)
 
 const selectOptions = computed(() => {
   if (!isLeaf.value || isLeaf.value.input.type !== 'select') return []
-  return isLeaf.value.input.options ?? []
+  return (isLeaf.value.input.options ?? []).map((opt) => ({
+    value: String(opt.value),
+    label: opt.label
+  }))
 })
 
 // Recompute composite preview segments with the current subSlotValues so

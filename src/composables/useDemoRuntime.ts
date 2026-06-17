@@ -3,7 +3,7 @@ import type { War3Editor, War3EditorState } from 'triggerix-ui-preset-war3'
 import { createRuntime } from '@triggerix/runtime'
 import { useEditor } from 'triggerix-editor-vue'
 import { createWar3Editor } from 'triggerix-ui-preset-war3'
-import { computed, type Ref, watch } from 'vue'
+import { computed, type Ref, shallowRef, watch } from 'vue'
 
 export type DemoActionHandler = ActionHandler
 
@@ -38,7 +38,20 @@ export function useDemoRuntime(options: DemoRuntimeOptions) {
   const triggers: InternalTrigger[] = options.triggers.map((def) => {
     const editor = createWar3Editor()
     options.setup(editor)
-    const { state, toRule } = useEditor(editor)
+    // Use `useEditor` for its provide/dispose side-effects, but ignore its
+    // `state` ref — that ref only calls `triggerRef` without reassigning
+    // `.value`, so it always exposes the same object reference and breaks
+    // prop-based reactivity in child components.
+    const { toRule } = useEditor(editor)
+
+    // Maintain our own shallowRef whose `.value` is reassigned to the latest
+    // state object on every mutation. The state manager performs immutable
+    // updates, so each `getState()` call returns a fresh reference, which
+    // correctly invalidates downstream `props.state` consumers.
+    const state = shallowRef<War3EditorState>(editor.getState())
+    editor.onChange(() => {
+      state.value = editor.getState()
+    })
 
     // Apply initial state immediately (synchronously) so the first
     // computed/watch evaluation already sees the populated rule.

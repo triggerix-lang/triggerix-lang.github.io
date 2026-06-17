@@ -3,7 +3,16 @@ import UnoCSS from 'unocss/vite'
 import { defineConfig } from 'vite-plus'
 
 export default defineConfig({
-  plugins: [vue(), UnoCSS()],
+  plugins: [
+    vue({
+      template: {
+        compilerOptions: {
+          isCustomElement: (tag) => tag === 'monaco-editor'
+        }
+      }
+    }),
+    UnoCSS()
+  ],
   staged: {
     '*': 'vp check --fix'
   },

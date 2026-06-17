@@ -5,6 +5,7 @@ import PlayCarousel from '../../components/playground/PlayCarousel.vue'
 import type { TriggerDef } from '../../composables/useDemoRuntime'
 import { useDemoRuntime } from '../../composables/useDemoRuntime'
 import { createHandlers, setup } from '../../definitions/carousel-switch'
+import { codeFiles } from '../../definitions/code-snippets/carousel-switch'
 import DemoLayout from '../../layouts/DemoLayout.vue'
 import TriggerEditor from '../../trigger-ui/components/TriggerEditor.vue'
 import TriggerTabs from '../../trigger-ui/components/TriggerTabs.vue'
@@ -91,7 +92,7 @@ function onTrigger(eventType: string, payload: Record<string, unknown>) {
 </script>
 
 <template>
-  <DemoLayout title="轮播切换 · Carousel Switch" :rules-json="rulesJson">
+  <DemoLayout title="轮播切换 · Carousel Switch" :rules-json="rulesJson" :code-files="codeFiles">
     <template #playground>
       <div class="flex flex-col gap-6">
         <div

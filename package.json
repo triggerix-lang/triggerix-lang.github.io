@@ -12,6 +12,8 @@
   },
   "dependencies": {
     "@triggerix/runtime": "catalog:",
+    "@vueuse/core": "^14.3.0",
+    "modern-monaco": "^0.4.2",
     "triggerix-editor-vue": "catalog:",
     "triggerix-ui-preset-war3": "catalog:",
     "vue": "catalog:",

@@ -6,6 +6,7 @@ import PlayInput from '../../components/playground/PlayInput.vue'
 import type { TriggerDef } from '../../composables/useDemoRuntime'
 import { useDemoRuntime } from '../../composables/useDemoRuntime'
 import { createHandlers, setup } from '../../definitions/button-modify-input'
+import { codeFiles } from '../../definitions/code-snippets/button-modify-input'
 import DemoLayout from '../../layouts/DemoLayout.vue'
 import TriggerEditor from '../../trigger-ui/components/TriggerEditor.vue'
 import TriggerTabs from '../../trigger-ui/components/TriggerTabs.vue'
@@ -92,7 +93,7 @@ function onTrigger(eventType: string, payload: Record<string, unknown>) {
 </script>
 
 <template>
-  <DemoLayout title="按钮修改输入框 · Patch Input" :rules-json="rulesJson">
+  <DemoLayout title="按钮修改输入框 · Patch Input" :rules-json="rulesJson" :code-files="codeFiles">
     <template #playground>
       <div class="flex flex-col gap-6">
         <div class="rounded-md border border-#1f2735 bg-#0c0e14/60 p-4">

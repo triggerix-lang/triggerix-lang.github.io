@@ -5,6 +5,7 @@ import PlayCarousel from '../../components/playground/PlayCarousel.vue'
 import type { TriggerDef } from '../../composables/useDemoRuntime'
 import { useDemoRuntime } from '../../composables/useDemoRuntime'
 import { createHandlers, setup } from '../../definitions/carousel-linkage'
+import { codeFiles } from '../../definitions/code-snippets/carousel-linkage'
 import DemoLayout from '../../layouts/DemoLayout.vue'
 import TriggerEditor from '../../trigger-ui/components/TriggerEditor.vue'
 import TriggerTabs from '../../trigger-ui/components/TriggerTabs.vue'
@@ -105,7 +106,7 @@ function onTrigger(eventType: string, payload: Record<string, unknown>) {
 </script>
 
 <template>
-  <DemoLayout title="轮播联动 · Linkage" :rules-json="rulesJson">
+  <DemoLayout title="轮播联动 · Linkage" :rules-json="rulesJson" :code-files="codeFiles">
     <template #playground>
       <div class="flex flex-col gap-6">
         <div class="rounded-md border border-#1f2735 bg-#0c0e14/60 p-4">

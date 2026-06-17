@@ -163,7 +163,7 @@ function getToolsForSegment(seg: SlotSegment): ToolDescriptor[] {
 <template>
   <Modal v-model:open="openModel" :mask-closable="true">
     <div
-      class="-mx-5 -my-4 px-5 py-4 bg-#131722 text-#c9d1d9 border border-#2a3348 rounded-md font-sans"
+      class="-mx-5 -my-4 px-5 py-4 bg-#131722 text-#c9d1d9 border border-#2a3348 b-b-none rounded-t-md font-sans"
     >
       <!-- Header -->
       <div class="flex items-center justify-between mb-3 pb-2 border-b border-#2a3348">

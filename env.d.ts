@@ -1,4 +1,5 @@
 /// <reference types="vite-plus/client" />
+/// <reference types="vue-router/auto-routes" />
 declare module '*.vue' {
   import type { DefineComponent } from 'vue'
 

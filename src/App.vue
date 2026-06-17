@@ -82,14 +82,14 @@ onBeforeUnmount(() => {
 <template>
   <div class="h-screen flex flex-col bg-#121212 text-#e0e0e0 overflow-hidden">
     <header class="px-8 py-4 border-b border-#2a2a2a bg-#1a1a1a flex items-center gap-6">
-      <RouterLink to="/" class="text-#4fc3f7 font-semibold tracking-wide no-underline">
+      <RouterLink to="/" class="text-primary font-semibold tracking-wide no-underline">
         Triggerix
       </RouterLink>
       <nav class="flex gap-5 text-sm">
         <RouterLink
           to="/"
-          class="text-#aaa no-underline transition-colors hover:text-#4fc3f7"
-          active-class="text-#4fc3f7"
+          class="text-#aaa no-underline transition-colors hover:text-primary"
+          exact-active-class="text-primary-3"
         >
           首页
         </RouterLink>
@@ -97,8 +97,8 @@ onBeforeUnmount(() => {
           v-for="d in demos"
           :key="d.to"
           :to="d.to"
-          class="text-#aaa no-underline transition-colors hover:text-#4fc3f7"
-          active-class="text-#4fc3f7"
+          class="text-#aaa no-underline transition-colors hover:text-primary"
+          active-class="text-primary-3"
         >
           {{ d.label }}
         </RouterLink>

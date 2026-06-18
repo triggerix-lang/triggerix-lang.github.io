@@ -76,6 +76,31 @@ const triggerDefs: TriggerDef[] = [
         }
       ]
     }
+  },
+  {
+    id: 'fill-url-trigger',
+    name: '填入网址',
+    initialState: {
+      event: {
+        type: 'button_click',
+        slotValues: {
+          button: { tool: 'button_picker', value: 'fill_url', subSlots: undefined }
+        }
+      },
+      actions: [
+        {
+          type: 'set_input_value',
+          slotValues: {
+            input: { tool: 'input_picker', value: 'target', subSlots: undefined },
+            value: {
+              tool: 'value_source',
+              value: { $ref: 'location.href' },
+              subSlots: undefined
+            }
+          }
+        }
+      ]
+    }
   }
 ]
 
@@ -134,7 +159,7 @@ function onTrigger(eventType: string, payload: Record<string, unknown>) {
           点击按钮 → 触发器命中 → 通过
           <span class="text-#c9a84c">$ref</span> 拉取页面信息写入 input。
           <br />
-          「填入网址」按钮没有配置触发器，可在右侧自行新建一条规则。
+          三个按钮各配一条触发器，分别写入标题、宽度、当前网址。
         </div>
       </div>
     </template>

@@ -1,5 +1,6 @@
 import type { LeafToolInput, War3Editor } from 'triggerix-ui-preset-war3'
 import type { DemoActionHandler } from '../composables/useDemoRuntime'
+import { defineCompositeTool, defineLeafTool } from 'triggerix-ui-preset-war3'
 import { defineAction, defineEvent } from './helpers'
 import { registerSharedTools } from './shared-tools'
 
@@ -11,24 +12,28 @@ const carouselOptions = [
 export function setup(editor: War3Editor) {
   registerSharedTools(editor)
 
-  editor.registerTool('carousel_picker', {
-    label: '选择轮播',
-    kind: 'leaf',
-    input: { type: 'select', options: carouselOptions },
-    resolve: (input: unknown) => input
-  })
-
-  editor.registerTool('carousel_index_ref', {
-    label: '轮播组件的当前索引',
-    kind: 'composite',
-    template: '${carousel}当前的索引值',
-    slots: {
-      carousel: { label: '轮播组件', tools: ['carousel_picker'] }
-    },
-    resolve: (slotValues: Record<string, unknown>) => ({
-      $ref: `carousel.${String((slotValues.carousel as string) ?? '')}.index`
+  editor.registerTool(
+    'carousel_picker',
+    defineLeafTool({
+      label: '选择轮播',
+      input: { type: 'select', options: carouselOptions },
+      resolve: (input: string) => input
     })
-  })
+  )
+
+  editor.registerTool(
+    'carousel_index_ref',
+    defineCompositeTool({
+      label: '轮播组件的当前索引',
+      template: '${carousel}当前的索引值',
+      slots: {
+        carousel: { label: '轮播组件', tools: ['carousel_picker'] }
+      },
+      resolve: (slotValues: { carousel: string }) => ({
+        $ref: `carousel.${slotValues.carousel ?? ''}.index`
+      })
+    })
+  )
 
   editor.registerEvent(
     defineEvent({

@@ -4,6 +4,7 @@ export const codeFiles: CodeFile[] = [
   {
     filename: 'setup.ts',
     content: `import type { War3Editor } from 'triggerix-ui-preset-war3'
+import { defineLeafTool } from 'triggerix-ui-preset-war3'
 
 const buttonOptions = [
   { value: 'fill_title', label: '填入标题按钮' },
@@ -18,18 +19,16 @@ export function setup(editor: War3Editor) {
   // value_source: 一组 $ref 选项（document.title / window.innerWidth ...）
   registerValueTools(editor)
 
-  editor.registerTool('button_picker', {
+  editor.registerTool('button_picker', defineLeafTool({
     label: '选择按钮',
-    kind: 'leaf',
     input: { type: 'select', options: buttonOptions },
-    resolve: (input) => input
-  })
-  editor.registerTool('input_picker', {
+    resolve: (input: string) => input
+  }))
+  editor.registerTool('input_picker', defineLeafTool({
     label: '选择输入框',
-    kind: 'leaf',
     input: { type: 'select', options: inputOptions },
-    resolve: (input) => input
-  })
+    resolve: (input: string) => input
+  }))
 
   editor.registerEvent({
     id: 'button_click',

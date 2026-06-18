@@ -1,4 +1,5 @@
 import type { LeafToolInput, War3Editor } from 'triggerix-ui-preset-war3'
+import { defineLeafTool } from 'triggerix-ui-preset-war3'
 
 /**
  * Pre-defined "value sources" pulled from the host page. Each option
@@ -13,13 +14,15 @@ export function registerValueTools(editor: War3Editor) {
     { value: { $ref: 'location.href' }, label: '当前网址' }
   ]
 
-  editor.registerTool('value_source', {
-    label: '选择值来源',
-    kind: 'leaf',
-    input: {
-      type: 'select',
-      options
-    },
-    resolve: (input: unknown) => input
-  })
+  editor.registerTool(
+    'value_source',
+    defineLeafTool({
+      label: '选择值来源',
+      input: {
+        type: 'select',
+        options
+      },
+      resolve: (input: unknown) => input
+    })
+  )
 }

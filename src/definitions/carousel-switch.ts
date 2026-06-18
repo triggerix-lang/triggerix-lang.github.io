@@ -1,5 +1,6 @@
 import type { LeafToolInput, War3Editor } from 'triggerix-ui-preset-war3'
 import type { DemoActionHandler } from '../composables/useDemoRuntime'
+import { defineLeafTool } from 'triggerix-ui-preset-war3'
 import { defineAction, defineEvent } from './helpers'
 import { registerSharedTools } from './shared-tools'
 
@@ -18,19 +19,23 @@ const colorOptions = [
 export function setup(editor: War3Editor) {
   registerSharedTools(editor)
 
-  editor.registerTool('carousel_picker', {
-    label: '选择轮播',
-    kind: 'leaf',
-    input: { type: 'select', options: carouselOptions },
-    resolve: (input: unknown) => input
-  })
+  editor.registerTool(
+    'carousel_picker',
+    defineLeafTool({
+      label: '选择轮播',
+      input: { type: 'select', options: carouselOptions },
+      resolve: (input: string) => input
+    })
+  )
 
-  editor.registerTool('color_picker', {
-    label: '选择颜色',
-    kind: 'leaf',
-    input: { type: 'select', options: colorOptions },
-    resolve: (input: unknown) => input
-  })
+  editor.registerTool(
+    'color_picker',
+    defineLeafTool({
+      label: '选择颜色',
+      input: { type: 'select', options: colorOptions },
+      resolve: (input: string) => input
+    })
+  )
 
   editor.registerEvent(
     defineEvent({

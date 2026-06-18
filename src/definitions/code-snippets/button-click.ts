@@ -4,6 +4,7 @@ export const codeFiles: CodeFile[] = [
   {
     filename: 'setup.ts',
     content: `import type { War3Editor } from 'triggerix-ui-preset-war3'
+import { defineLeafTool } from 'triggerix-ui-preset-war3'
 
 const buttonOptions = [
   { value: 'confirm_btn', label: '确认按钮' },
@@ -15,12 +16,11 @@ export function setup(editor: War3Editor) {
   registerSharedTools(editor)
 
   // 业务工具：从下拉里挑一个按钮 ID
-  editor.registerTool('button_picker', {
+  editor.registerTool('button_picker', defineLeafTool({
     label: '选择按钮',
-    kind: 'leaf',
     input: { type: 'select', options: buttonOptions },
-    resolve: (input) => input
-  })
+    resolve: (input: string) => input
+  }))
 
   // 事件：按钮被点击
   editor.registerEvent({

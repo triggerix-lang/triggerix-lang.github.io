@@ -4,6 +4,7 @@ export const codeFiles: CodeFile[] = [
   {
     filename: 'setup.ts',
     content: `import type { War3Editor } from 'triggerix-ui-preset-war3'
+import { defineCompositeTool, defineLeafTool } from 'triggerix-ui-preset-war3'
 
 const carouselOptions = [
   { value: 'left_carousel', label: '左侧轮播' },
@@ -13,26 +14,24 @@ const carouselOptions = [
 export function setup(editor: War3Editor) {
   registerSharedTools(editor)
 
-  editor.registerTool('carousel_picker', {
+  editor.registerTool('carousel_picker', defineLeafTool({
     label: '选择轮播',
-    kind: 'leaf',
     input: { type: 'select', options: carouselOptions },
-    resolve: (input) => input
-  })
+    resolve: (input: string) => input
+  }))
 
   // 关键：composite 工具 —— 它本身有子槽位，
   // resolve 时把子槽位的值组装成一个 $ref 表达式。
-  editor.registerTool('carousel_index_ref', {
+  editor.registerTool('carousel_index_ref', defineCompositeTool({
     label: '轮播组件的当前索引',
-    kind: 'composite',
     template: '\${carousel}当前的索引值',
     slots: {
       carousel: { label: '轮播组件', tools: ['carousel_picker'] }
     },
-    resolve: (slotValues) => ({
-      $ref: \`carousel.\${String(slotValues.carousel ?? '')}.index\`
+    resolve: (slotValues: { carousel: string }) => ({
+      $ref: \`carousel.\${slotValues.carousel ?? ''}.index\`
     })
-  })
+  }))
 
   editor.registerEvent({
     id: 'carousel_switch',

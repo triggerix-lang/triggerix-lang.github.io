@@ -17,7 +17,7 @@ catalog:
   '@unocss/reset': latest
   '@vitejs/plugin-vue': ^5.2.0
   triggerix-editor-vue: ^0.0.5
-  triggerix-ui-preset-war3: ^0.0.3
+  triggerix-ui-preset-war3: ^0.0.4
   typescript: ~6.0.2
   unocss: latest
   vite: npm:@voidzero-dev/vite-plus-core@latest

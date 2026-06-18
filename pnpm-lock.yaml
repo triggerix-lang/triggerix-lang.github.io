@@ -19,8 +19,8 @@ catalogs:
       specifier: ^0.0.5
       version: 0.0.5
     triggerix-ui-preset-war3:
-      specifier: ^0.0.3
-      version: 0.0.3
+      specifier: ^0.0.4
+      version: 0.0.4
     typescript:
       specifier: ~6.0.2
       version: 6.0.3
@@ -59,7 +59,7 @@ importers:
         version: 0.0.5(vue@3.5.38(typescript@6.0.3))
       triggerix-ui-preset-war3:
         specifier: 'catalog:'
-        version: 0.0.3
+        version: 0.0.4
       vue:
         specifier: 'catalog:'
         version: 3.5.38(typescript@6.0.3)
@@ -1269,8 +1269,8 @@ packages:
     peerDependencies:
       vue: ^3.5.0
 
-  triggerix-ui-preset-war3@0.0.3:
-    resolution: {integrity: sha512-54Vk/tWkOo4bCyoM6YmY3zbR4js3BqbHu1shMZhuUqY7p6P+cuaKUYJFPTCevCAP6jfhVAvQAgm5rWhdJUQJZg==}
+  triggerix-ui-preset-war3@0.0.4:
+    resolution: {integrity: sha512-bbLo2auTuAC1xGezyPjCfZWDsyfHC58DLG2SevBrE2DXofUulsHHvLgU2AEB0NSOQ7Zoj8x9OWDWPRU9SKxmfw==}
 
   tslib@2.8.1:
     resolution: {integrity: sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w==}
@@ -2351,7 +2351,7 @@ snapshots:
       '@triggerix/editor': 0.0.4
       vue: 3.5.38(typescript@6.0.3)
 
-  triggerix-ui-preset-war3@0.0.3:
+  triggerix-ui-preset-war3@0.0.4:
     dependencies:
       '@triggerix/core': 0.0.5
       '@triggerix/editor': 0.0.5

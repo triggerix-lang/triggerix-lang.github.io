@@ -99,7 +99,7 @@ export function useDemoRuntime(options: DemoRuntimeOptions) {
       const rule = t.toRule(t.id) as Record<string, unknown> | null | undefined
       if (rule) {
         // The runtime only matches by event type — it doesn't filter by
-        // event.params.  We inject conditions so that rules are only triggered
+        // event.payload.  We inject conditions so that rules are only triggered
         // when the payload's `source` field matches the selected component id.
         injectSourceCondition(rule)
         runtime.addRule(rule as unknown as Parameters<typeof runtime.addRule>[0])
@@ -108,16 +108,16 @@ export function useDemoRuntime(options: DemoRuntimeOptions) {
   }
 
   /**
-   * Convert the first string-valued event param into a runtime condition
-   * that checks `payload.source === value`.  This bridges the gap between
-   * the editor's event params and the playground's payload shape.
+   * Convert the first string-valued event payload field into a runtime
+   * condition that checks `payload.source === value`.  This bridges the gap
+   * between the editor's event payload and the playground's payload shape.
    */
   function injectSourceCondition(rule: Record<string, unknown>) {
-    const event = rule.event as { params?: Record<string, unknown> } | undefined
-    const params = event?.params
-    if (!params) return
+    const event = rule.event as { payload?: Record<string, unknown> } | undefined
+    const payload = event?.payload
+    if (!payload) return
 
-    const sourceValue = Object.values(params).find((v) => typeof v === 'string')
+    const sourceValue = Object.values(payload).find((v) => typeof v === 'string')
     if (sourceValue === undefined) return
 
     const condition = {

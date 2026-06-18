@@ -1,5 +1,6 @@
 import type { LeafToolInput, War3Editor } from 'triggerix-ui-preset-war3'
 import type { DemoActionHandler } from '../composables/useDemoRuntime'
+import { defineLeafTool } from 'triggerix-ui-preset-war3'
 import { defineAction, defineEvent } from './helpers'
 import { registerSharedTools } from './shared-tools'
 
@@ -11,12 +12,14 @@ const buttonOptions = [
 export function setup(editor: War3Editor) {
   registerSharedTools(editor)
 
-  editor.registerTool('button_picker', {
-    label: '选择按钮',
-    kind: 'leaf',
-    input: { type: 'select', options: buttonOptions },
-    resolve: (input: unknown) => input
-  })
+  editor.registerTool(
+    'button_picker',
+    defineLeafTool({
+      label: '选择按钮',
+      input: { type: 'select', options: buttonOptions },
+      resolve: (input: string) => input
+    })
+  )
 
   editor.registerEvent(
     defineEvent({

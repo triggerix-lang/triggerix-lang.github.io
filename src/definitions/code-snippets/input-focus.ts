@@ -4,6 +4,7 @@ export const codeFiles: CodeFile[] = [
   {
     filename: 'setup.ts',
     content: `import type { War3Editor } from 'triggerix-ui-preset-war3'
+import { defineLeafTool } from 'triggerix-ui-preset-war3'
 
 const inputOptions = [
   { value: 'username_input', label: '用户名输入框' },
@@ -14,12 +15,11 @@ export function setup(editor: War3Editor) {
   registerSharedTools(editor)
 
   // 业务工具：选择一个输入框
-  editor.registerTool('input_picker', {
+  editor.registerTool('input_picker', defineLeafTool({
     label: '选择输入框',
-    kind: 'leaf',
     input: { type: 'select', options: inputOptions },
-    resolve: (input) => input
-  })
+    resolve: (input: string) => input
+  }))
 
   // 一对事件：focus / blur
   editor.registerEvent({

@@ -4,6 +4,7 @@ export const codeFiles: CodeFile[] = [
   {
     filename: 'setup.ts',
     content: `import type { War3Editor } from 'triggerix-ui-preset-war3'
+import { defineLeafTool } from 'triggerix-ui-preset-war3'
 
 const carouselOptions = [{ value: 'main_carousel', label: '主轮播' }]
 const colorOptions = [
@@ -16,18 +17,16 @@ const colorOptions = [
 export function setup(editor: War3Editor) {
   registerSharedTools(editor)
 
-  editor.registerTool('carousel_picker', {
+  editor.registerTool('carousel_picker', defineLeafTool({
     label: '选择轮播',
-    kind: 'leaf',
     input: { type: 'select', options: carouselOptions },
-    resolve: (input) => input
-  })
-  editor.registerTool('color_picker', {
+    resolve: (input: string) => input
+  }))
+  editor.registerTool('color_picker', defineLeafTool({
     label: '选择颜色',
-    kind: 'leaf',
     input: { type: 'select', options: colorOptions },
-    resolve: (input) => input
-  })
+    resolve: (input: string) => input
+  }))
 
   // 事件：轮播切换
   editor.registerEvent({

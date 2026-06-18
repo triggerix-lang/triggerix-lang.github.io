@@ -15,7 +15,7 @@ const numberValue = ref<number | undefined>(undefined)
 const selectedValue = ref<unknown>(null)
 
 const leafDescriptor = computed<LeafToolDescriptor | null>(() =>
-  props.descriptor.type === 'leaf' ? props.descriptor : null
+  props.descriptor.kind === 'leaf' ? props.descriptor : null
 )
 
 const leafInput = computed<LeafToolInput | null>(() => leafDescriptor.value?.input ?? null)

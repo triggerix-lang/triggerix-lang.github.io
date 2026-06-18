@@ -70,8 +70,8 @@ export function useDemoRuntime(options: DemoRuntimeOptions) {
   //    and action handlers with the runtime.
   if (triggers.length > 0) {
     for (const evt of triggers[0].editor.getAvailableEvents()) {
-      const type = (evt as unknown as { type: string }).type
-      runtime.registerEvent(type)
+      const id = (evt as unknown as { id: string }).id
+      runtime.registerEvent(id)
     }
   }
   for (const [type, handler] of Object.entries(options.handlers)) {
@@ -159,14 +159,14 @@ export function useDemoRuntime(options: DemoRuntimeOptions) {
 
 function applyInitialState(editor: War3Editor, initial: Partial<War3EditorState>) {
   if (initial.event) {
-    editor.setEvent(initial.event.type)
+    editor.setEvent(initial.event.id)
     for (const [key, entry] of Object.entries(initial.event.slotValues ?? {})) {
       editor.setEventSlot(key, entry)
     }
   }
   if (initial.conditions) {
     initial.conditions.forEach((cond, index) => {
-      editor.addCondition(cond.type)
+      editor.addCondition(cond.id)
       for (const [key, entry] of Object.entries(cond.slotValues ?? {})) {
         editor.setConditionSlot(index, key, entry)
       }
@@ -174,7 +174,7 @@ function applyInitialState(editor: War3Editor, initial: Partial<War3EditorState>
   }
   if (initial.actions) {
     initial.actions.forEach((action, index) => {
-      editor.addAction(action.type)
+      editor.addAction(action.id)
       for (const [key, entry] of Object.entries(action.slotValues ?? {})) {
         editor.setActionSlot(index, key, entry)
       }

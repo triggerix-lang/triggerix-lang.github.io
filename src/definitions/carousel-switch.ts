@@ -20,14 +20,14 @@ export function setup(editor: War3Editor) {
 
   editor.registerTool('carousel_picker', {
     label: '选择轮播',
-    type: 'leaf',
+    kind: 'leaf',
     input: { type: 'select', options: carouselOptions },
     resolve: (input: unknown) => input
   })
 
   editor.registerTool('color_picker', {
     label: '选择颜色',
-    type: 'leaf',
+    kind: 'leaf',
     input: { type: 'select', options: colorOptions },
     resolve: (input: unknown) => input
   })
@@ -46,6 +46,7 @@ export function setup(editor: War3Editor) {
   editor.registerAction(
     defineAction({
       id: 'show_message',
+      label: '显示消息',
       template: '显示消息${message}',
       slots: {
         message: { label: '消息', tools: ['text_input'] }
@@ -56,6 +57,7 @@ export function setup(editor: War3Editor) {
   editor.registerAction(
     defineAction({
       id: 'change_bg_color',
+      label: '改变背景色',
       template: '更改背景色为${color}',
       slots: {
         color: { label: '颜色', tools: ['color_picker'] }

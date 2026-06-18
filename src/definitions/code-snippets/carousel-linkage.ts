@@ -15,7 +15,7 @@ export function setup(editor: War3Editor) {
 
   editor.registerTool('carousel_picker', {
     label: '选择轮播',
-    type: 'leaf',
+    kind: 'leaf',
     input: { type: 'select', options: carouselOptions },
     resolve: (input) => input
   })
@@ -24,7 +24,7 @@ export function setup(editor: War3Editor) {
   // resolve 时把子槽位的值组装成一个 $ref 表达式。
   editor.registerTool('carousel_index_ref', {
     label: '轮播组件的当前索引',
-    type: 'composite',
+    kind: 'composite',
     template: '\${carousel}当前的索引值',
     slots: {
       carousel: { label: '轮播组件', tools: ['carousel_picker'] }

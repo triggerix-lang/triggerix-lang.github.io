@@ -25,14 +25,14 @@ const triggerDefs: TriggerDef[] = [
     name: '确认按钮',
     initialState: {
       event: {
-        type: 'button_click',
+        id: 'button_click',
         slotValues: {
           button: { tool: 'button_picker', value: 'confirm_btn', subSlots: undefined }
         }
       },
       actions: [
         {
-          type: 'show_message',
+          id: 'show_message',
           slotValues: {
             message: { tool: 'text_input', value: 'Hello Triggerix!', subSlots: undefined }
           }
@@ -45,14 +45,14 @@ const triggerDefs: TriggerDef[] = [
     name: '取消按钮',
     initialState: {
       event: {
-        type: 'button_click',
+        id: 'button_click',
         slotValues: {
           button: { tool: 'button_picker', value: 'cancel_btn', subSlots: undefined }
         }
       },
       actions: [
         {
-          type: 'show_message',
+          id: 'show_message',
           slotValues: {
             message: { tool: 'text_input', value: '已取消', subSlots: undefined }
           }

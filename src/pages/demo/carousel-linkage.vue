@@ -58,14 +58,14 @@ const triggerDefs: TriggerDef[] = [
     name: '左右联动',
     initialState: {
       event: {
-        type: 'carousel_switch',
+        id: 'carousel_switch',
         slotValues: {
           carousel: { tool: 'carousel_picker', value: 'left_carousel', subSlots: undefined }
         }
       },
       actions: [
         {
-          type: 'set_carousel_index',
+          id: 'set_carousel_index',
           slotValues: {
             carousel: { tool: 'carousel_picker', value: 'right_carousel', subSlots: undefined },
             index: {

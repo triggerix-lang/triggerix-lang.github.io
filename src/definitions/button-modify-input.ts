@@ -18,14 +18,14 @@ export function setup(editor: War3Editor) {
 
   editor.registerTool('button_picker', {
     label: '选择按钮',
-    type: 'leaf',
+    kind: 'leaf',
     input: { type: 'select', options: buttonOptions },
     resolve: (input: unknown) => input
   })
 
   editor.registerTool('input_picker', {
     label: '选择输入框',
-    type: 'leaf',
+    kind: 'leaf',
     input: { type: 'select', options: inputOptions },
     resolve: (input: unknown) => input
   })
@@ -33,6 +33,7 @@ export function setup(editor: War3Editor) {
   editor.registerEvent(
     defineEvent({
       id: 'button_click',
+      label: '按钮点击',
       template: '${button}被点击',
       slots: {
         button: { label: '按钮', tools: ['button_picker'] }
@@ -43,6 +44,7 @@ export function setup(editor: War3Editor) {
   editor.registerAction(
     defineAction({
       id: 'set_input_value',
+      label: '设置输入框值',
       template: '设置${input}的值为${value}',
       slots: {
         input: { label: '输入框', tools: ['input_picker'] },

@@ -53,7 +53,7 @@ const displayText = computed<string>(() => {
   // literal that is not reference-equal to the registered option.
   if (props.toolDescriptors) {
     for (const d of props.toolDescriptors) {
-      if (d.type !== 'leaf') continue
+      if (d.kind !== 'leaf') continue
       if (d.input.type !== 'select') continue
       const opt = d.input.options?.find((o) => optionValueEquals(o.value, v))
       if (opt) return opt.label

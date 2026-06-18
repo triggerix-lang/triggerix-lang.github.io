@@ -17,7 +17,7 @@ export function setup(editor: War3Editor) {
   // 业务工具：从下拉里挑一个按钮 ID
   editor.registerTool('button_picker', {
     label: '选择按钮',
-    type: 'leaf',
+    kind: 'leaf',
     input: { type: 'select', options: buttonOptions },
     resolve: (input) => input
   })

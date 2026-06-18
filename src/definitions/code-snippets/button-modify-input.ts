@@ -20,13 +20,13 @@ export function setup(editor: War3Editor) {
 
   editor.registerTool('button_picker', {
     label: '选择按钮',
-    type: 'leaf',
+    kind: 'leaf',
     input: { type: 'select', options: buttonOptions },
     resolve: (input) => input
   })
   editor.registerTool('input_picker', {
     label: '选择输入框',
-    type: 'leaf',
+    kind: 'leaf',
     input: { type: 'select', options: inputOptions },
     resolve: (input) => input
   })

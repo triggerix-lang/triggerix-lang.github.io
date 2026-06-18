@@ -30,12 +30,12 @@ const actionSlotEntriesList = computed(() => props.state.actions.map((a) => a.sl
 const conditionSlotEntriesList = computed(() => props.state.conditions.map((c) => c.slotValues))
 
 interface AvailableType {
-  type: string
+  id: string
   label: string
 }
 
 interface DefLike {
-  type: string
+  id: string
   label?: string
   template: string
   slots?: Record<string, SlotDef>
@@ -43,7 +43,7 @@ interface DefLike {
 
 function toAvailableTypes<T extends DefLike>(defs: T[]): AvailableType[] {
   return defs.map((d) => ({
-    type: d.type,
+    id: d.id,
     label:
       d.label && d.label.length > 0
         ? d.label
@@ -91,7 +91,7 @@ function handleEditItem(kind: 'event' | 'condition' | 'action', index: number) {
   itemModalKind.value = kind
 
   const state = props.editor.getState()
-  let itemState: { type: string; slotValues: Record<string, SlotValueEntry> } | null = null
+  let itemState: { id: string; slotValues: Record<string, SlotValueEntry> } | null = null
 
   if (kind === 'event') {
     itemState = state.event
@@ -103,7 +103,7 @@ function handleEditItem(kind: 'event' | 'condition' | 'action', index: number) {
 
   if (!itemState) return
 
-  editType.value = itemState.type
+  editType.value = itemState.id
   editSlotValues.value = { ...itemState.slotValues }
   editIndex.value = index
 

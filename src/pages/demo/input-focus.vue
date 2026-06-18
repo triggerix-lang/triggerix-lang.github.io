@@ -34,14 +34,14 @@ const triggerDefs: TriggerDef[] = [
     name: '获焦提示',
     initialState: {
       event: {
-        type: 'input_focus',
+        id: 'input_focus',
         slotValues: {
           input: { tool: 'input_picker', value: 'username_input', subSlots: undefined }
         }
       },
       actions: [
         {
-          type: 'show_tip',
+          id: 'show_tip',
           slotValues: {
             message: { tool: 'text_input', value: '请输入用户名', subSlots: undefined }
           }
@@ -54,12 +54,12 @@ const triggerDefs: TriggerDef[] = [
     name: '失焦隐藏',
     initialState: {
       event: {
-        type: 'input_blur',
+        id: 'input_blur',
         slotValues: {
           input: { tool: 'input_picker', value: 'username_input', subSlots: undefined }
         }
       },
-      actions: [{ type: 'hide_tip', slotValues: {} }]
+      actions: [{ id: 'hide_tip', slotValues: {} }]
     }
   }
 ]

@@ -16,7 +16,7 @@ export function setup(editor: War3Editor) {
   // 业务工具：选择一个输入框
   editor.registerTool('input_picker', {
     label: '选择输入框',
-    type: 'leaf',
+    kind: 'leaf',
     input: { type: 'select', options: inputOptions },
     resolve: (input) => input
   })

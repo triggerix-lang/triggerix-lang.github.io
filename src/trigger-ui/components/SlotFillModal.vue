@@ -48,10 +48,10 @@ const selectValue = ref<string | null>(null)
 const subSlotValues = ref<Record<string, SlotValueEntry>>({})
 
 const isLeaf = computed<LeafToolDescriptor | null>(() =>
-  selectedTool.value?.type === 'leaf' ? selectedTool.value : null
+  selectedTool.value?.kind === 'leaf' ? selectedTool.value : null
 )
 const isComposite = computed<CompositeToolDescriptor | null>(() =>
-  selectedTool.value?.type === 'composite' ? selectedTool.value : null
+  selectedTool.value?.kind === 'composite' ? selectedTool.value : null
 )
 
 const inputType = computed(() => isLeaf.value?.input.type)
@@ -71,7 +71,7 @@ const compositeSegments = computed<Segment[]>(() => {
   if (!composite) return []
   if (props.editor) {
     const descriptor = props.editor.getToolDescriptor(composite.name, subSlotValues.value)
-    if (descriptor && descriptor.type === 'composite') return descriptor.segments
+    if (descriptor && descriptor.kind === 'composite') return descriptor.segments
   }
   return composite.segments
 })
@@ -130,7 +130,7 @@ function pickTool(tool: ToolDescriptor) {
 
 const canConfirm = computed(() => {
   if (!selectedTool.value) return false
-  if (selectedTool.value.type === 'leaf') {
+  if (selectedTool.value.kind === 'leaf') {
     switch (selectedTool.value.input.type) {
       case 'text':
         return textValue.value.length > 0
@@ -141,7 +141,7 @@ const canConfirm = computed(() => {
     }
     return false
   }
-  if (selectedTool.value.type === 'composite') {
+  if (selectedTool.value.kind === 'composite') {
     // Require every slot in the composite tool to be filled.
     for (const seg of compositeSegments.value) {
       if (seg.type === 'slot') {
@@ -163,7 +163,7 @@ function close() {
 
 function confirm() {
   if (!selectedTool.value || !canConfirm.value) return
-  if (selectedTool.value.type === 'leaf') {
+  if (selectedTool.value.kind === 'leaf') {
     let value: unknown = null
     switch (selectedTool.value.input.type) {
       case 'text':
@@ -262,7 +262,7 @@ function handleNestedConfirm(entry: SlotValueEntry) {
         >
           {{ tool.label }}
           <span
-            v-if="tool.type === 'composite'"
+            v-if="tool.kind === 'composite'"
             class="ml-1.5 text-[0.6rem] uppercase tracking-widest text-#9d7cd8/80"
           >
             composite
@@ -287,7 +287,7 @@ function handleNestedConfirm(entry: SlotValueEntry) {
         </div>
 
         <!-- Leaf inputs -->
-        <template v-if="selectedTool.type === 'leaf' && inputType === 'text'">
+        <template v-if="selectedTool.kind === 'leaf' && inputType === 'text'">
           <input
             v-model="textValue"
             type="text"
@@ -297,7 +297,7 @@ function handleNestedConfirm(entry: SlotValueEntry) {
           />
         </template>
 
-        <template v-else-if="selectedTool.type === 'leaf' && inputType === 'number'">
+        <template v-else-if="selectedTool.kind === 'leaf' && inputType === 'number'">
           <input
             v-model.number="numberValue"
             type="number"
@@ -307,7 +307,7 @@ function handleNestedConfirm(entry: SlotValueEntry) {
           />
         </template>
 
-        <template v-else-if="selectedTool.type === 'leaf' && inputType === 'select'">
+        <template v-else-if="selectedTool.kind === 'leaf' && inputType === 'select'">
           <div class="flex flex-col gap-1 max-h-[260px] overflow-y-auto pr-0.5">
             <button
               v-for="opt in selectOptions"
@@ -333,7 +333,7 @@ function handleNestedConfirm(entry: SlotValueEntry) {
         </template>
 
         <!-- Composite preview -->
-        <template v-else-if="selectedTool.type === 'composite'">
+        <template v-else-if="selectedTool.kind === 'composite'">
           <div
             class="px-3 py-2.5 rounded-sm bg-#0c0e14 border border-#9d7cd8/30 font-mono text-[0.85rem] leading-relaxed text-#c9d1d9"
           >

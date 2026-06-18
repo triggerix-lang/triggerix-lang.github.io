@@ -15,7 +15,7 @@ export function registerValueTools(editor: War3Editor) {
 
   editor.registerTool('value_source', {
     label: '选择值来源',
-    type: 'leaf',
+    kind: 'leaf',
     input: {
       type: 'select',
       options

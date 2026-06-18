@@ -33,14 +33,14 @@ const triggerDefs: TriggerDef[] = [
     name: '切换消息',
     initialState: {
       event: {
-        type: 'carousel_switch',
+        id: 'carousel_switch',
         slotValues: {
           carousel: { tool: 'carousel_picker', value: 'main_carousel', subSlots: undefined }
         }
       },
       actions: [
         {
-          type: 'show_message',
+          id: 'show_message',
           slotValues: {
             message: { tool: 'text_input', value: '轮播已切换', subSlots: undefined }
           }
@@ -53,14 +53,14 @@ const triggerDefs: TriggerDef[] = [
     name: '切换变色',
     initialState: {
       event: {
-        type: 'carousel_switch',
+        id: 'carousel_switch',
         slotValues: {
           carousel: { tool: 'carousel_picker', value: 'main_carousel', subSlots: undefined }
         }
       },
       actions: [
         {
-          type: 'change_bg_color',
+          id: 'change_bg_color',
           slotValues: {
             color: { tool: 'color_picker', value: '#5fb3a1', subSlots: undefined }
           }

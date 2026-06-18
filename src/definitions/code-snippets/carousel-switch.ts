@@ -18,13 +18,13 @@ export function setup(editor: War3Editor) {
 
   editor.registerTool('carousel_picker', {
     label: '选择轮播',
-    type: 'leaf',
+    kind: 'leaf',
     input: { type: 'select', options: carouselOptions },
     resolve: (input) => input
   })
   editor.registerTool('color_picker', {
     label: '选择颜色',
-    type: 'leaf',
+    kind: 'leaf',
     input: { type: 'select', options: colorOptions },
     resolve: (input) => input
   })

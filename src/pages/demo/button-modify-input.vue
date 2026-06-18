@@ -32,14 +32,14 @@ const triggerDefs: TriggerDef[] = [
     name: '填入标题',
     initialState: {
       event: {
-        type: 'button_click',
+        id: 'button_click',
         slotValues: {
           button: { tool: 'button_picker', value: 'fill_title', subSlots: undefined }
         }
       },
       actions: [
         {
-          type: 'set_input_value',
+          id: 'set_input_value',
           slotValues: {
             input: { tool: 'input_picker', value: 'target', subSlots: undefined },
             value: {
@@ -57,14 +57,14 @@ const triggerDefs: TriggerDef[] = [
     name: '填入宽度',
     initialState: {
       event: {
-        type: 'button_click',
+        id: 'button_click',
         slotValues: {
           button: { tool: 'button_picker', value: 'fill_width', subSlots: undefined }
         }
       },
       actions: [
         {
-          type: 'set_input_value',
+          id: 'set_input_value',
           slotValues: {
             input: { tool: 'input_picker', value: 'target', subSlots: undefined },
             value: {
@@ -82,14 +82,14 @@ const triggerDefs: TriggerDef[] = [
     name: '填入网址',
     initialState: {
       event: {
-        type: 'button_click',
+        id: 'button_click',
         slotValues: {
           button: { tool: 'button_picker', value: 'fill_url', subSlots: undefined }
         }
       },
       actions: [
         {
-          type: 'set_input_value',
+          id: 'set_input_value',
           slotValues: {
             input: { tool: 'input_picker', value: 'target', subSlots: undefined },
             value: {

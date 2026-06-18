@@ -13,7 +13,7 @@ export function setup(editor: War3Editor) {
 
   editor.registerTool('button_picker', {
     label: '选择按钮',
-    type: 'leaf',
+    kind: 'leaf',
     input: { type: 'select', options: buttonOptions },
     resolve: (input: unknown) => input
   })
@@ -21,6 +21,7 @@ export function setup(editor: War3Editor) {
   editor.registerEvent(
     defineEvent({
       id: 'button_click',
+      label: '按钮点击',
       template: '${button}被点击',
       slots: {
         button: { label: '按钮', tools: ['button_picker'] }
@@ -31,6 +32,7 @@ export function setup(editor: War3Editor) {
   editor.registerAction(
     defineAction({
       id: 'show_message',
+      label: '显示消息',
       template: '显示消息${message}',
       slots: {
         message: { label: '消息', tools: ['text_input'] }

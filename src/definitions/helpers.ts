@@ -14,7 +14,7 @@ import type {
 interface ItemDef {
   id: string
   type?: string
-  label?: string
+  label: string
   template: string
   slots?: Record<string, SlotDef>
 }

@@ -13,14 +13,14 @@ export function setup(editor: War3Editor) {
 
   editor.registerTool('carousel_picker', {
     label: '选择轮播',
-    type: 'leaf',
+    kind: 'leaf',
     input: { type: 'select', options: carouselOptions },
     resolve: (input: unknown) => input
   })
 
   editor.registerTool('carousel_index_ref', {
     label: '轮播组件的当前索引',
-    type: 'composite',
+    kind: 'composite',
     template: '${carousel}当前的索引值',
     slots: {
       carousel: { label: '轮播组件', tools: ['carousel_picker'] }
@@ -44,6 +44,7 @@ export function setup(editor: War3Editor) {
   editor.registerAction(
     defineAction({
       id: 'set_carousel_index',
+      label: '设置轮播索引',
       template: '设置${carousel}切换到第${index}张',
       slots: {
         carousel: { label: '轮播', tools: ['carousel_picker'] },

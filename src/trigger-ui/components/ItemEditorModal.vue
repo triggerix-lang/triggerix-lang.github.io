@@ -13,7 +13,7 @@ import SegmentRenderer from './SegmentRenderer.vue'
 import SlotFillModal from './SlotFillModal.vue'
 
 interface AvailableType {
-  type: string
+  id: string
   label: string
 }
 
@@ -71,7 +71,7 @@ watch(
         slotValues.value = props.editSlotValues ? { ...props.editSlotValues } : {}
       } else {
         // Add mode: reset to defaults
-        selectedType.value = props.availableTypes.length > 0 ? props.availableTypes[0].type : null
+        selectedType.value = props.availableTypes.length > 0 ? props.availableTypes[0].id : null
         slotValues.value = {}
       }
       fillModalOpen.value = false
@@ -91,14 +91,14 @@ watch(selectedType, () => {
 
 function getDefByType(
   type: string
-): { type: string; template: string; slots?: Record<string, SlotDef> } | undefined {
+): { id: string; template: string; slots?: Record<string, SlotDef> } | undefined {
   switch (props.type) {
     case 'event':
-      return props.editor.getAvailableEvents().find((d) => d.type === type)
+      return props.editor.getAvailableEvents().find((d) => d.id === type)
     case 'condition':
-      return props.editor.getAvailableConditions().find((d) => d.type === type)
+      return props.editor.getAvailableConditions().find((d) => d.id === type)
     case 'action':
-      return props.editor.getAvailableActions().find((d) => d.type === type)
+      return props.editor.getAvailableActions().find((d) => d.id === type)
   }
   return undefined
 }
@@ -210,7 +210,7 @@ function getToolsForSegment(seg: SlotSegment): ToolDescriptor[] {
           v-model="selectedType"
           class="w-full px-3 py-2 rounded-sm bg-#1a2030 border border-#2f3d54 text-sm text-#c9d1d9 outline-none focus:border-#3d4f6a appearance-none cursor-pointer"
         >
-          <option v-for="t in availableTypes" :key="t.type" :value="t.type">
+          <option v-for="t in availableTypes" :key="t.id" :value="t.id">
             {{ t.label }}
           </option>
         </select>

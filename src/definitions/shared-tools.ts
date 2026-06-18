@@ -7,14 +7,14 @@ import type { War3Editor } from 'triggerix-ui-preset-war3'
 export function registerSharedTools(editor: War3Editor) {
   editor.registerTool('text_input', {
     label: '文本输入',
-    type: 'leaf',
+    kind: 'leaf',
     input: { type: 'text', placeholder: '请输入文本...' },
     resolve: (input: unknown) => input
   })
 
   editor.registerTool('number_input', {
     label: '数字输入',
-    type: 'leaf',
+    kind: 'leaf',
     input: { type: 'number', placeholder: '请输入数字...' },
     resolve: (input: unknown) => Number(input)
   })

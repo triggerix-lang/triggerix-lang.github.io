@@ -56,14 +56,22 @@ async function initWorkspace(codeFiles: CodeFile[], json: unknown[] | null | und
   lazyDone = true
 }
 
+// 通过传入 readonlyContent（内容字符串）让编辑器以只读模式打开文件，
+// 文本可选中、可复制、可移动光标，但禁止修改。第二个参数在 modern-monaco
+// 内部被解释为 readonlyContent，传字符串即进入只读分支。
 async function safeOpen(filename: string, content?: string) {
   if (!workspace || !lazyDone) return
   try {
-    if (content !== undefined) {
-      await workspace.openTextDocument(filename, content)
-    } else {
-      await workspace.openTextDocument(filename)
+    let readonlyContent = content
+    if (readonlyContent === undefined) {
+      // 从 workspace 文件系统读取，确保即便未显式传入内容也以只读模式打开
+      try {
+        readonlyContent = await workspace.fs.readTextFile(filename)
+      } catch {
+        return
+      }
     }
+    await workspace.openTextDocument(filename, readonlyContent)
   } catch (e: any) {
     if (e?.message !== 'Canceled' && e?.name !== 'Canceled') throw e
   }

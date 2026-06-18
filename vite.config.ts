@@ -5,7 +5,9 @@ import VueRouter from 'vue-router/vite'
 
 export default defineConfig({
   plugins: [
-    VueRouter(),
+    VueRouter({
+      dts: '.auto-generated/typed-router.d.ts'
+    }),
     vue({
       template: {
         compilerOptions: {

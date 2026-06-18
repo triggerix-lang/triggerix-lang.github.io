@@ -28,3 +28,6 @@ dist-ssr
 
 # AI
 .qoder
+
+# Auto-generated
+.auto-generated

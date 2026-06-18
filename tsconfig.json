@@ -17,5 +17,5 @@
     "erasableSyntaxOnly": true,
     "skipLibCheck": true
   },
-  "include": ["src", "env.d.ts"]
+  "include": ["src", "env.d.ts", ".auto-generated/typed-router.d.ts"]
 }

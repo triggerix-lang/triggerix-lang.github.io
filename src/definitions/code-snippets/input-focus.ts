@@ -23,24 +23,24 @@ export function setup(editor: War3Editor) {
 
   // 一对事件：focus / blur
   editor.registerEvent({
-    type: 'input_focus',
+    id: 'input_focus',
     template: '\${input}获得焦点',
     slots: { input: { label: '输入框', tools: ['input_picker'] } }
   })
   editor.registerEvent({
-    type: 'input_blur',
+    id: 'input_blur',
     template: '\${input}失去焦点',
     slots: { input: { label: '输入框', tools: ['input_picker'] } }
   })
 
   // 一对动作：show_tip 带文本，hide_tip 无槽位
   editor.registerAction({
-    type: 'show_tip',
+    id: 'show_tip',
     template: '显示提示\${message}',
     slots: { message: { label: '提示文本', tools: ['text_input'] } }
   })
   editor.registerAction({
-    type: 'hide_tip',
+    id: 'hide_tip',
     template: '隐藏提示'
   })
 }

@@ -34,7 +34,7 @@ export function setup(editor: War3Editor) {
 
   editor.registerEvent(
     defineEvent({
-      type: 'carousel_switch',
+      id: 'carousel_switch',
       label: '轮播组件切换',
       template: '${carousel}切换',
       slots: {
@@ -45,7 +45,7 @@ export function setup(editor: War3Editor) {
 
   editor.registerAction(
     defineAction({
-      type: 'show_message',
+      id: 'show_message',
       template: '显示消息${message}',
       slots: {
         message: { label: '消息', tools: ['text_input'] }
@@ -55,7 +55,7 @@ export function setup(editor: War3Editor) {
 
   editor.registerAction(
     defineAction({
-      type: 'change_bg_color',
+      id: 'change_bg_color',
       template: '更改背景色为${color}',
       slots: {
         color: { label: '颜色', tools: ['color_picker'] }

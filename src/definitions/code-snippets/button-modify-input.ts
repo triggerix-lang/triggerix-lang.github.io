@@ -32,14 +32,14 @@ export function setup(editor: War3Editor) {
   })
 
   editor.registerEvent({
-    type: 'button_click',
+    id: 'button_click',
     template: '\${button}被点击',
     slots: { button: { label: '按钮', tools: ['button_picker'] } }
   })
 
   // value 槽位允许两种工具：从下拉选 $ref，或直接打字
   editor.registerAction({
-    type: 'set_input_value',
+    id: 'set_input_value',
     template: '设置\${input}的值为\${value}',
     slots: {
       input: { label: '输入框', tools: ['input_picker'] },

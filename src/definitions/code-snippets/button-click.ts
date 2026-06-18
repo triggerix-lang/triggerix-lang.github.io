@@ -24,7 +24,7 @@ export function setup(editor: War3Editor) {
 
   // 事件：按钮被点击
   editor.registerEvent({
-    type: 'button_click',
+    id: 'button_click',
     template: '\${button}被点击',
     slots: {
       button: { label: '按钮', tools: ['button_picker'] }
@@ -33,7 +33,7 @@ export function setup(editor: War3Editor) {
 
   // 动作：弹出消息
   editor.registerAction({
-    type: 'show_message',
+    id: 'show_message',
     template: '显示消息\${message}',
     slots: {
       message: { label: '消息', tools: ['text_input'] }

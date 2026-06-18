@@ -31,7 +31,7 @@ export function setup(editor: War3Editor) {
 
   // 事件：轮播切换
   editor.registerEvent({
-    type: 'carousel_switch',
+    id: 'carousel_switch',
     label: '轮播组件切换',
     template: '\${carousel}切换',
     slots: {
@@ -41,12 +41,12 @@ export function setup(editor: War3Editor) {
 
   // 同一事件可以挂多条规则，分别派发不同动作
   editor.registerAction({
-    type: 'show_message',
+    id: 'show_message',
     template: '显示消息\${message}',
     slots: { message: { label: '消息', tools: ['text_input'] } }
   })
   editor.registerAction({
-    type: 'change_bg_color',
+    id: 'change_bg_color',
     template: '更改背景色为\${color}',
     slots: { color: { label: '颜色', tools: ['color_picker'] } }
   })

@@ -20,7 +20,7 @@ export function setup(editor: War3Editor) {
 
   editor.registerEvent(
     defineEvent({
-      type: 'input_focus',
+      id: 'input_focus',
       template: '${input}获得焦点',
       slots: {
         input: { label: '输入框', tools: ['input_picker'] }
@@ -30,7 +30,7 @@ export function setup(editor: War3Editor) {
 
   editor.registerEvent(
     defineEvent({
-      type: 'input_blur',
+      id: 'input_blur',
       template: '${input}失去焦点',
       slots: {
         input: { label: '输入框', tools: ['input_picker'] }
@@ -40,7 +40,7 @@ export function setup(editor: War3Editor) {
 
   editor.registerAction(
     defineAction({
-      type: 'show_tip',
+      id: 'show_tip',
       template: '显示提示${message}',
       slots: {
         message: { label: '提示文本', tools: ['text_input'] }
@@ -50,7 +50,7 @@ export function setup(editor: War3Editor) {
 
   editor.registerAction(
     defineAction({
-      type: 'hide_tip',
+      id: 'hide_tip',
       template: '隐藏提示'
     })
   )

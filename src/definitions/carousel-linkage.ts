@@ -32,7 +32,7 @@ export function setup(editor: War3Editor) {
 
   editor.registerEvent(
     defineEvent({
-      type: 'carousel_switch',
+      id: 'carousel_switch',
       label: '轮播组件切换',
       template: '${carousel}切换',
       slots: {
@@ -43,7 +43,7 @@ export function setup(editor: War3Editor) {
 
   editor.registerAction(
     defineAction({
-      type: 'set_carousel_index',
+      id: 'set_carousel_index',
       template: '设置${carousel}切换到第${index}张',
       slots: {
         carousel: { label: '轮播', tools: ['carousel_picker'] },

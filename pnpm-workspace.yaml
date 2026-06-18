@@ -13,7 +13,7 @@ overrides:
   vite: 'catalog:'
   vitest: 'catalog:'
 catalog:
-  '@triggerix/runtime': ^0.0.4
+  '@triggerix/runtime': ^0.0.5
   '@unocss/reset': latest
   '@vitejs/plugin-vue': ^5.2.0
   triggerix-editor-vue: ^0.0.5

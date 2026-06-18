@@ -1,5 +1,5 @@
-import type { War3Editor } from 'triggerix-ui-preset-war3'
-import { defineLeafTool } from 'triggerix-ui-preset-war3'
+import type { War3Editor } from 'triggerix-editor-preset-war3'
+import { defineLeafTool } from 'triggerix-editor-preset-war3'
 
 /**
  * Generic input tools shared by every demo: a plain text field and a

@@ -5,7 +5,7 @@ import {
   type SlotValueEntry,
   type ToolDescriptor,
   type War3Editor
-} from 'triggerix-ui-preset-war3'
+} from 'triggerix-editor-preset-war3'
 import { computed, ref, watch } from 'vue'
 import type { SlotSegment } from '../composables/useTriggerEditor'
 import Modal from './Modal.vue'

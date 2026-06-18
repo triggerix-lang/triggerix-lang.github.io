@@ -3,8 +3,8 @@ import type { CodeFile } from './types'
 export const codeFiles: CodeFile[] = [
   {
     filename: 'setup.ts',
-    content: `import type { War3Editor } from 'triggerix-ui-preset-war3'
-import { defineCompositeTool, defineLeafTool } from 'triggerix-ui-preset-war3'
+    content: `import type { War3Editor } from 'triggerix-editor-preset-war3'
+import { defineCompositeTool, defineLeafTool } from 'triggerix-editor-preset-war3'
 
 const carouselOptions = [
   { value: 'left_carousel', label: '左侧轮播' },

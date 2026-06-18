@@ -7,22 +7,22 @@ settings:
 catalogs:
   default:
     '@triggerix/runtime':
-      specifier: ^0.0.5
-      version: 0.0.5
+      specifier: ^0.0.6
+      version: 0.0.6
     '@unocss/reset':
       specifier: latest
       version: 66.7.2
     '@vitejs/plugin-vue':
-      specifier: ^5.2.0
-      version: 5.2.4
-    triggerix-editor-vue:
+      specifier: ^6.0.7
+      version: 6.0.7
+    triggerix-editor-preset-war3:
       specifier: ^0.0.5
       version: 0.0.5
-    triggerix-ui-preset-war3:
-      specifier: ^0.0.4
-      version: 0.0.4
+    triggerix-editor-vue:
+      specifier: ^0.0.7
+      version: 0.0.7
     typescript:
-      specifier: ~6.0.2
+      specifier: ~6.0.3
       version: 6.0.3
     unocss:
       specifier: latest
@@ -31,7 +31,7 @@ catalogs:
       specifier: latest
       version: 0.1.24
     vue:
-      specifier: ^3.5.0
+      specifier: ^3.5.38
       version: 3.5.38
     vue-router:
       specifier: ^5.1.0
@@ -47,19 +47,19 @@ importers:
     dependencies:
       '@triggerix/runtime':
         specifier: 'catalog:'
-        version: 0.0.5
+        version: 0.0.6
       '@vueuse/core':
         specifier: ^14.3.0
         version: 14.3.0(vue@3.5.38(typescript@6.0.3))
       modern-monaco:
         specifier: ^0.4.2
         version: 0.4.2(typescript@6.0.3)
+      triggerix-editor-preset-war3:
+        specifier: 'catalog:'
+        version: 0.0.5
       triggerix-editor-vue:
         specifier: 'catalog:'
-        version: 0.0.5(vue@3.5.38(typescript@6.0.3))
-      triggerix-ui-preset-war3:
-        specifier: 'catalog:'
-        version: 0.0.4
+        version: 0.0.7(vue@3.5.38(typescript@6.0.3))
       vue:
         specifier: 'catalog:'
         version: 3.5.38(typescript@6.0.3)
@@ -72,7 +72,7 @@ importers:
         version: 66.7.2
       '@vitejs/plugin-vue':
         specifier: 'catalog:'
-        version: 5.2.4(@voidzero-dev/vite-plus-core@0.1.24(jiti@2.7.0)(typescript@6.0.3)(yaml@2.9.0))(vue@3.5.38(typescript@6.0.3))
+        version: 6.0.7(@voidzero-dev/vite-plus-core@0.1.24(jiti@2.7.0)(typescript@6.0.3)(yaml@2.9.0))(vue@3.5.38(typescript@6.0.3))
       typescript:
         specifier: 'catalog:'
         version: 6.0.3
@@ -590,23 +590,23 @@ packages:
   '@quansync/fs@1.0.0':
     resolution: {integrity: sha512-4TJ3DFtlf1L5LDMaM6CanJ/0lckGNtJcMjQ1NAV6zDmA0tEHKZtxNKin8EgPaVX1YzljbxckyT2tJrpQKAtngQ==}
 
+  '@rolldown/pluginutils@1.0.1':
+    resolution: {integrity: sha512-2j9bGt5Jh8hj+vPtgzPtl72j0yRxHAyumoo6TNfAjsLB04UtpSvPbPcDcBMxz7n+9CYB0c1GxQFxYRg2jimqGw==}
+
   '@standard-schema/spec@1.1.0':
     resolution: {integrity: sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w==}
 
-  '@triggerix/core@0.0.4':
-    resolution: {integrity: sha512-tRaBcKESLdNv2kjdm9fz+mxwjNObkV8dhBtsJnXlklK9dvFHfcy+y3wkFgggKBS7rb1zp9Q6wnDTPFZZFsyAdQ==}
+  '@triggerix/core@0.0.6':
+    resolution: {integrity: sha512-dcrjgmTVv0JIwEXUQlAHYDVIFP8LHSffFnXKmT+Rw+kgmVpdFRUUzs42z4xPEhZy21RGHzq82SWnyr23NBwejg==}
 
-  '@triggerix/core@0.0.5':
-    resolution: {integrity: sha512-2NPrt7a3lJCdZ4tn+Q33vhO5tKaj0nGxSRPEKMNjD563tnN/JDlfd4Zpx5R5MrjY7eGclawT/P2e9Lfhhe7ygA==}
+  '@triggerix/editor@0.0.6':
+    resolution: {integrity: sha512-P/S4y/PVd2SBhFuIwpkdtNZV/u/hqfI6B/7hPD4ACPhVaoD4YtyVEGywIfVCfBIL5zZnmOKanwai9sOrrZUpOQ==}
 
-  '@triggerix/editor@0.0.4':
-    resolution: {integrity: sha512-nOYxy76jk8v99JUDORUdJV51ZGIiMyl59T/p3KxUIA2ZzIBUDMLcZqtIrSMSc0fTukVNLjb0yl5NYrgk5OxZag==}
+  '@triggerix/registry@0.0.6':
+    resolution: {integrity: sha512-/0SVI3kPH7C2WNlW+RduJUbbKo0c220xsjrmfe8/wqQ1oFr19xHDcbDWxvEPd5UUtiPllMo08r14iXJ2iXkWsA==}
 
-  '@triggerix/editor@0.0.5':
-    resolution: {integrity: sha512-Quns6Bku8F+bm0I9n2seb0+qP+NU+D3j4ceYTJXIs7cIJM3voMlwVinPgZbg+Ex6RtnzMPlbg1NVYpjyjPVc8A==}
-
-  '@triggerix/runtime@0.0.5':
-    resolution: {integrity: sha512-W+i+qZdsaZPlX9P2/aD5gIi2pgUlqOqTRkvPjNZMauUkc8NyLKqhUn1xKuSCwOLNbf099z8ovHLJoHVc8plcgA==}
+  '@triggerix/runtime@0.0.6':
+    resolution: {integrity: sha512-KbH02frpHUXxmLp4j37+q9eGzeu6kEh6jljycAqh+7GsryXSOnPbjZhukEGLSe615RuAhEEVH+bFBNkhG8kztg==}
 
   '@tybys/wasm-util@0.10.2':
     resolution: {integrity: sha512-RoBvJ2X0wuKlWFIjrwffGw1IqZHKQqzIchKaadZZfnNpsAYp2mM0h36JtPCjNDAHGgYez/15uMBpfGwchhiMgg==}
@@ -695,11 +695,11 @@ packages:
     peerDependencies:
       vite: ^5.0.0-0 || ^6.0.0-0 || ^7.0.0-0 || ^8.0.0-0
 
-  '@vitejs/plugin-vue@5.2.4':
-    resolution: {integrity: sha512-7Yx/SXSOcQq5HiiV3orevHUFn+pmMB4cgbEkDYgnkUWb0WfeQ/wa2yFv6D5ICiCQOVpjA7vYDXrC7AGO8yjDHA==}
-    engines: {node: ^18.0.0 || >=20.0.0}
+  '@vitejs/plugin-vue@6.0.7':
+    resolution: {integrity: sha512-km+p+XdSz9Sxm5rqUbqcSfZYaAniKxWBj1KURl+Jr7UaPvvX7BmaWMdP69I5rrFDeQGyxAG7NXdc57vz+snhWg==}
+    engines: {node: ^20.19.0 || >=22.12.0}
     peerDependencies:
-      vite: ^5.0.0 || ^6.0.0
+      vite: ^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0
       vue: ^3.2.25
 
   '@voidzero-dev/vite-plus-core@0.1.24':
@@ -1264,13 +1264,13 @@ packages:
     resolution: {integrity: sha512-sf4i37nQ2LBx4m3wB74y+ubopq6W/dIzXg0FDGjsYnZHVa1Da8FH853wlL2gtUhg+xJXjfk3kUZS3BRoQeoQBQ==}
     engines: {node: '>=6'}
 
-  triggerix-editor-vue@0.0.5:
-    resolution: {integrity: sha512-M/XHY3jyJpa+Yk1QNJVNM9bfe+5OqShTw9zTLrPFDVoWHinE69NKFoThs99HhqrAP5SRQt0lhe5ABMUmziH2wQ==}
+  triggerix-editor-preset-war3@0.0.5:
+    resolution: {integrity: sha512-3YnhazE5/OK3zz+KYzgiAU3OIUKPZYNu+q5/JFk++4BJNc0BTWWI71TZNa4ezfm5mTim1eB/YQqf20NyAQmbrw==}
+
+  triggerix-editor-vue@0.0.7:
+    resolution: {integrity: sha512-/9cigAZOLksaw7lkk2Q3MOdywyjF6qGPqXpzPWyfMwH5mNjdNHT+s/W4y7rZyUA6ETMDx79pnd2DIRiHq5/d/A==}
     peerDependencies:
       vue: ^3.5.0
-
-  triggerix-ui-preset-war3@0.0.4:
-    resolution: {integrity: sha512-bbLo2auTuAC1xGezyPjCfZWDsyfHC58DLG2SevBrE2DXofUulsHHvLgU2AEB0NSOQ7Zoj8x9OWDWPRU9SKxmfw==}
 
   tslib@2.8.1:
     resolution: {integrity: sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w==}
@@ -1674,23 +1674,22 @@ snapshots:
     dependencies:
       quansync: 1.0.0
 
+  '@rolldown/pluginutils@1.0.1': {}
+
   '@standard-schema/spec@1.1.0': {}
 
-  '@triggerix/core@0.0.4': {}
+  '@triggerix/core@0.0.6': {}
 
-  '@triggerix/core@0.0.5': {}
-
-  '@triggerix/editor@0.0.4':
+  '@triggerix/editor@0.0.6':
     dependencies:
-      '@triggerix/core': 0.0.4
+      '@triggerix/core': 0.0.6
+      '@triggerix/registry': 0.0.6
 
-  '@triggerix/editor@0.0.5':
-    dependencies:
-      '@triggerix/core': 0.0.5
+  '@triggerix/registry@0.0.6': {}
 
-  '@triggerix/runtime@0.0.5':
+  '@triggerix/runtime@0.0.6':
     dependencies:
-      '@triggerix/core': 0.0.5
+      '@triggerix/core': 0.0.6
 
   '@tybys/wasm-util@0.10.2':
     dependencies:
@@ -1841,8 +1840,9 @@ snapshots:
       unplugin-utils: 0.3.1
       vite: '@voidzero-dev/vite-plus-core@0.1.24(jiti@2.7.0)(typescript@6.0.3)(yaml@2.9.0)'
 
-  '@vitejs/plugin-vue@5.2.4(@voidzero-dev/vite-plus-core@0.1.24(jiti@2.7.0)(typescript@6.0.3)(yaml@2.9.0))(vue@3.5.38(typescript@6.0.3))':
+  '@vitejs/plugin-vue@6.0.7(@voidzero-dev/vite-plus-core@0.1.24(jiti@2.7.0)(typescript@6.0.3)(yaml@2.9.0))(vue@3.5.38(typescript@6.0.3))':
     dependencies:
+      '@rolldown/pluginutils': 1.0.1
       vite: '@voidzero-dev/vite-plus-core@0.1.24(jiti@2.7.0)(typescript@6.0.3)(yaml@2.9.0)'
       vue: 3.5.38(typescript@6.0.3)
 
@@ -2346,15 +2346,15 @@ snapshots:
 
   totalist@3.0.1: {}
 
-  triggerix-editor-vue@0.0.5(vue@3.5.38(typescript@6.0.3)):
+  triggerix-editor-preset-war3@0.0.5:
     dependencies:
-      '@triggerix/editor': 0.0.4
-      vue: 3.5.38(typescript@6.0.3)
+      '@triggerix/core': 0.0.6
+      '@triggerix/editor': 0.0.6
 
-  triggerix-ui-preset-war3@0.0.4:
+  triggerix-editor-vue@0.0.7(vue@3.5.38(typescript@6.0.3)):
     dependencies:
-      '@triggerix/core': 0.0.5
-      '@triggerix/editor': 0.0.5
+      '@triggerix/editor': 0.0.6
+      vue: 3.5.38(typescript@6.0.3)
 
   tslib@2.8.1:
     optional: true

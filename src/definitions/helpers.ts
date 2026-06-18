@@ -1,5 +1,5 @@
-import type { War3ActionDef, War3EventDef } from 'triggerix-ui-preset-war3'
-import { defineCondition as defineConditionImpl } from 'triggerix-ui-preset-war3'
+import type { War3ActionDef, War3EventDef } from 'triggerix-editor-preset-war3'
+import { defineCondition as defineConditionImpl } from 'triggerix-editor-preset-war3'
 
 /**
  * Identity wrappers that keep the demo definitions consistent in style.

@@ -3,8 +3,8 @@ import type { CodeFile } from './types'
 export const codeFiles: CodeFile[] = [
   {
     filename: 'setup.ts',
-    content: `import type { War3Editor } from 'triggerix-ui-preset-war3'
-import { defineLeafTool } from 'triggerix-ui-preset-war3'
+    content: `import type { War3Editor } from 'triggerix-editor-preset-war3'
+import { defineLeafTool } from 'triggerix-editor-preset-war3'
 
 const buttonOptions = [
   { value: 'fill_title', label: '填入标题按钮' },

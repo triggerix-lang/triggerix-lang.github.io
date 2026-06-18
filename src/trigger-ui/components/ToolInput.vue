@@ -1,5 +1,9 @@
 <script setup lang="ts">
-import type { LeafToolDescriptor, LeafToolInput, ToolDescriptor } from 'triggerix-ui-preset-war3'
+import type {
+  LeafToolDescriptor,
+  LeafToolInput,
+  ToolDescriptor
+} from 'triggerix-editor-preset-war3'
 import { computed, ref } from 'vue'
 
 const props = defineProps<{

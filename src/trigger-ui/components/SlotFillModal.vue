@@ -7,7 +7,7 @@ import {
   type SlotValueEntry,
   type ToolDescriptor,
   type War3Editor
-} from 'triggerix-ui-preset-war3'
+} from 'triggerix-editor-preset-war3'
 import { computed, ref, watch } from 'vue'
 import type { SlotSegment } from '../composables/useTriggerEditor'
 import Modal from './Modal.vue'
@@ -42,7 +42,8 @@ const selectedTool = ref<ToolDescriptor | null>(null)
 // Leaf-tool inputs
 const textValue = ref('')
 const numberValue = ref<number | null>(null)
-const selectValue = ref<string | null>(null)
+// Allow non-string option values (e.g. `{ $ref: ... }` from value_source).
+const selectValue = ref<unknown>(null)
 
 // Composite-tool sub-slot values
 const subSlotValues = ref<Record<string, SlotValueEntry>>({})
@@ -58,8 +59,12 @@ const inputType = computed(() => isLeaf.value?.input.type)
 
 const selectOptions = computed(() => {
   if (!isLeaf.value || isLeaf.value.input.type !== 'select') return []
+  // Keep the raw option value — stringifying object-shaped values
+  // (e.g. `{ $ref: 'document.title' }`) would collapse every option to
+  // `"[object Object]"` and break both default-selection and per-click
+  // highlighting. Equality is handled via `optionValueEquals` below.
   return (isLeaf.value.input.options ?? []).map((opt) => ({
-    value: String(opt.value),
+    value: opt.value,
     label: opt.label
   }))
 })
@@ -95,7 +100,9 @@ function reset() {
   const v = props.currentValue?.value
   textValue.value = typeof v === 'string' ? v : ''
   numberValue.value = typeof v === 'number' ? v : null
-  selectValue.value = typeof v === 'string' ? v : null
+  // Preserve the original (possibly object) option value so deep-equality
+  // matching in the template highlights the currently selected option.
+  selectValue.value = v ?? null
   subSlotValues.value = { ...props.currentValue?.subSlots }
 }
 
@@ -126,6 +133,17 @@ function pickTool(tool: ToolDescriptor) {
   numberValue.value = null
   selectValue.value = null
   subSlotValues.value = {}
+}
+
+function optionValueEquals(a: unknown, b: unknown): boolean {
+  if (a === b) return true
+  if (a == null || b == null) return false
+  if (typeof a !== 'object' || typeof b !== 'object') return false
+  try {
+    return JSON.stringify(a) === JSON.stringify(b)
+  } catch {
+    return false
+  }
 }
 
 const canConfirm = computed(() => {
@@ -311,11 +329,11 @@ function handleNestedConfirm(entry: SlotValueEntry) {
           <div class="flex flex-col gap-1 max-h-[260px] overflow-y-auto pr-0.5">
             <button
               v-for="opt in selectOptions"
-              :key="opt.value"
+              :key="String(opt.value)"
               type="button"
               class="w-full px-3 py-2 text-left rounded-sm bg-#1a2030 border text-sm cursor-pointer transition-colors duration-150"
               :class="
-                selectValue === opt.value
+                optionValueEquals(selectValue, opt.value)
                   ? 'border-#80cbc4 text-#80cbc4 bg-#80cbc4/8'
                   : 'border-#2f3d54 text-#c9d1d9 hover:bg-#222b3d hover:border-#4fc3f7/40'
               "

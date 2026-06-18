@@ -1,6 +1,11 @@
 <script setup lang="ts">
-import type { Segment, SlotValueEntry, ToolDescriptor, War3Editor } from 'triggerix-ui-preset-war3'
-import { resolveSlotDisplayText } from 'triggerix-ui-preset-war3'
+import type {
+  Segment,
+  SlotValueEntry,
+  ToolDescriptor,
+  War3Editor
+} from 'triggerix-editor-preset-war3'
+import { resolveSlotDisplayText } from 'triggerix-editor-preset-war3'
 import type { SlotSegment } from '../composables/useTriggerEditor'
 import SlotChip from './SlotChip.vue'
 

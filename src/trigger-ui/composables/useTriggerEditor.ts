@@ -4,7 +4,7 @@ import type {
   ToolDescriptor,
   War3Editor,
   War3EditorState
-} from 'triggerix-ui-preset-war3'
+} from 'triggerix-editor-preset-war3'
 import { computed, type Ref } from 'vue'
 
 export type SlotSegment = Extract<Segment, { type: 'slot' }>

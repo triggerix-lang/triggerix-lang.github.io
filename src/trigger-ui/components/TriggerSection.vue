@@ -4,13 +4,13 @@ import type {
   SlotValueEntry,
   ToolDescriptor,
   War3Editor
-} from 'triggerix-ui-preset-war3'
+} from 'triggerix-editor-preset-war3'
 import { computed } from 'vue'
 import type { SlotSegment } from '../composables/useTriggerEditor'
 import TriggerItem from './TriggerItem.vue'
 
 interface AvailableType {
-  type: string
+  id: string
   label: string
 }
 

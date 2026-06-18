@@ -1,6 +1,6 @@
-import type { LeafToolInput, War3Editor } from 'triggerix-ui-preset-war3'
+import type { LeafToolInput, War3Editor } from 'triggerix-editor-preset-war3'
 import type { DemoActionHandler } from '../composables/useDemoRuntime'
-import { defineLeafTool } from 'triggerix-ui-preset-war3'
+import { defineLeafTool } from 'triggerix-editor-preset-war3'
 import { defineAction, defineEvent } from './helpers'
 import { registerSharedTools } from './shared-tools'
 import { registerValueTools } from './shared-values'

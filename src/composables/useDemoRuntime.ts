@@ -1,8 +1,8 @@
 import type { ActionHandler } from '@triggerix/runtime'
-import type { War3Editor, War3EditorState } from 'triggerix-ui-preset-war3'
+import type { War3Editor, War3EditorState } from 'triggerix-editor-preset-war3'
 import { createRuntime } from '@triggerix/runtime'
 import { useEditor } from 'triggerix-editor-vue'
-import { createWar3Editor } from 'triggerix-ui-preset-war3'
+import { createWar3Editor } from 'triggerix-editor-preset-war3'
 import { computed, type Ref, shallowRef, watch } from 'vue'
 
 export type DemoActionHandler = ActionHandler

@@ -5,7 +5,7 @@ import type {
   ToolDescriptor,
   War3Editor,
   War3EditorState
-} from 'triggerix-ui-preset-war3'
+} from 'triggerix-editor-preset-war3'
 import { computed, ref, toRef } from 'vue'
 import { useTriggerEditor, type SlotSegment } from '../composables/useTriggerEditor'
 import ItemEditorModal from './ItemEditorModal.vue'

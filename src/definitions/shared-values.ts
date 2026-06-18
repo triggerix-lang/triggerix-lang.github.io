@@ -1,5 +1,5 @@
-import type { LeafToolInput, War3Editor } from 'triggerix-ui-preset-war3'
-import { defineLeafTool } from 'triggerix-ui-preset-war3'
+import type { LeafToolInput, War3Editor } from 'triggerix-editor-preset-war3'
+import { defineLeafTool } from 'triggerix-editor-preset-war3'
 
 /**
  * Pre-defined "value sources" pulled from the host page. Each option

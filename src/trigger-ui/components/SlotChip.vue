@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { SlotValueEntry, ToolDescriptor, War3Editor } from 'triggerix-ui-preset-war3'
-import { resolveSlotDisplayText } from 'triggerix-ui-preset-war3'
+import type { SlotValueEntry, ToolDescriptor, War3Editor } from 'triggerix-editor-preset-war3'
+import { resolveSlotDisplayText } from 'triggerix-editor-preset-war3'
 import { computed } from 'vue'
 import type { SlotSegment } from '../composables/useTriggerEditor'
 
@@ -8,7 +8,7 @@ const props = defineProps<{
   segment: SlotSegment
   /**
    * The structured value entry bound to this slot. Provided separately
-   * because `Segment` from `triggerix-ui-preset-war3` only carries the
+   * because `Segment` from `triggerix-editor-preset-war3` only carries the
    * primitive `value`, not the full `SlotValueEntry` tree.
    */
   entry?: SlotValueEntry | null

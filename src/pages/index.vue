@@ -102,7 +102,7 @@ const scenarios: Scenario[] = [
             class="mb-6 flex items-center gap-3 font-mono text-[11px] uppercase tracking-[0.4em] text-#7a8599"
           >
             <span class="h-px w-10 bg-#3d4f6a" />
-            <span>v0.0.0 · trigger rule engine</span>
+            <span>v0.0.0 · trigger engine</span>
           </div>
           <h1
             class="font-['Cinzel'] text-7xl font-700 leading-[0.95] tracking-tight text-#e6edf3 lg:text-8xl"
@@ -118,7 +118,7 @@ const scenarios: Scenario[] = [
             <span class="text-#c9a84c">ACTION</span>
           </div>
           <p class="mt-6 max-w-xl text-base leading-relaxed text-#aab3c4">
-            事件-条件-动作 触发器规则引擎。
+            事件-条件-动作 触发器引擎。
             <br />
             可视化、可序列化、可扩展，把 if-this-then-that 的开发体验带回前端编排现场。
           </p>
@@ -146,7 +146,7 @@ const scenarios: Scenario[] = [
           </div>
         </div>
 
-        <!-- right: rule preview card -->
+        <!-- right: trigger preview card -->
         <div class="relative">
           <div
             class="absolute -inset-px rounded-md opacity-60 blur-md"
@@ -162,12 +162,12 @@ const scenarios: Scenario[] = [
               <span class="h-2.5 w-2.5 rounded-full bg-#c9a84c" />
               <span class="h-2.5 w-2.5 rounded-full bg-#5fb3a1" />
               <span class="ml-3 font-mono text-[11px] uppercase tracking-widest text-#7a8599"
-                >rule.json</span
+                >trigger.json</span
               >
             </div>
             <pre
               class="overflow-x-auto font-mono text-[12.5px] leading-relaxed text-#aab3c4"
-            ><span class="text-#7a8599">// id</span> <span class="text-#5fb3a1">"demo-rule"</span>
+            ><span class="text-#7a8599">// id</span> <span class="text-#5fb3a1">"demo-trigger"</span>
 <span class="text-#9d7cd8">event</span>:    <span class="text-#c9a84c">button_click</span>(button=<span class="text-#5fb3a1">confirm_btn</span>)
 <span class="text-#9d7cd8">when</span>:     <span class="text-#7a8599">— always —</span>
 <span class="text-#9d7cd8">do</span>:

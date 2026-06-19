@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, reactive, ref, useTemplateRef, watchEffect } from 'vue'
+import { computed, onMounted, reactive, ref, useTemplateRef, watch } from 'vue'
 import DemoToast from '../../components/DemoToast.vue'
 import PlayCarousel from '../../components/playground/PlayCarousel.vue'
 import type { TriggerDef } from '../../composables/useDemoRuntime'
@@ -28,8 +28,8 @@ const indexMap = reactive<Record<string, number>>({
 // next tick, after emit() returns).
 const lastEmittedIndex = ref<unknown>(0)
 
-// Dispatch the linkage target to whichever carousel the rule picked.
-// The rule decides the direction (e.g. event=right → action=left), so
+// Dispatch the linkage target to whichever carousel the trigger picked.
+// The trigger decides the direction (e.g. event=right → action=left), so
 // the controller must be id-driven, not hard-coded to one side.
 function setCarouselIndex(carousel: string, index: number) {
   if (carousel === 'left_carousel') {
@@ -82,7 +82,7 @@ const triggerDefs: TriggerDef[] = [
   }
 ]
 
-const { triggers, rulesJson, emit } = useDemoRuntime({
+const { triggers, triggersJson, emit } = useDemoRuntime({
   setup,
   handlers,
   triggers: triggerDefs
@@ -106,8 +106,14 @@ function syncRight(v: number) {
 }
 
 const { setPanel } = useCodePanel()
-watchEffect(() => {
-  setPanel(codeFiles, rulesJson.value)
+// 路由进入时立即同步一次面板状态；之后随 triggersJson 变化更新。
+// 不能用 watchEffect：依赖 triggersJson 一开始可能与上一个页面的值相同，
+// 导致路由切换时不会再次写入 files，CodeViewer 也就不会刷新。
+onMounted(() => {
+  setPanel(codeFiles, triggersJson.value)
+})
+watch(triggersJson, (v) => {
+  setPanel(codeFiles, v)
 })
 
 function onTrigger(eventType: string, payload: Record<string, unknown>) {

@@ -27,7 +27,7 @@ export interface TriggerInstance {
 }
 
 interface InternalTrigger extends TriggerInstance {
-  toRule: (id?: string) => unknown
+  toTrigger: (id?: string) => unknown
 }
 
 export function useDemoRuntime(options: DemoRuntimeOptions) {
@@ -42,7 +42,7 @@ export function useDemoRuntime(options: DemoRuntimeOptions) {
     // `state` ref — that ref only calls `triggerRef` without reassigning
     // `.value`, so it always exposes the same object reference and breaks
     // prop-based reactivity in child components.
-    const { toRule } = useEditor(editor)
+    const { toTrigger } = useEditor(editor)
 
     // Maintain our own shallowRef whose `.value` is reassigned to the latest
     // state object on every mutation. The state manager performs immutable
@@ -54,7 +54,7 @@ export function useDemoRuntime(options: DemoRuntimeOptions) {
     })
 
     // Apply initial state immediately (synchronously) so the first
-    // computed/watch evaluation already sees the populated rule.
+    // computed/watch evaluation already sees the populated trigger.
     applyInitialState(editor, def.initialState)
 
     return {
@@ -62,7 +62,7 @@ export function useDemoRuntime(options: DemoRuntimeOptions) {
       name: def.name,
       editor,
       state,
-      toRule
+      toTrigger
     }
   })
 
@@ -78,31 +78,31 @@ export function useDemoRuntime(options: DemoRuntimeOptions) {
     runtime.registerAction(type, handler)
   }
 
-  // 4. Reactive rules JSON used by the JsonDrawer.
+  // 4. Reactive triggers JSON used by the JsonDrawer.
   //    Touch each `state.value` so the computed re-runs whenever any editor
-  //    state changes (state is a shallowRef + triggerRef internally).
-  const rulesJson = computed(() => {
+  // state changes (state is a shallowRef + triggerRef internally).
+  const triggersJson = computed(() => {
     return triggers
       .map((t) => {
         void t.state.value
-        return t.toRule(t.id)
+        return t.toTrigger(t.id)
       })
-      .filter((rule): rule is NonNullable<typeof rule> => rule != null)
+      .filter((trigger): trigger is NonNullable<typeof trigger> => trigger != null)
   })
 
-  // 5. Sync all triggers' rules into runtime by replacing the rule set.
-  function syncRules() {
-    for (const rule of runtime.listRules()) {
-      runtime.removeRule(rule.id)
+  // 5. Sync all triggers into runtime by replacing the trigger set.
+  function syncTriggers() {
+    for (const trigger of runtime.listTriggers()) {
+      runtime.removeTrigger(trigger.id)
     }
     for (const t of triggers) {
-      const rule = t.toRule(t.id) as Record<string, unknown> | null | undefined
-      if (rule) {
+      const trigger = t.toTrigger(t.id) as Record<string, unknown> | null | undefined
+      if (trigger) {
         // The runtime only matches by event type — it doesn't filter by
-        // event.payload.  We inject conditions so that rules are only triggered
+        // event.payload.  We inject conditions so that triggers are only triggered
         // when the payload's `source` field matches the selected component id.
-        injectSourceCondition(rule)
-        runtime.addRule(rule as unknown as Parameters<typeof runtime.addRule>[0])
+        injectSourceCondition(trigger)
+        runtime.addTrigger(trigger as unknown as Parameters<typeof runtime.addTrigger>[0])
       }
     }
   }
@@ -112,8 +112,8 @@ export function useDemoRuntime(options: DemoRuntimeOptions) {
    * condition that checks `payload.source === value`.  This bridges the gap
    * between the editor's event payload and the playground's payload shape.
    */
-  function injectSourceCondition(rule: Record<string, unknown>) {
-    const event = rule.event as { payload?: Record<string, unknown> } | undefined
+  function injectSourceCondition(trigger: Record<string, unknown>) {
+    const event = trigger.event as { payload?: Record<string, unknown> } | undefined
     const payload = event?.payload
     if (!payload) return
 
@@ -126,32 +126,32 @@ export function useDemoRuntime(options: DemoRuntimeOptions) {
       right: sourceValue
     }
 
-    if (rule.conditions) {
-      const conds = rule.conditions as { type: string; conditions: unknown[] }
+    if (trigger.conditions) {
+      const conds = trigger.conditions as { type: string; conditions: unknown[] }
       conds.conditions.push(condition)
     } else {
-      rule.conditions = { type: 'and', conditions: [condition] }
+      trigger.conditions = { type: 'and', conditions: [condition] }
     }
   }
 
   // Watch each trigger's state independently.
   for (const t of triggers) {
-    watch(t.state, syncRules)
+    watch(t.state, syncTriggers)
   }
   // Initial sync after all triggers have applied their initial state.
-  syncRules()
+  syncTriggers()
 
   // 6. Expose emit() so playgrounds can fire events at the runtime.
   function emit(eventType: string, payload?: Record<string, unknown>) {
     return runtime.emit(eventType, payload)
   }
 
-  // Cast to the public TriggerInstance[] (hides toRule).
+  // Cast to the public TriggerInstance[] (hides toTrigger).
   const publicTriggers: TriggerInstance[] = triggers
 
   return {
     triggers: publicTriggers,
-    rulesJson,
+    triggersJson,
     runtime,
     emit
   }

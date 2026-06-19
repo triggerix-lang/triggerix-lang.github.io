@@ -47,7 +47,7 @@ export function setup(editor: War3Editor) {
     content: `import type { DemoActionHandler } from '../composables/useDemoRuntime'
 
 // 动作类型 → 实际执行函数。
-// 这里把规则里 message 槽位的值直接弹成一个 Toast。
+// 这里把触发器里 message 槽位的值直接弹成一个 Toast。
 export const handlers: Record<string, DemoActionHandler> = {
   show_message: (params) => {
     const message = String((params?.message as string) ?? '')
@@ -63,10 +63,10 @@ import { useDemoRuntime } from '../composables/useDemoRuntime'
 import { setup } from '../definitions/button-click'
 import { handlers } from './handlers'
 
-// triggers 是页面默认带的两条规则：confirm / cancel。
+// triggers 是页面默认带的两条触发器：confirm / cancel。
 const { triggers, emit } = useDemoRuntime({ setup, handlers, triggers: triggerDefs })
 
-// 按钮点击 → 抛出 button_click 事件 → 命中规则 → 执行 show_message。
+// 按钮点击 → 抛出 button_click 事件 → 命中触发器 → 执行 show_message。
 function onTrigger(eventType: string, payload: Record<string, unknown>) {
   emit(eventType, payload)
 }

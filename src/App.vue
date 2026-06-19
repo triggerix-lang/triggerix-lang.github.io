@@ -13,7 +13,7 @@ const demos = [
   { to: '/demo/carousel-linkage', label: '轮播联动' }
 ]
 
-const { files, rulesJson, visible, hidePanel } = useCodePanel()
+const { files, triggersJson, visible, hidePanel } = useCodePanel()
 
 // 离开 demo 路由时隐藏面板（首页/未匹配路由）。
 const route = useRoute()
@@ -122,7 +122,7 @@ onBeforeUnmount(() => {
           <div class="w-8 h-0.5 rounded bg-#555" />
         </div>
         <div class="flex-1 min-h-0">
-          <CodeViewer :files="files" :rules-json="rulesJson" />
+          <CodeViewer :files="files" :triggers-json="triggersJson" />
         </div>
       </div>
     </div>

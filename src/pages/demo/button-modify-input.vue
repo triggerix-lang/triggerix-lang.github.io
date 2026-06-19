@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, useTemplateRef, watchEffect } from 'vue'
+import { computed, onMounted, ref, useTemplateRef, watch } from 'vue'
 import DemoToast from '../../components/DemoToast.vue'
 import PlayButton from '../../components/playground/PlayButton.vue'
 import PlayInput from '../../components/playground/PlayInput.vue'
@@ -104,7 +104,7 @@ const triggerDefs: TriggerDef[] = [
   }
 ]
 
-const { triggers, rulesJson, emit } = useDemoRuntime({
+const { triggers, triggersJson, emit } = useDemoRuntime({
   setup,
   handlers,
   triggers: triggerDefs
@@ -114,8 +114,14 @@ const activeTab = ref(0)
 const activeTrigger = computed(() => triggers[activeTab.value])
 
 const { setPanel } = useCodePanel()
-watchEffect(() => {
-  setPanel(codeFiles, rulesJson.value)
+// 路由进入时立即同步一次面板状态；之后随 triggersJson 变化更新。
+// 不能用 watchEffect：依赖 triggersJson 一开始可能与上一个页面的值相同，
+// 导致路由切换时不会再次写入 files，CodeViewer 也就不会刷新。
+onMounted(() => {
+  setPanel(codeFiles, triggersJson.value)
+})
+watch(triggersJson, (v) => {
+  setPanel(codeFiles, v)
 })
 
 function onTrigger(eventType: string, payload: Record<string, unknown>) {

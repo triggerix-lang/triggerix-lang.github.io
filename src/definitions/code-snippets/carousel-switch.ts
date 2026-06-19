@@ -38,7 +38,7 @@ export function setup(editor: War3Editor) {
     }
   })
 
-  // 同一事件可以挂多条规则，分别派发不同动作
+  // 同一事件可以挂多条触发器，分别派发不同动作
   editor.registerAction({
     id: 'show_message',
     template: '显示消息\${message}',

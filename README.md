@@ -13,9 +13,9 @@ English | [中文](./README_CN.md)
 
 ## Project Overview
 
-Triggerix is a complete **Event-Condition-Action (ECA) rule engine ecosystem** that can build and drive arbitrary interaction logic at runtime. It consists of several collaborating npm packages and applications, with the core design philosophy of representing rules as data, supporting visual editing, validation, and runtime execution.
+Triggerix is a complete **Event-Condition-Action (ECA) trigger engine ecosystem** that can build and drive arbitrary interaction logic at runtime. It consists of several collaborating npm packages and applications, with the core design philosophy of representing triggers as data, supporting visual editing, validation, and runtime execution.
 
-This Demo project (triggerix-lang.github.io) is the official showcase site for Triggerix, demonstrating the full rule editing and execution flow.
+This Demo project (triggerix-lang.github.io) is the official showcase site for Triggerix, demonstrating the full trigger editing and execution flow.
 
 ### Vision
 
@@ -39,19 +39,19 @@ At the current stage, Triggerix has achieved the ability to describe arbitrary i
 
 ### Related Projects
 
-| Project                      | Type               | Description                                                                   |
-| ---------------------------- | ------------------ | ----------------------------------------------------------------------------- |
-| triggerix                    | Monorepo           | Core open-source library, containing 7 npm packages                           |
-| triggerix-editor-preset-war3 | Standalone package | War3-style editor preset (visual editor implementation)                       |
-| triggerix-editor-vue         | Standalone package | Vue 3 editor integration library (composables and utilities)                  |
-| triggerix-lang.github.io     | Demo app           | Official showcase site demonstrating the full rule editing and execution flow |
+| Project                      | Type               | Description                                                                      |
+| ---------------------------- | ------------------ | -------------------------------------------------------------------------------- |
+| triggerix                    | Monorepo           | Core open-source library, containing 7 npm packages                              |
+| triggerix-editor-preset-war3 | Standalone package | War3-style editor preset (visual editor implementation)                          |
+| triggerix-editor-vue         | Standalone package | Vue 3 editor integration library (composables and utilities)                     |
+| triggerix-lang.github.io     | Demo app           | Official showcase site demonstrating the full trigger editing and execution flow |
 
 ## Core Concepts
 
-### Rule Model
+### Trigger Model
 
 ```typescript
-interface Rule {
+interface Trigger {
   id: string
   event: { type: string; payload?: Record<string, unknown> }
   conditions?: ConditionGroup
@@ -61,7 +61,7 @@ interface Rule {
 
 ### How the Editor Works
 
-The editor is inspired by the trigger panel of the War3 map editor. Each rule contains three sections:
+The editor is inspired by the trigger panel of the War3 map editor. Each trigger contains three sections:
 
 - **Event**: the trigger condition, e.g. "button is clicked"
 - **Condition**: optional filter conditions
@@ -82,7 +82,7 @@ The tool system defines how users provide values for slots:
 - **Leaf Tool**: direct input, such as a text field, number field, or dropdown
 - **Composite Tool**: a nested structure containing child slots
 
-Each tool has a `resolve` function that converts user input into a value the rule engine can understand.
+Each tool has a `resolve` function that converts user input into a value the trigger engine can understand.
 
 ## Ecosystem Architecture
 
@@ -93,25 +93,25 @@ triggerix is a pnpm workspace monorepo consisting of 7 collaborating npm package
 ```mermaid
 graph TD
     Core["@triggerix/core<br/>Core type definitions"]
-    Core --> Schema["@triggerix/schema<br/>Rule construction API"]
+    Core --> Schema["@triggerix/schema<br/>Trigger construction API"]
     Core --> Runtime["@triggerix/runtime<br/>Runtime engine"]
     Core --> Editor["@triggerix/editor<br/>Generic editor framework"]
-    Core --> Validator["@triggerix/validator<br/>Rule validation"]
+    Core --> Validator["@triggerix/validator<br/>Trigger validation"]
     Core --> JsonSchema["@triggerix/json-schema<br/>JSON Schema generation"]
     Aggregate["triggerix<br/>Aggregate package"]
 ```
 
 Details of each package:
 
-| Package                  | Version | Responsibility                                   | Key Exports                                                                                                  |
-| ------------------------ | ------- | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------ |
-| `@triggerix/core`        | v0.0.3  | Type definitions and interface specifications    | Event / Condition / Action / Rule / Expression / ActionNode                                                  |
-| `@triggerix/schema`      | v0.0.3  | Rule construction API                            | defineEvent / defineAction / defineCondition / defineRule / expr / sequence / parallel / tryCatch / actionIf |
-| `@triggerix/runtime`     | v0.0.3  | Rule engine execution                            | createRuntime / event dispatch / evaluateCondition / executeActionNode / ExpressionEvaluator                 |
-| `@triggerix/editor`      | v0.0.3  | Generic editor abstraction (framework-agnostic)  | Editor interface / descriptor system / observable state                                                      |
-| `@triggerix/validator`   | v0.0.3  | Rule validation                                  | Rule structure and type checks                                                                               |
-| `@triggerix/json-schema` | v0.0.3  | JSON Schema generation                           | Generates JSON Schema from types                                                                             |
-| `triggerix`              | v0.0.3  | Aggregate package, re-exporting all of the above | —                                                                                                            |
+| Package                  | Version | Responsibility                                   | Key Exports                                                                                                     |
+| ------------------------ | ------- | ------------------------------------------------ | --------------------------------------------------------------------------------------------------------------- |
+| `@triggerix/core`        | v0.0.3  | Type definitions and interface specifications    | Event / Condition / Action / Trigger / Expression / ActionNode                                                  |
+| `@triggerix/schema`      | v0.0.3  | Trigger construction API                         | defineEvent / defineAction / defineCondition / defineTrigger / expr / sequence / parallel / tryCatch / actionIf |
+| `@triggerix/runtime`     | v0.0.3  | Trigger engine execution                         | createRuntime / event dispatch / evaluateCondition / executeActionNode / ExpressionEvaluator                    |
+| `@triggerix/editor`      | v0.0.3  | Generic editor abstraction (framework-agnostic)  | Editor interface / descriptor system / observable state                                                         |
+| `@triggerix/validator`   | v0.0.3  | Trigger validation                               | Trigger structure and type checks                                                                               |
+| `@triggerix/json-schema` | v0.0.3  | JSON Schema generation                           | Generates JSON Schema from types                                                                                |
+| `triggerix`              | v0.0.3  | Aggregate package, re-exporting all of the above | —                                                                                                               |
 
 ### Editor Implementation Layer
 
@@ -124,13 +124,13 @@ A War3-style editor preset that implements concrete visual editing logic on top 
 - Tool system (leaf tools / composite tools)
 - Slot system (`${slot}` placeholders in templates)
 - Template rendering
-- Serialization (`toRule`)
+- Serialization (`toTrigger`)
 
 **Tool system design:**
 
 - **Leaf tools**: atomic inputs (text / number / select)
 - **Composite tools**: may contain child slots (nested structure)
-- **resolve function**: converts user input into a rule value
+- **resolve function**: converts user input into a trigger value
 
 #### triggerix-editor-vue
 
@@ -190,7 +190,7 @@ src/
 │       ├── carousel-linkage.vue    # Carousel linkage demo
 │       ├── carousel-switch.vue     # Carousel switching demo
 │       └── input-focus.vue         # Input focus demo
-├── definitions/              # Rule definitions (describing each demo's trigger rules)
+├── definitions/              # Trigger definitions (describing each demo's triggers)
 │   ├── button-click.ts
 │   ├── button-modify-input.ts
 │   ├── carousel-linkage.ts
@@ -236,8 +236,8 @@ src/
 
 ```mermaid
 flowchart LR
-    Defs["definitions<br/>Rule definitions"] --> Editor3["useTriggerEditor<br/>Visual editor"]
-    Editor3 -->|onChange triggers| Sync["syncRules()<br/>Generate rule JSON"]
+    Defs["definitions<br/>Trigger definitions"] --> Editor3["useTriggerEditor<br/>Visual editor"]
+    Editor3 -->|onChange triggers| Sync["syncTriggers()<br/>Generate trigger JSON"]
     Sync --> Runtime3["useDemoRuntime<br/>Runtime engine"]
     Runtime3 -->|emit triggers| Exec["Execute actions<br/>Update demo state"]
 ```
@@ -248,26 +248,26 @@ flowchart LR
 graph TB
     A[definitions: definition stage] --> B[trigger-ui: editing stage]
     B --> C[onChange: sync stage]
-    C --> D[syncRules: generate rule JSON]
+    C --> D[syncTriggers: generate trigger JSON]
     D --> E[useDemoRuntime: load into runtime]
     E --> F[Event dispatch and matching]
     F --> G[Execute actions to update demo state]
     G --> H[UI feedback / toast notification]
 ```
 
-1. **Definition stage**: `definitions/` defines the events, actions, tools, and rule templates for each demo.
-2. **Editing stage**: `trigger-ui/` provides a visual editor where users interactively edit trigger rules.
-3. **Sync stage**: editor changes flow through `onChange` → `syncRules()` to produce rule JSON.
-4. **Execution stage**: `useDemoRuntime` loads the rules into `@triggerix/runtime`, which automatically matches and executes them when events are dispatched.
+1. **Definition stage**: `definitions/` defines the events, actions, tools, and trigger templates for each demo.
+2. **Editing stage**: `trigger-ui/` provides a visual editor where users interactively edit triggers.
+3. **Sync stage**: editor changes flow through `onChange` → `syncTriggers()` to produce trigger JSON.
+4. **Execution stage**: `useDemoRuntime` loads the triggers into `@triggerix/runtime`, which automatically matches and executes them when events are dispatched.
 
 ## Technology Stack Overview
 
 | Layer                 | Core Package                   | Responsibility                                |
 | --------------------- | ------------------------------ | --------------------------------------------- |
 | Data                  | `@triggerix/core`              | Type definitions and interface specifications |
-| Construction          | `@triggerix/schema`            | Rule construction API                         |
-| Validation            | `@triggerix/validator`         | Rule validation                               |
-| Runtime               | `@triggerix/runtime`           | Rule engine execution                         |
+| Construction          | `@triggerix/schema`            | Trigger construction API                      |
+| Validation            | `@triggerix/validator`         | Trigger validation                            |
+| Runtime               | `@triggerix/runtime`           | Trigger engine execution                      |
 | Editor framework      | `@triggerix/editor`            | Generic editor abstraction                    |
 | Visual implementation | `triggerix-editor-preset-war3` | War3-style editor UI implementation           |
 | Vue integration       | `triggerix-editor-vue`         | Vue composables                               |
@@ -276,7 +276,7 @@ graph TB
 ## Key Design Decisions
 
 1. **Framework-agnostic design**: `@triggerix/editor` defines generic interfaces, so War3Editor, Form Editor, and Workflow Editor can each be implemented independently.
-2. **Descriptor system**: the editor never manipulates rule JSON directly; it exposes UI views through a descriptor interface.
+2. **Descriptor system**: the editor never manipulates trigger JSON directly; it exposes UI views through a descriptor interface.
 3. **Multi-trigger isolation**: each trigger has its own War3Editor instance, with fully isolated editing state.
 4. **Source condition injection**: source conditions enable precise event matching and routing.
-5. **Instant synchronization**: editor changes → `onChange` triggers → `syncRules()` regenerates the rules → pushed to the runtime.
+5. **Instant synchronization**: editor changes → `onChange` triggers → `syncTriggers()` regenerates the triggers → pushed to the runtime.

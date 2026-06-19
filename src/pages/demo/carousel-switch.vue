@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, useTemplateRef, watchEffect } from 'vue'
+import { computed, onMounted, ref, useTemplateRef, watch } from 'vue'
 import DemoToast from '../../components/DemoToast.vue'
 import PlayCarousel from '../../components/playground/PlayCarousel.vue'
 import type { TriggerDef } from '../../composables/useDemoRuntime'
@@ -70,7 +70,7 @@ const triggerDefs: TriggerDef[] = [
   }
 ]
 
-const { triggers, rulesJson, emit } = useDemoRuntime({
+const { triggers, triggersJson, emit } = useDemoRuntime({
   setup,
   handlers,
   triggers: triggerDefs
@@ -83,8 +83,14 @@ const slides = ['⚔  第 1 张  起手式', '🔥  第 2 张  推进中', '🏁
 const currentIndex = ref(0)
 
 const { setPanel } = useCodePanel()
-watchEffect(() => {
-  setPanel(codeFiles, rulesJson.value)
+// 路由进入时立即同步一次面板状态；之后随 triggersJson 变化更新。
+// 不能用 watchEffect：依赖 triggersJson 一开始可能与上一个页面的值相同，
+// 导致路由切换时不会再次写入 files，CodeViewer 也就不会刷新。
+onMounted(() => {
+  setPanel(codeFiles, triggersJson.value)
+})
+watch(triggersJson, (v) => {
+  setPanel(codeFiles, v)
 })
 
 function onTrigger(eventType: string, payload: Record<string, unknown>) {
@@ -123,9 +129,9 @@ function onTrigger(eventType: string, payload: Record<string, unknown>) {
         >
           <span class="text-#5fb3a1">// hint</span>
           <br />
-          切换轮播 → 同时触发两条规则：弹 Toast + 区域背景变色。
+          切换轮播 → 同时触发两条触发器：弹 Toast + 区域背景变色。
           <br />
-          可以在编辑器里调整任一触发器的动作内容，立刻看到 JSON 抽屉里规则同步更新。
+          可以在编辑器里调整任一触发器的动作内容，立刻看到 JSON 抽屉里触发器同步更新。
         </div>
       </div>
     </template>

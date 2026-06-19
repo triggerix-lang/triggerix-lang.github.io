@@ -41,7 +41,7 @@ Triggerix 是面向 AI 时代的应用基础设施的一部分。我们认为未
 
 | 项目                           | 类型      | 描述                                         |
 | ------------------------------ | --------- | -------------------------------------------- |
-| triggerix                      | Monorepo  | 核心开源库，包含 7 个 npm 包                 |
+| triggerix                      | Monorepo  | 核心开源库，包含多个 npm 包                  |
 | triggerix-editor-preset-war3   | 独立包    | War3 风格的编辑器预设（可视化编辑器实现）    |
 | triggerix-editor-vue           | 独立包    | Vue 3 编辑器集成库（composables 和工具函数） |
 | triggerix-collective.github.io | Demo 应用 | 官方演示网站，展示完整的触发器编辑和执行流程 |
@@ -88,30 +88,33 @@ ${button} 被点击
 
 ### 核心包
 
-triggerix 是一个 pnpm workspace monorepo，包含 7 个相互协作的 npm 包，包之间的依赖关系如下：
+triggerix 是一个 pnpm workspace monorepo，包含多个相互协作的 npm 包，包之间的依赖关系如下：
 
 ```mermaid
 graph TD
     Core["@triggerix/core<br/>核心类型定义"]
+    Registry["@triggerix/registry<br/>类型安全的定义注册表"]
     Core --> Schema["@triggerix/schema<br/>触发器构建 API"]
     Core --> Runtime["@triggerix/runtime<br/>运行时引擎"]
     Core --> Editor["@triggerix/editor<br/>通用编辑器框架"]
     Core --> Validator["@triggerix/validator<br/>触发器验证"]
     Core --> JsonSchema["@triggerix/json-schema<br/>JSON Schema 生成"]
+    Registry --> Editor
     Aggregate["triggerix<br/>聚合包"]
 ```
 
 各包详细说明：
 
-| 包名                     | 版本   | 职责                       | 关键导出                                                                                                        |
-| ------------------------ | ------ | -------------------------- | --------------------------------------------------------------------------------------------------------------- |
-| `@triggerix/core`        | v0.0.3 | 类型定义、接口规范         | Event / Condition / Action / Trigger / Expression / ActionNode                                                  |
-| `@triggerix/schema`      | v0.0.3 | 触发器构建 API             | defineEvent / defineAction / defineCondition / defineTrigger / expr / sequence / parallel / tryCatch / actionIf |
-| `@triggerix/runtime`     | v0.0.3 | 触发器引擎执行             | createRuntime / 事件分发 / evaluateCondition / executeActionNode / ExpressionEvaluator                          |
-| `@triggerix/editor`      | v0.0.3 | 通用编辑器抽象（框架无关） | Editor 接口 / 描述符系统 / 可观察状态                                                                           |
-| `@triggerix/validator`   | v0.0.3 | 触发器验证                 | 触发器结构与类型校验                                                                                            |
-| `@triggerix/json-schema` | v0.0.3 | JSON Schema 生成           | 由类型生成 JSON Schema                                                                                          |
-| `triggerix`              | v0.0.3 | 聚合包，重新导出以上所有包 | —                                                                                                               |
+| 包名                     | 职责                                         | 关键导出                                                                                                        |
+| ------------------------ | -------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| `@triggerix/core`        | 类型定义、接口规范                           | Event / Condition / Action / Trigger / Expression / ActionNode                                                  |
+| `@triggerix/schema`      | 触发器构建 API                               | defineEvent / defineAction / defineCondition / defineTrigger / expr / sequence / parallel / tryCatch / actionIf |
+| `@triggerix/runtime`     | 触发器引擎执行                               | createRuntime / 事件分发 / evaluateCondition / executeActionNode / ExpressionEvaluator                          |
+| `@triggerix/editor`      | 通用编辑器抽象（框架无关）                   | Editor 接口 / 描述符系统 / 可观察状态                                                                           |
+| `@triggerix/validator`   | 触发器验证                                   | 触发器结构与类型校验                                                                                            |
+| `@triggerix/json-schema` | JSON Schema 生成                             | 由类型生成 JSON Schema                                                                                          |
+| `@triggerix/registry`    | 类型安全的 event/action/condition 定义注册表 | BaseRegistry / BaseItemDef                                                                                      |
+| `triggerix`              | 聚合包，重新导出核心数据/构建/运行子包       | —                                                                                                               |
 
 ### 编辑器实现层
 
@@ -138,8 +141,8 @@ War3 风格的编辑器预设，基于 `@triggerix/editor` 框架实现具体的
 
 **核心能力：**
 
-- 对等依赖：`vue ^3.5.0`
-- 依赖：`@triggerix/editor (^0.0.4)`
+- 对等依赖：Vue 3（推荐最新稳定版）
+- 依赖：`@triggerix/editor`
 - 提供 Vue 3 composables 集成层
 
 ### 依赖拓扑
@@ -148,6 +151,7 @@ War3 风格的编辑器预设，基于 `@triggerix/editor` 框架实现具体的
 graph TD
     subgraph Mono["triggerix Monorepo"]
         Core2["@triggerix/core"]
+        Registry2["@triggerix/registry"]
         Runtime2["@triggerix/runtime"]
         Editor2["@triggerix/editor"]
         Schema2["@triggerix/schema"]
@@ -158,6 +162,7 @@ graph TD
         Core2 --> Schema2
         Core2 --> Validator2
         Core2 --> JsonSchema2
+        Registry2 --> Editor2
     end
 
     subgraph Adapters["编辑器实现层"]

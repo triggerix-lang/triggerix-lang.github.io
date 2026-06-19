@@ -41,7 +41,7 @@ At the current stage, Triggerix has achieved the ability to describe arbitrary i
 
 | Project                        | Type               | Description                                                                      |
 | ------------------------------ | ------------------ | -------------------------------------------------------------------------------- |
-| triggerix                      | Monorepo           | Core open-source library, containing 7 npm packages                              |
+| triggerix                      | Monorepo           | Core open-source library, containing multiple npm packages                       |
 | triggerix-editor-preset-war3   | Standalone package | War3-style editor preset (visual editor implementation)                          |
 | triggerix-editor-vue           | Standalone package | Vue 3 editor integration library (composables and utilities)                     |
 | triggerix-collective.github.io | Demo app           | Official showcase site demonstrating the full trigger editing and execution flow |
@@ -88,30 +88,33 @@ Each tool has a `resolve` function that converts user input into a value the tri
 
 ### Core Packages
 
-triggerix is a pnpm workspace monorepo consisting of 7 collaborating npm packages, with the following dependency relationships:
+triggerix is a pnpm workspace monorepo consisting of multiple collaborating npm packages, with the following dependency relationships:
 
 ```mermaid
 graph TD
     Core["@triggerix/core<br/>Core type definitions"]
+    Registry["@triggerix/registry<br/>Type-safe definition registry"]
     Core --> Schema["@triggerix/schema<br/>Trigger construction API"]
     Core --> Runtime["@triggerix/runtime<br/>Runtime engine"]
     Core --> Editor["@triggerix/editor<br/>Generic editor framework"]
     Core --> Validator["@triggerix/validator<br/>Trigger validation"]
     Core --> JsonSchema["@triggerix/json-schema<br/>JSON Schema generation"]
+    Registry --> Editor
     Aggregate["triggerix<br/>Aggregate package"]
 ```
 
 Details of each package:
 
-| Package                  | Version | Responsibility                                   | Key Exports                                                                                                     |
-| ------------------------ | ------- | ------------------------------------------------ | --------------------------------------------------------------------------------------------------------------- |
-| `@triggerix/core`        | v0.0.3  | Type definitions and interface specifications    | Event / Condition / Action / Trigger / Expression / ActionNode                                                  |
-| `@triggerix/schema`      | v0.0.3  | Trigger construction API                         | defineEvent / defineAction / defineCondition / defineTrigger / expr / sequence / parallel / tryCatch / actionIf |
-| `@triggerix/runtime`     | v0.0.3  | Trigger engine execution                         | createRuntime / event dispatch / evaluateCondition / executeActionNode / ExpressionEvaluator                    |
-| `@triggerix/editor`      | v0.0.3  | Generic editor abstraction (framework-agnostic)  | Editor interface / descriptor system / observable state                                                         |
-| `@triggerix/validator`   | v0.0.3  | Trigger validation                               | Trigger structure and type checks                                                                               |
-| `@triggerix/json-schema` | v0.0.3  | JSON Schema generation                           | Generates JSON Schema from types                                                                                |
-| `triggerix`              | v0.0.3  | Aggregate package, re-exporting all of the above | —                                                                                                               |
+| Package                  | Responsibility                                                      | Key Exports                                                                                                     |
+| ------------------------ | ------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| `@triggerix/core`        | Type definitions and interface specifications                       | Event / Condition / Action / Trigger / Expression / ActionNode                                                  |
+| `@triggerix/schema`      | Trigger construction API                                            | defineEvent / defineAction / defineCondition / defineTrigger / expr / sequence / parallel / tryCatch / actionIf |
+| `@triggerix/runtime`     | Trigger engine execution                                            | createRuntime / event dispatch / evaluateCondition / executeActionNode / ExpressionEvaluator                    |
+| `@triggerix/editor`      | Generic editor abstraction (framework-agnostic)                     | Editor interface / descriptor system / observable state                                                         |
+| `@triggerix/validator`   | Trigger validation                                                  | Trigger structure and type checks                                                                               |
+| `@triggerix/json-schema` | JSON Schema generation                                              | Generates JSON Schema from types                                                                                |
+| `@triggerix/registry`    | Type-safe registry for event/action/condition definitions           | BaseRegistry / BaseItemDef                                                                                      |
+| `triggerix`              | Aggregate package re-exporting the core data/build/runtime packages | —                                                                                                               |
 
 ### Editor Implementation Layer
 
@@ -138,8 +141,8 @@ A library that integrates `@triggerix/editor` with Vue 3's reactivity system, pr
 
 **Core capabilities:**
 
-- Peer dependency: `vue ^3.5.0`
-- Dependency: `@triggerix/editor (^0.0.4)`
+- Peer dependency: Vue 3 (latest stable recommended)
+- Dependency: `@triggerix/editor`
 - Provides a Vue 3 composables integration layer
 
 ### Dependency Topology
@@ -148,6 +151,7 @@ A library that integrates `@triggerix/editor` with Vue 3's reactivity system, pr
 graph TD
     subgraph Mono["triggerix Monorepo"]
         Core2["@triggerix/core"]
+        Registry2["@triggerix/registry"]
         Runtime2["@triggerix/runtime"]
         Editor2["@triggerix/editor"]
         Schema2["@triggerix/schema"]
@@ -158,6 +162,7 @@ graph TD
         Core2 --> Schema2
         Core2 --> Validator2
         Core2 --> JsonSchema2
+        Registry2 --> Editor2
     end
 
     subgraph Adapters["Editor Implementation Layer"]

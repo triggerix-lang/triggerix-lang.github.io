@@ -15,7 +15,7 @@
 
 Triggerix 是一个完整的**事件-条件-动作 (ECA) 触发器引擎生态**，能够在运行时构建并驱动任意交互逻辑。由多个协作的 npm 包和应用组成，核心设计理念是：将触发器表示为数据，支持可视化编辑、验证和运行时执行。
 
-本 Demo 项目 (triggerix-lang.github.io) 是 Triggerix 的官方演示网站，展示完整的触发器编辑与执行流程。
+本 Demo 项目 (triggerix-collective.github.io) 是 Triggerix 的官方演示网站，展示完整的触发器编辑与执行流程。
 
 ### 愿景
 
@@ -39,12 +39,12 @@ Triggerix 是面向 AI 时代的应用基础设施的一部分。我们认为未
 
 ### 相关项目
 
-| 项目                         | 类型      | 描述                                         |
-| ---------------------------- | --------- | -------------------------------------------- |
-| triggerix                    | Monorepo  | 核心开源库，包含 7 个 npm 包                 |
-| triggerix-editor-preset-war3 | 独立包    | War3 风格的编辑器预设（可视化编辑器实现）    |
-| triggerix-editor-vue         | 独立包    | Vue 3 编辑器集成库（composables 和工具函数） |
-| triggerix-lang.github.io     | Demo 应用 | 官方演示网站，展示完整的触发器编辑和执行流程 |
+| 项目                           | 类型      | 描述                                         |
+| ------------------------------ | --------- | -------------------------------------------- |
+| triggerix                      | Monorepo  | 核心开源库，包含 7 个 npm 包                 |
+| triggerix-editor-preset-war3   | 独立包    | War3 风格的编辑器预设（可视化编辑器实现）    |
+| triggerix-editor-vue           | 独立包    | Vue 3 编辑器集成库（composables 和工具函数） |
+| triggerix-collective.github.io | Demo 应用 | 官方演示网站，展示完整的触发器编辑和执行流程 |
 
 ## 核心概念
 
@@ -165,7 +165,7 @@ graph TD
         VueLib["editor-vue<br/>Vue 3 集成"]
     end
 
-    Demo["triggerix-lang.github.io<br/>Demo 应用"]
+    Demo["triggerix-collective.github.io<br/>Demo 应用"]
 
     Core2 --> Preset
     Editor2 --> Preset
@@ -262,16 +262,16 @@ graph TB
 
 ## 技术栈总览
 
-| 层级     | 核心包                         | 职责                |
-| -------- | ------------------------------ | ------------------- |
-| 数据层   | `@triggerix/core`              | 类型定义、接口规范  |
-| 构建层   | `@triggerix/schema`            | 触发器构建 API      |
-| 验证层   | `@triggerix/validator`         | 触发器验证          |
-| 运行层   | `@triggerix/runtime`           | 触发器引擎执行      |
-| 编辑框架 | `@triggerix/editor`            | 通用编辑器抽象      |
-| 可视实现 | `triggerix-editor-preset-war3` | War3 编辑器 UI 实现 |
-| Vue 集成 | `triggerix-editor-vue`         | Vue composables     |
-| 示范应用 | `triggerix-lang.github.io`     | Demo 网站           |
+| 层级     | 核心包                           | 职责                |
+| -------- | -------------------------------- | ------------------- |
+| 数据层   | `@triggerix/core`                | 类型定义、接口规范  |
+| 构建层   | `@triggerix/schema`              | 触发器构建 API      |
+| 验证层   | `@triggerix/validator`           | 触发器验证          |
+| 运行层   | `@triggerix/runtime`             | 触发器引擎执行      |
+| 编辑框架 | `@triggerix/editor`              | 通用编辑器抽象      |
+| 可视实现 | `triggerix-editor-preset-war3`   | War3 编辑器 UI 实现 |
+| Vue 集成 | `triggerix-editor-vue`           | Vue composables     |
+| 示范应用 | `triggerix-collective.github.io` | Demo 网站           |
 
 ## 关键设计决策
 

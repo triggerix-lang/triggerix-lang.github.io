@@ -135,7 +135,7 @@ const scenarios: Scenario[] = [
               >
             </RouterLink>
             <a
-              href="https://github.com/triggerix-lang"
+              href="https://github.com/triggerix-collective"
               target="_blank"
               rel="noreferrer"
               class="inline-flex items-center gap-2 rounded border border-#2a3348 px-5 py-2.5 text-sm text-#9aa6b8 no-underline transition-colors hover:border-#5fb3a1 hover:text-#e6edf3"

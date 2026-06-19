@@ -15,7 +15,7 @@ English | [中文](./README_CN.md)
 
 Triggerix is a complete **Event-Condition-Action (ECA) trigger engine ecosystem** that can build and drive arbitrary interaction logic at runtime. It consists of several collaborating npm packages and applications, with the core design philosophy of representing triggers as data, supporting visual editing, validation, and runtime execution.
 
-This Demo project (triggerix-lang.github.io) is the official showcase site for Triggerix, demonstrating the full trigger editing and execution flow.
+This Demo project (triggerix-collective.github.io) is the official showcase site for Triggerix, demonstrating the full trigger editing and execution flow.
 
 ### Vision
 
@@ -39,12 +39,12 @@ At the current stage, Triggerix has achieved the ability to describe arbitrary i
 
 ### Related Projects
 
-| Project                      | Type               | Description                                                                      |
-| ---------------------------- | ------------------ | -------------------------------------------------------------------------------- |
-| triggerix                    | Monorepo           | Core open-source library, containing 7 npm packages                              |
-| triggerix-editor-preset-war3 | Standalone package | War3-style editor preset (visual editor implementation)                          |
-| triggerix-editor-vue         | Standalone package | Vue 3 editor integration library (composables and utilities)                     |
-| triggerix-lang.github.io     | Demo app           | Official showcase site demonstrating the full trigger editing and execution flow |
+| Project                        | Type               | Description                                                                      |
+| ------------------------------ | ------------------ | -------------------------------------------------------------------------------- |
+| triggerix                      | Monorepo           | Core open-source library, containing 7 npm packages                              |
+| triggerix-editor-preset-war3   | Standalone package | War3-style editor preset (visual editor implementation)                          |
+| triggerix-editor-vue           | Standalone package | Vue 3 editor integration library (composables and utilities)                     |
+| triggerix-collective.github.io | Demo app           | Official showcase site demonstrating the full trigger editing and execution flow |
 
 ## Core Concepts
 
@@ -165,7 +165,7 @@ graph TD
         VueLib["editor-vue<br/>Vue 3 integration"]
     end
 
-    Demo["triggerix-lang.github.io<br/>Demo App"]
+    Demo["triggerix-collective.github.io<br/>Demo App"]
 
     Core2 --> Preset
     Editor2 --> Preset
@@ -262,16 +262,16 @@ graph TB
 
 ## Technology Stack Overview
 
-| Layer                 | Core Package                   | Responsibility                                |
-| --------------------- | ------------------------------ | --------------------------------------------- |
-| Data                  | `@triggerix/core`              | Type definitions and interface specifications |
-| Construction          | `@triggerix/schema`            | Trigger construction API                      |
-| Validation            | `@triggerix/validator`         | Trigger validation                            |
-| Runtime               | `@triggerix/runtime`           | Trigger engine execution                      |
-| Editor framework      | `@triggerix/editor`            | Generic editor abstraction                    |
-| Visual implementation | `triggerix-editor-preset-war3` | War3-style editor UI implementation           |
-| Vue integration       | `triggerix-editor-vue`         | Vue composables                               |
-| Showcase app          | `triggerix-lang.github.io`     | Demo website                                  |
+| Layer                 | Core Package                     | Responsibility                                |
+| --------------------- | -------------------------------- | --------------------------------------------- |
+| Data                  | `@triggerix/core`                | Type definitions and interface specifications |
+| Construction          | `@triggerix/schema`              | Trigger construction API                      |
+| Validation            | `@triggerix/validator`           | Trigger validation                            |
+| Runtime               | `@triggerix/runtime`             | Trigger engine execution                      |
+| Editor framework      | `@triggerix/editor`              | Generic editor abstraction                    |
+| Visual implementation | `triggerix-editor-preset-war3`   | War3-style editor UI implementation           |
+| Vue integration       | `triggerix-editor-vue`           | Vue composables                               |
+| Showcase app          | `triggerix-collective.github.io` | Demo website                                  |
 
 ## Key Design Decisions
 

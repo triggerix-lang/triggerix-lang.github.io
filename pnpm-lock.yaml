@@ -7,8 +7,8 @@ settings:
 catalogs:
   default:
     '@triggerix/runtime':
-      specifier: ^0.0.7
-      version: 0.0.7
+      specifier: ^0.0.8
+      version: 0.0.8
     '@unocss/reset':
       specifier: latest
       version: 66.7.2
@@ -16,11 +16,11 @@ catalogs:
       specifier: ^6.0.7
       version: 6.0.7
     triggerix-editor-preset-war3:
-      specifier: ^0.0.6
-      version: 0.0.6
+      specifier: ^0.0.7
+      version: 0.0.7
     triggerix-editor-vue:
-      specifier: ^0.0.8
-      version: 0.0.8
+      specifier: ^0.0.9
+      version: 0.0.9
     typescript:
       specifier: ~6.0.3
       version: 6.0.3
@@ -47,7 +47,7 @@ importers:
     dependencies:
       '@triggerix/runtime':
         specifier: 'catalog:'
-        version: 0.0.7
+        version: 0.0.8
       '@vueuse/core':
         specifier: ^14.3.0
         version: 14.3.0(vue@3.5.38(typescript@6.0.3))
@@ -56,10 +56,10 @@ importers:
         version: 0.4.2(typescript@6.0.3)
       triggerix-editor-preset-war3:
         specifier: 'catalog:'
-        version: 0.0.6
+        version: 0.0.7
       triggerix-editor-vue:
         specifier: 'catalog:'
-        version: 0.0.8(vue@3.5.38(typescript@6.0.3))
+        version: 0.0.9(vue@3.5.38(typescript@6.0.3))
       vue:
         specifier: 'catalog:'
         version: 3.5.38(typescript@6.0.3)
@@ -114,8 +114,8 @@ packages:
     resolution: {integrity: sha512-qehxGkRj55h/ff8EMaJ+cYhyaKlHIxqYDn682wQD7RNp9UujOQsHog2uS0r2vzr4pW+sXf90NeeayjcNaX3fFg==}
     engines: {node: '>=6.9.0'}
 
-  '@babel/helper-validator-identifier@8.0.0':
-    resolution: {integrity: sha512-kXxQVZHNOctSJJsqzmcbPSCEkM6oHNnDIkua7g9RCO9xRHj2eCiKvRx2KPdfWR9QxcGWnK/oArrtunmie3rL9g==}
+  '@babel/helper-validator-identifier@8.0.2':
+    resolution: {integrity: sha512-9Fr9QeyCAyi1BR1jKZ6uYQ24EIhQUx5ReHfQU7drOE+TPOb+w11/dsqLkMOT2U29OdCT71XajrOT8xDc1C7orA==}
     engines: {node: ^22.18.0 || >=24.11.0}
 
   '@babel/parser@7.29.7':
@@ -627,14 +627,23 @@ packages:
   '@triggerix/core@0.0.7':
     resolution: {integrity: sha512-bb1NEBZ1Sq9VdIe0EnJ41cE0KNE7vbDe2sVPhU6FeeKmELcfrPLopsePszshXy9T9U1EtN3StbVzzhFXwtlhdw==}
 
+  '@triggerix/core@0.0.8':
+    resolution: {integrity: sha512-HK2PFRQXOvJg6bUZHkjjusOznBOKf1rDjbrtPCPc7RQiiTMijDjOTCG/NTi1+w5vvuamhYwJWawwruwZHdTVzQ==}
+
   '@triggerix/editor@0.0.7':
     resolution: {integrity: sha512-rvCccfXisxD45yvr/23Aj82Kx7N8peDTf73hC97biMhB0WFdsS0tdlzEr6lKAf6b1sXUHw+olTzmSjrXrBrTnQ==}
+
+  '@triggerix/editor@0.0.8':
+    resolution: {integrity: sha512-+Ux3IxLgE2XWBwgWJJdR/bH8Tr51Qj+F3vMxvculWD3UJqj7kkFc3Vj+eOkFn0ttuxxq6DPr7jS88JFVCfidHg==}
 
   '@triggerix/registry@0.0.7':
     resolution: {integrity: sha512-/gjJKiPB53XttYbxLAos13aOHbGZz6dutKdTnjL/PzX0EBW3MZQAf2WUHWIprfX2J2A0JD8p2ifqug421c+JUA==}
 
-  '@triggerix/runtime@0.0.7':
-    resolution: {integrity: sha512-tH4BC3nQ2r5+IX+ilOAOntz6DvjH3BbCcO6XvjRPMBigwlK1YWHPt43ogxoFUuIxwQz33tEV7WGiNpeBimHvRQ==}
+  '@triggerix/registry@0.0.8':
+    resolution: {integrity: sha512-q+fYGXTC8qi60Wxlc2mXu6RIkQYlXmWX65Cq4MgiUVvsVoJguAefPKhNZxmqhyf8eT0k/PPMFx2/v0FAlsBrGQ==}
+
+  '@triggerix/runtime@0.0.8':
+    resolution: {integrity: sha512-9c/nqdWVhtSt/r6XrTpZg2JyonaxUzgeeVKFDSdt0O1kRSgMpao/YPMRneQCQsgULkmD8dc8aMEKAIFziDkldQ==}
 
   '@tybys/wasm-util@0.10.2':
     resolution: {integrity: sha512-RoBvJ2X0wuKlWFIjrwffGw1IqZHKQqzIchKaadZZfnNpsAYp2mM0h36JtPCjNDAHGgYez/15uMBpfGwchhiMgg==}
@@ -1440,11 +1449,11 @@ packages:
     resolution: {integrity: sha512-sf4i37nQ2LBx4m3wB74y+ubopq6W/dIzXg0FDGjsYnZHVa1Da8FH853wlL2gtUhg+xJXjfk3kUZS3BRoQeoQBQ==}
     engines: {node: '>=6'}
 
-  triggerix-editor-preset-war3@0.0.6:
-    resolution: {integrity: sha512-JrqWkwLoHpzU46wiHSOk2AD3kEQrsjFCbugBZ9di224re5QAjLUHGag0gl9kW8Tg71rBn80UoAfPXMWzmEHrJQ==}
+  triggerix-editor-preset-war3@0.0.7:
+    resolution: {integrity: sha512-WSo5k6t1Y7J/4kWBfq8XhZxbG7eSaXhpDudWpsN+PDime+Riu+oNv8E0beTVcehAubQums6uB6kjErny3m/Otg==}
 
-  triggerix-editor-vue@0.0.8:
-    resolution: {integrity: sha512-u/ssEMEV3PKQO8I1lbzL9qypuKlcaJalL6gZpRoIKthZ4NgaF026yfssLzggRaflse1GaHWhhkJ5LwWgfFnMvQ==}
+  triggerix-editor-vue@0.0.9:
+    resolution: {integrity: sha512-1O9B7aGe/SAaIZLlpcEo2pTDTqWEFobAQ3SqptqfQkdJOXKFvAGcGA3ypBgWGwjl1sy3SItkGQktoNvgyxUDzw==}
     peerDependencies:
       vue: ^3.5.0
 
@@ -1584,7 +1593,7 @@ snapshots:
 
   '@babel/helper-validator-identifier@7.29.7': {}
 
-  '@babel/helper-validator-identifier@8.0.0': {}
+  '@babel/helper-validator-identifier@8.0.2': {}
 
   '@babel/parser@7.29.7':
     dependencies:
@@ -1604,7 +1613,7 @@ snapshots:
   '@babel/types@8.0.0':
     dependencies:
       '@babel/helper-string-parser': 8.0.0
-      '@babel/helper-validator-identifier': 8.0.0
+      '@babel/helper-validator-identifier': 8.0.2
 
   '@blazediff/core@1.9.1': {}
 
@@ -1893,16 +1902,25 @@ snapshots:
 
   '@triggerix/core@0.0.7': {}
 
+  '@triggerix/core@0.0.8': {}
+
   '@triggerix/editor@0.0.7':
     dependencies:
       '@triggerix/core': 0.0.7
       '@triggerix/registry': 0.0.7
 
+  '@triggerix/editor@0.0.8':
+    dependencies:
+      '@triggerix/core': 0.0.8
+      '@triggerix/registry': 0.0.8
+
   '@triggerix/registry@0.0.7': {}
 
-  '@triggerix/runtime@0.0.7':
+  '@triggerix/registry@0.0.8': {}
+
+  '@triggerix/runtime@0.0.8':
     dependencies:
-      '@triggerix/core': 0.0.7
+      '@triggerix/core': 0.0.8
 
   '@tybys/wasm-util@0.10.2':
     dependencies:
@@ -2673,12 +2691,12 @@ snapshots:
 
   totalist@3.0.1: {}
 
-  triggerix-editor-preset-war3@0.0.6:
+  triggerix-editor-preset-war3@0.0.7:
     dependencies:
-      '@triggerix/core': 0.0.7
-      '@triggerix/editor': 0.0.7
+      '@triggerix/core': 0.0.8
+      '@triggerix/editor': 0.0.8
 
-  triggerix-editor-vue@0.0.8(vue@3.5.38(typescript@6.0.3)):
+  triggerix-editor-vue@0.0.9(vue@3.5.38(typescript@6.0.3)):
     dependencies:
       '@triggerix/editor': 0.0.7
       vue: 3.5.38(typescript@6.0.3)

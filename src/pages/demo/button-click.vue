@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, useTemplateRef, watch } from 'vue'
+import { computed, ref, useTemplateRef } from 'vue'
 import DemoToast from '../../components/DemoToast.vue'
 import PlayButton from '../../components/playground/PlayButton.vue'
 import type { DemoActionHandler, TriggerDef } from '../../composables/useDemoRuntime'
 import { useDemoRuntime } from '../../composables/useDemoRuntime'
-import { useCodePanel } from '../../composables/useCodePanel'
+import { useSyncCodePanel } from '../../composables/useSyncCodePanel'
 import { setup } from '../../definitions/button-click'
 import { codeFiles } from '../../definitions/code-snippets/button-click'
 import DemoLayout from '../../layouts/DemoLayout.vue'
@@ -71,16 +71,7 @@ const { triggers, triggersJson, emit } = useDemoRuntime({
 const activeTab = ref(0)
 const activeTrigger = computed(() => triggers[activeTab.value])
 
-const { setPanel } = useCodePanel()
-// 路由进入时立即同步一次面板状态；之后随 triggersJson 变化更新。
-// 不能用 watchEffect：依赖 triggersJson 一开始可能与上一个页面的值相同，
-// 导致路由切换时不会再次写入 files，CodeViewer 也就不会刷新。
-onMounted(() => {
-  setPanel(codeFiles, triggersJson.value)
-})
-watch(triggersJson, (v) => {
-  setPanel(codeFiles, v)
-})
+useSyncCodePanel(codeFiles, triggersJson)
 
 function onTrigger(eventType: string, payload: Record<string, unknown>) {
   emit(eventType, payload)

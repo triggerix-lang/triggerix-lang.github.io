@@ -10,8 +10,20 @@ const visible = ref(false)
 
 export function useCodePanel() {
   function setPanel(newFiles: CodeFile[], json?: unknown[] | null) {
+    const nextJson = json ?? null
+    // 快路径：同一 demo 内重复进入时 files 引用相同（模块级常量 codeFiles），
+    // 且 json 也未变 → 跳过对下游 ref 的赋值与 trigger 调度，
+    // CodeViewer 的 watcher / watch(props.files) 不会无意义地重跑。
+    // visible 仍需同步，避免 hidePanel 后重新 setPanel 时面板保持隐藏。
+    if (files.value === newFiles && triggersJson.value === nextJson) {
+      const nextVisible = newFiles.length > 0
+      if (visible.value !== nextVisible) {
+        visible.value = nextVisible
+      }
+      return
+    }
     files.value = newFiles
-    triggersJson.value = json ?? null
+    triggersJson.value = nextJson
     visible.value = newFiles.length > 0
   }
 

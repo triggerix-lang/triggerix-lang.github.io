@@ -56,7 +56,19 @@ async function initWorkspace(codeFiles: CodeFile[], json: unknown[] | null | und
   lazyDone = true
 }
 
-// 同步某个文件到 monaco model。
+// 解析指定文件对应的 monaco 实例与 model URI。
+// 集中 (workspace as any)._monaco.promise 与 URI 构造，
+// 把 `as any` 逃生舱收敛到一处，将来 modern-monaco 暴露正式 API 时只改这里。
+async function resolveMonaco(filename: string) {
+  if (!workspace) return null
+  const monaco = await (workspace as any)._monaco.promise
+  if (!monaco) return null
+  const href = new URL(filename, 'file:///').href
+  const modelUri = monaco.Uri.parse(href)
+  return { monaco, modelUri }
+}
+
+// 同步某个文件到 monaco model（必要时创建）。
 // 不走 fs.writeFile + fs watcher 这条间接路径：
 // 同一文件被多次 writeFile 时，watcher 回调里的 fs.readTextFile
 // 是异步的，多个回调的解析顺序不可控，旧快照可能后解析并
@@ -66,11 +78,9 @@ async function safeOpen(filename: string, content?: string) {
   const readonlyContent = content ?? findFileContent(filename)
   if (readonlyContent === undefined) return
 
-  const monaco = await (workspace as any)._monaco.promise
-  if (!monaco) return
-  const href = new URL(filename, 'file:///').href
-  const modelUri = monaco.Uri.parse(href)
-  let model = monaco.editor.getModel(modelUri)
+  const ctx = await resolveMonaco(filename)
+  if (!ctx) return
+  let model = ctx.monaco.editor.getModel(ctx.modelUri)
   if (model) {
     if (model.getValue() !== readonlyContent) {
       model.setValue(readonlyContent)
@@ -86,17 +96,22 @@ async function safeOpen(filename: string, content?: string) {
 // 切换 editor 是「用户点了 tab」或「路由切换」时的意图动作，
 // 不在 safeOpen 里做，避免 sync 多个文件时最后一同步停留在错误的 model。
 async function switchTo(filename: string) {
-  if (!workspace) return
-  const monaco = await (workspace as any)._monaco.promise
-  if (!monaco) return
-  const href = new URL(filename, 'file:///').href
-  const modelUri = monaco.Uri.parse(href)
-  const model = monaco.editor.getModel(modelUri)
+  const ctx = await resolveMonaco(filename)
+  if (!ctx) return
+  const model = ctx.monaco.editor.getModel(ctx.modelUri)
   if (!model) return
-  const editor = monaco.editor.getEditors()[0]
+  const editor = ctx.monaco.editor.getEditors()[0]
   if (editor && editor.getModel() !== model) {
     editor.setModel(model)
   }
+}
+
+// 高层动作：同步文件到 model 并切换到该 model。
+// watch(active) / watch(jsonActive) / watch(props.files) / handleUpdateActive
+// 都需要「open + switch」两步，抽取到这里统一调用。
+async function openAndFocus(filename: string, content?: string) {
+  await safeOpen(filename, content)
+  await switchTo(filename)
 }
 
 function findFileContent(filename: string): string | undefined {
@@ -114,8 +129,7 @@ watch(active, async (i) => {
   if (jsonActive.value) return
   const file = props.files[i]
   if (file) {
-    await safeOpen(file.filename, file.content)
-    await switchTo(file.filename)
+    await openAndFocus(file.filename, file.content)
   }
 })
 
@@ -125,13 +139,11 @@ watch(jsonActive, async (next) => {
     return
   }
   if (next) {
-    await safeOpen(JSON_FILENAME, formatJson(props.triggersJson))
-    await switchTo(JSON_FILENAME)
+    await openAndFocus(JSON_FILENAME, formatJson(props.triggersJson))
   } else {
     const file = props.files[active.value]
     if (file) {
-      await safeOpen(file.filename, file.content)
-      await switchTo(file.filename)
+      await openAndFocus(file.filename, file.content)
     }
   }
 })
@@ -157,6 +169,10 @@ watch(
       // 不会注册 watcher，无副作用。
       await initWorkspace(newFiles, props.triggersJson)
     } else {
+      // 循环里只调 safeOpen（只同步内容、不切 model）。
+      // 如果在循环里切换 model，最后一次 openAndFocus(JSON_FILENAME) 会把
+      // 编辑器切到 triggers.json；随后 switchTo(entry) / watch(active) 再切回
+      // 入口，三者竞争时编辑器可能停留在 JSON 文件上。
       for (const file of newFiles) {
         await safeOpen(file.filename, file.content)
       }
@@ -186,8 +202,7 @@ function handleUpdateActive(i: number) {
       // active 值不变，watcher 不会触发，手动打开文件
       const file = props.files[i]
       if (file) {
-        safeOpen(file.filename, file.content)
-        switchTo(file.filename)
+        openAndFocus(file.filename, file.content)
       }
       return
     }

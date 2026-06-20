@@ -3,6 +3,7 @@ import { useLocalStorage } from '@vueuse/core'
 import { onBeforeUnmount, useTemplateRef, watch } from 'vue'
 import { RouterLink, RouterView, useRoute } from 'vue-router'
 import CodeViewer from './components/code-viewer/CodeViewer.vue'
+import NavDropdown from './components/NavDropdown.vue'
 import { useCodePanel } from './composables/useCodePanel'
 
 const demos = [
@@ -89,19 +90,21 @@ onBeforeUnmount(() => {
         <RouterLink
           to="/"
           class="text-#aaa no-underline transition-colors hover:text-primary"
-          exact-active-class="text-primary-3"
+          exact-active-class="text-primary"
         >
           首页
         </RouterLink>
-        <RouterLink
-          v-for="d in demos"
-          :key="d.to"
-          :to="d.to"
-          class="text-#aaa no-underline transition-colors hover:text-primary"
-          active-class="text-primary-3"
-        >
-          {{ d.label }}
-        </RouterLink>
+        <NavDropdown label="触发器">
+          <RouterLink
+            v-for="d in demos"
+            :key="d.to"
+            :to="d.to"
+            class="block px-4 py-2 text-#aaa text-sm no-underline transition-colors hover:bg-#2a2a2a hover:text-primary"
+            active-class="text-primary"
+          >
+            {{ d.label }}
+          </RouterLink>
+        </NavDropdown>
       </nav>
     </header>
     <div ref="container" class="flex-1 min-h-0 flex flex-col">

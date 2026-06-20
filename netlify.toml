@@ -3,6 +3,11 @@ command = "pnpm run build"
 publish = "dist"
 functions = "netlify/functions"
 
+# secret 扫描白名单
+[build.environment]
+SECRETS_SCAN_OMIT_PATHS = "dist/**,node_modules/**"
+SECRETS_SCAN_OMIT_KEYS = "AI_MODEL,AI_API_URL,AI_API_KEY"
+
 # SPA fallback：所有非静态资源、非 function、非 redirect 路径都返回 index.html
 [[redirects]]
 from = "/*"

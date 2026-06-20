@@ -5,6 +5,13 @@ minimumReleaseAgeExclude:
   - triggerix-editor-vue
   - triggerix-editor-preset-war3
   - '@triggerix/registry'
+  - '@triggerix-ai/component'
+  - '@triggerix-ai/registry'
+  - '@triggerix-ai/fn'
+  - triggerix-ai
+  - triggerix-ai-component-native
+  - '@triggerix-ai/builder'
+  - '@triggerix-ai/builder'
 
 shellEmulator: true
 
@@ -15,9 +22,15 @@ overrides:
   vitest: 'catalog:'
 
 catalog:
-  '@triggerix/runtime': ^0.0.10
+  '@triggerix-ai/builder': ^0.0.6
+  '@triggerix-ai/component': ^0.0.8
+  '@triggerix-ai/fn': ^0.0.8
+  '@triggerix-ai/registry': ^0.0.8
+  '@triggerix/runtime': ^0.0.11
   '@unocss/reset': ^66.7.2
   '@vitejs/plugin-vue': ^6.0.7
+  triggerix-ai: ^0.0.8
+  triggerix-ai-component-native: ^0.0.2
   triggerix-editor-vue: ^0.0.11
   triggerix-editor-preset-war3: ^0.0.8
   typescript: ^6.0.3
@@ -35,3 +48,6 @@ peerDependencyRules:
   allowedVersions:
     vite: '*'
     vitest: '*'
+
+allowBuilds:
+  '@parcel/watcher': true

@@ -1,0 +1,22 @@
+[build]
+command = "pnpm run build"
+publish = "dist"
+functions = "netlify/functions"
+
+# SPA fallback：所有非静态资源、非 function、非 redirect 路径都返回 index.html
+[[redirects]]
+from = "/*"
+to = "/index.html"
+status = 200
+
+# 把客户端 fetch('/api/ai') 重写到 Netlify Function
+[[redirects]]
+from = "/api/*"
+to = "/.netlify/functions/:splat"
+status = 200
+
+[functions]
+node_bundler = "esbuild"
+
+[functions."ai"]
+timeout = 26

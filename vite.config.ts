@@ -2,6 +2,7 @@ import vue from '@vitejs/plugin-vue'
 import UnoCSS from 'unocss/vite'
 import { defineConfig } from 'vite-plus'
 import VueRouter from 'vue-router/vite'
+import { netlifyDevProxy } from './scripts/vite/plugins/netlifyDevProxy'
 
 export default defineConfig({
   plugins: [
@@ -15,7 +16,8 @@ export default defineConfig({
         }
       }
     }),
-    UnoCSS()
+    UnoCSS(),
+    netlifyDevProxy()
   ],
   staged: {
     '*': 'vp check --fix'

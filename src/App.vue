@@ -105,6 +105,13 @@ onBeforeUnmount(() => {
             {{ d.label }}
           </RouterLink>
         </NavDropdown>
+        <RouterLink
+          to="/ai-app"
+          class="text-#aaa no-underline transition-colors hover:text-primary"
+          active-class="text-primary"
+        >
+          AI 应用
+        </RouterLink>
       </nav>
     </header>
     <div ref="container" class="flex-1 min-h-0 flex flex-col">

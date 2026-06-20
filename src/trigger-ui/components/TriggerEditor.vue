@@ -23,7 +23,7 @@ const { eventDescriptor, actionDescriptors, conditionDescriptors, getSlotToolDes
   useTriggerEditor(props.editor, stateRef)
 
 const eventSlotEntriesList = computed(() => {
-  const ev = props.state.event
+  const ev = props.state.events[0]
   return ev ? [ev.slotValues] : []
 })
 const actionSlotEntriesList = computed(() => props.state.actions.map((a) => a.slotValues))
@@ -94,7 +94,7 @@ function handleEditItem(kind: 'event' | 'condition' | 'action', index: number) {
   let itemState: { id: string; slotValues: Record<string, SlotValueEntry> } | null = null
 
   if (kind === 'event') {
-    itemState = state.event
+    itemState = state.events[0] ?? null
   } else if (kind === 'condition') {
     itemState = state.conditions[index] ?? null
   } else if (kind === 'action') {
@@ -177,7 +177,7 @@ const slotFillContext = ref<SlotFillContext | null>(null)
 
 function getCurrentEntry(kind: SlotFillContext['kind'], itemIndex: number, key: string) {
   const state = props.editor.getState()
-  if (kind === 'event') return state.event?.slotValues?.[key] ?? null
+  if (kind === 'event') return state.events[0]?.slotValues?.[key] ?? null
   if (kind === 'action') return state.actions[itemIndex]?.slotValues?.[key] ?? null
   return state.conditions[itemIndex]?.slotValues?.[key] ?? null
 }

@@ -57,12 +57,14 @@ const triggerDefs: TriggerDef[] = [
     id: 'linkage-trigger',
     name: '左右联动',
     initialState: {
-      event: {
-        id: 'carousel_switch',
-        slotValues: {
-          carousel: { tool: 'carousel_picker', value: 'left_carousel', subSlots: undefined }
+      events: [
+        {
+          id: 'carousel_switch',
+          slotValues: {
+            carousel: { tool: 'carousel_picker', value: 'left_carousel', subSlots: undefined }
+          }
         }
-      },
+      ],
       actions: [
         {
           id: 'set_carousel_index',

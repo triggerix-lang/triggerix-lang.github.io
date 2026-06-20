@@ -32,12 +32,14 @@ const triggerDefs: TriggerDef[] = [
     id: 'switch-message-trigger',
     name: '切换消息',
     initialState: {
-      event: {
-        id: 'carousel_switch',
-        slotValues: {
-          carousel: { tool: 'carousel_picker', value: 'main_carousel', subSlots: undefined }
+      events: [
+        {
+          id: 'carousel_switch',
+          slotValues: {
+            carousel: { tool: 'carousel_picker', value: 'main_carousel', subSlots: undefined }
+          }
         }
-      },
+      ],
       actions: [
         {
           id: 'show_message',
@@ -52,12 +54,14 @@ const triggerDefs: TriggerDef[] = [
     id: 'switch-color-trigger',
     name: '切换变色',
     initialState: {
-      event: {
-        id: 'carousel_switch',
-        slotValues: {
-          carousel: { tool: 'carousel_picker', value: 'main_carousel', subSlots: undefined }
+      events: [
+        {
+          id: 'carousel_switch',
+          slotValues: {
+            carousel: { tool: 'carousel_picker', value: 'main_carousel', subSlots: undefined }
+          }
         }
-      },
+      ],
       actions: [
         {
           id: 'change_bg_color',

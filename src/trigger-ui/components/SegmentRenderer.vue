@@ -57,7 +57,7 @@ function getEntry(seg: SlotSegment): SlotValueEntry | null {
     const { kind, index } = props.itemContext
     let slotValues: Record<string, SlotValueEntry> | undefined
     if (kind === 'event') {
-      slotValues = state.event?.slotValues
+      slotValues = state.events[0]?.slotValues
     } else if (kind === 'action') {
       slotValues = state.actions[index]?.slotValues
     } else {

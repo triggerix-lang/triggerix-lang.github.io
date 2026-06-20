@@ -24,12 +24,14 @@ const triggerDefs: TriggerDef[] = [
     id: 'confirm-trigger',
     name: '确认按钮',
     initialState: {
-      event: {
-        id: 'button_click',
-        slotValues: {
-          button: { tool: 'button_picker', value: 'confirm_btn', subSlots: undefined }
+      events: [
+        {
+          id: 'button_click',
+          slotValues: {
+            button: { tool: 'button_picker', value: 'confirm_btn', subSlots: undefined }
+          }
         }
-      },
+      ],
       actions: [
         {
           id: 'show_message',
@@ -44,12 +46,14 @@ const triggerDefs: TriggerDef[] = [
     id: 'cancel-trigger',
     name: '取消按钮',
     initialState: {
-      event: {
-        id: 'button_click',
-        slotValues: {
-          button: { tool: 'button_picker', value: 'cancel_btn', subSlots: undefined }
+      events: [
+        {
+          id: 'button_click',
+          slotValues: {
+            button: { tool: 'button_picker', value: 'cancel_btn', subSlots: undefined }
+          }
         }
-      },
+      ],
       actions: [
         {
           id: 'show_message',

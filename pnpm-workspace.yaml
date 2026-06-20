@@ -13,19 +13,21 @@ trustPolicy: no-downgrade
 overrides:
   vite: 'catalog:'
   vitest: 'catalog:'
+
 catalog:
-  '@triggerix/runtime': ^0.0.8
-  '@unocss/reset': latest
+  '@triggerix/runtime': ^0.0.10
+  '@unocss/reset': ^66.7.2
   '@vitejs/plugin-vue': ^6.0.7
-  triggerix-editor-vue: ^0.0.9
-  triggerix-editor-preset-war3: ^0.0.7
-  typescript: ~6.0.3
-  unocss: latest
-  vite: npm:@voidzero-dev/vite-plus-core@latest
-  vite-plus: latest
-  vitest: npm:@voidzero-dev/vite-plus-test@latest
+  triggerix-editor-vue: ^0.0.11
+  triggerix-editor-preset-war3: ^0.0.8
+  typescript: ^6.0.3
+  unocss: ^66.7.2
+  vite: npm:@voidzero-dev/vite-plus-core@^0.2.1
+  vite-plus: ^0.2.1
+  vitest: npm:@voidzero-dev/vite-plus-test@^0.1.24
   vue: ^3.5.38
   vue-router: ^5.1.0
+
 peerDependencyRules:
   allowAny:
     - vite

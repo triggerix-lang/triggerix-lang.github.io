@@ -111,27 +111,33 @@ export function useDemoRuntime(options: DemoRuntimeOptions) {
    * Convert the first string-valued event payload field into a runtime
    * condition that checks `payload.source === value`.  This bridges the gap
    * between the editor's event payload and the playground's payload shape.
+   *
+   * Mutates `trigger.conditions` (a flat `ConditionItem[]`) by appending the
+   * source condition. Multiple events may carry payload — we inject one
+   * condition per event so each is bound to its own source value.
    */
   function injectSourceCondition(trigger: Record<string, unknown>) {
-    const event = trigger.event as { payload?: Record<string, unknown> } | undefined
-    const payload = event?.payload
-    if (!payload) return
+    const events =
+      (trigger.events as Array<{ payload?: Record<string, unknown> }> | undefined) ?? []
+    const newConditions: unknown[] = []
 
-    const sourceValue = Object.values(payload).find((v) => typeof v === 'string')
-    if (sourceValue === undefined) return
+    for (const event of events) {
+      const payload = event?.payload
+      if (!payload) continue
+      const sourceValue = Object.values(payload).find((v) => typeof v === 'string')
+      if (sourceValue === undefined) continue
 
-    const condition = {
-      left: { $ref: 'source' },
-      operator: 'eq',
-      right: sourceValue
+      newConditions.push({
+        left: { $ref: 'source' },
+        operator: 'eq',
+        right: sourceValue
+      })
     }
 
-    if (trigger.conditions) {
-      const conds = trigger.conditions as { type: string; conditions: unknown[] }
-      conds.conditions.push(condition)
-    } else {
-      trigger.conditions = { type: 'and', conditions: [condition] }
-    }
+    if (newConditions.length === 0) return
+
+    const existing = Array.isArray(trigger.conditions) ? (trigger.conditions as unknown[]) : []
+    trigger.conditions = [...existing, ...newConditions]
   }
 
   // Watch each trigger's state independently.
@@ -142,8 +148,16 @@ export function useDemoRuntime(options: DemoRuntimeOptions) {
   syncTriggers()
 
   // 6. Expose emit() so playgrounds can fire events at the runtime.
+  //    The runtime's signature is `emit(type, source?, payload?)`. Playgrounds
+  //    call this wrapper as `emit(type, payload)` where `payload` typically
+  //    carries a `source` field — pull it out so the runtime can match events
+  //    by source as designed.
   function emit(eventType: string, payload?: Record<string, unknown>) {
-    return runtime.emit(eventType, payload)
+    if (!payload) {
+      return runtime.emit(eventType)
+    }
+    const { source, ...rest } = payload
+    return runtime.emit(eventType, typeof source === 'string' ? source : undefined, rest)
   }
 
   // Cast to the public TriggerInstance[] (hides toTrigger).
@@ -158,10 +172,21 @@ export function useDemoRuntime(options: DemoRuntimeOptions) {
 }
 
 function applyInitialState(editor: War3Editor, initial: Partial<War3EditorState>) {
-  if (initial.event) {
-    editor.setEvent(initial.event.id)
-    for (const [key, entry] of Object.entries(initial.event.slotValues ?? {})) {
-      editor.setEventSlot(key, entry)
+  if (initial.events && initial.events.length > 0) {
+    // Single-event UI helper: take the first event for `setEvent` semantics.
+    // Multi-event initial states are also supported via `addEvent` for subsequent items.
+    const [first, ...rest] = initial.events
+    if (first) {
+      editor.setEvent(first.id)
+      for (const [key, entry] of Object.entries(first.slotValues ?? {})) {
+        editor.setEventSlot(key, entry)
+      }
+    }
+    for (const ev of rest) {
+      const index = editor.addEvent(ev.id)
+      for (const [key, entry] of Object.entries(ev.slotValues ?? {})) {
+        editor.setEventSlotAt(index, key, entry)
+      }
     }
   }
   if (initial.conditions) {

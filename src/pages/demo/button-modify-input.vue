@@ -31,12 +31,14 @@ const triggerDefs: TriggerDef[] = [
     id: 'fill-title-trigger',
     name: '填入标题',
     initialState: {
-      event: {
-        id: 'button_click',
-        slotValues: {
-          button: { tool: 'button_picker', value: 'fill_title', subSlots: undefined }
+      events: [
+        {
+          id: 'button_click',
+          slotValues: {
+            button: { tool: 'button_picker', value: 'fill_title', subSlots: undefined }
+          }
         }
-      },
+      ],
       actions: [
         {
           id: 'set_input_value',
@@ -56,12 +58,14 @@ const triggerDefs: TriggerDef[] = [
     id: 'fill-width-trigger',
     name: '填入宽度',
     initialState: {
-      event: {
-        id: 'button_click',
-        slotValues: {
-          button: { tool: 'button_picker', value: 'fill_width', subSlots: undefined }
+      events: [
+        {
+          id: 'button_click',
+          slotValues: {
+            button: { tool: 'button_picker', value: 'fill_width', subSlots: undefined }
+          }
         }
-      },
+      ],
       actions: [
         {
           id: 'set_input_value',
@@ -81,12 +85,14 @@ const triggerDefs: TriggerDef[] = [
     id: 'fill-url-trigger',
     name: '填入网址',
     initialState: {
-      event: {
-        id: 'button_click',
-        slotValues: {
-          button: { tool: 'button_picker', value: 'fill_url', subSlots: undefined }
+      events: [
+        {
+          id: 'button_click',
+          slotValues: {
+            button: { tool: 'button_picker', value: 'fill_url', subSlots: undefined }
+          }
         }
-      },
+      ],
       actions: [
         {
           id: 'set_input_value',

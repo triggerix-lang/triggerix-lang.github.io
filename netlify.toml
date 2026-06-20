@@ -8,16 +8,16 @@ functions = "netlify/functions"
 SECRETS_SCAN_OMIT_PATHS = "dist/**,node_modules/**"
 SECRETS_SCAN_OMIT_KEYS = "AI_MODEL,AI_API_URL,AI_API_KEY"
 
+# 把客户端 fetch('/api/ai') 重写到 Netlify Function（必须在 SPA fallback 之前：Netlify 按顺序首匹配）
+[[redirects]]
+from = "/api/*"
+to = "/.netlify/functions/:splat"
+status = 200
+
 # SPA fallback：所有非静态资源、非 function、非 redirect 路径都返回 index.html
 [[redirects]]
 from = "/*"
 to = "/index.html"
-status = 200
-
-# 把客户端 fetch('/api/ai') 重写到 Netlify Function
-[[redirects]]
-from = "/api/*"
-to = "/.netlify/functions/:splat"
 status = 200
 
 [functions]

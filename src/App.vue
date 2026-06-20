@@ -14,15 +14,15 @@ const demos = [
   { to: '/demo/carousel-linkage', label: '轮播联动' }
 ]
 
-const { files, triggersJson, visible, hidePanel } = useCodePanel()
+const { files, triggersJson, visible } = useCodePanel()
 
-// 离开 demo 路由时隐藏面板（首页/未匹配路由）。
+// 离开 demo 路由时隐藏面板（首页/未匹配路由）
 const route = useRoute()
 watch(
   () => route.path,
   (path) => {
     if (!path.startsWith('/demo/')) {
-      hidePanel()
+      visible.value = false
     }
   }
 )

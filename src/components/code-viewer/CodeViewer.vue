@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { lazy, Workspace } from 'modern-monaco'
-import { computed, ref, watch } from 'vue'
+import { init, type editor } from 'modern-monaco'
+import { onMounted, ref, useTemplateRef, watch } from 'vue'
 import CodeTabs from './CodeTabs.vue'
 
 interface CodeFile {
@@ -8,206 +8,105 @@ interface CodeFile {
   content: string
 }
 
+const JSON_FILENAME = 'triggers.json'
+
 const props = defineProps<{
   files: CodeFile[]
   triggersJson?: unknown[] | null
 }>()
 
-const JSON_FILENAME = 'triggers.json'
-
 const active = ref(0)
 const jsonActive = ref(false)
+const containerRef = useTemplateRef<HTMLDivElement>('container')
 
-const showJsonBtn = computed(() => !!props.triggersJson)
+// 全局状态：一个 monaco 实例、一个 editor、按文件名缓存的 model map。
+// monaco / editor 变化不触发 Vue 渲染，用 let 让 watch 闭包直接读最新值。
+let monaco: Awaited<ReturnType<typeof init>> | null = null
+let ed: editor.IStandaloneCodeEditor | null = null
+const models = new Map<string, editor.ITextModel>()
 
-function formatJson(json: unknown[] | null | undefined): string {
-  if (!json || json.length === 0) {
-    return '// 暂无触发器'
-  }
-  return JSON.stringify(json, null, 2)
+function uriFor(filename: string) {
+  return monaco!.Uri.parse(`file:///${filename}`)
 }
 
-// 组件级 workspace。由于本组件挂载在 App.vue 中且通过 v-show 控制显隐，
-// workspace 与 monaco-editor 实例在整个会话中持续有效。
-// 延迟初始化：等待 files 第一次非空时才创建 workspace。
-let workspace: Workspace | null = null
-let lazyDone = false
-
-async function initWorkspace(codeFiles: CodeFile[], json: unknown[] | null | undefined) {
-  const initialFiles: Record<string, string> = {}
-  for (const file of codeFiles) {
-    initialFiles[file.filename] = file.content
+// 取已有 model 并 setValue；没有则 createModel。
+// 与 workspace.openTextDocument 不同，这里不注册任何 self-dispose 监听，
+// model 生命周期由本组件独占管理。
+function ensureModel(filename: string, content: string, language?: string) {
+  const uri = uriFor(filename)
+  const existing = monaco!.editor.getModel(uri)
+  if (existing) {
+    if (existing.getValue() !== content) existing.setValue(content)
+    return existing
   }
-  initialFiles[JSON_FILENAME] = formatJson(json)
-  const entryFile = codeFiles[0]?.filename
-  workspace = new Workspace({ initialFiles, entryFile })
-  lazy({
-    workspace,
-    defaultTheme: 'vitesse-dark',
+  const model = monaco!.editor.createModel(content, language, uri)
+  models.set(filename, model)
+  return model
+}
+
+// 根据 active / jsonActive 把 editor 切到对应 model。
+function showCurrent() {
+  if (!ed) return
+  const filename = jsonActive.value ? JSON_FILENAME : props.files[active.value]?.filename
+  const model = filename ? models.get(filename) : undefined
+  if (model && ed.getModel() !== model) ed.setModel(model)
+}
+
+onMounted(async () => {
+  monaco = await init({
     langs: ['typescript', 'vue', 'json'],
-    lsp: {
-      typescript: {
-        diagnosticsOptions: {
-          validate: false
-        }
-      }
-    }
+    defaultTheme: 'vitesse-dark'
   })
-  lazyDone = true
-}
-
-// 解析指定文件对应的 monaco 实例与 model URI。
-// 集中 (workspace as any)._monaco.promise 与 URI 构造，
-// 把 `as any` 逃生舱收敛到一处，将来 modern-monaco 暴露正式 API 时只改这里。
-async function resolveMonaco(filename: string) {
-  if (!workspace) return null
-  const monaco = await (workspace as any)._monaco.promise
-  if (!monaco) return null
-  const href = new URL(filename, 'file:///').href
-  const modelUri = monaco.Uri.parse(href)
-  return { monaco, modelUri }
-}
-
-// 同步某个文件到 monaco model（必要时创建）。
-// 不走 fs.writeFile + fs watcher 这条间接路径：
-// 同一文件被多次 writeFile 时，watcher 回调里的 fs.readTextFile
-// 是异步的，多个回调的解析顺序不可控，旧快照可能后解析并
-// 覆盖 model.setValue，导致内容卡在旧版本。
-async function safeOpen(filename: string, content?: string) {
-  if (!workspace || !lazyDone) return
-  const readonlyContent = content ?? findFileContent(filename)
-  if (readonlyContent === undefined) return
-
-  const ctx = await resolveMonaco(filename)
-  if (!ctx) return
-  let model = ctx.monaco.editor.getModel(ctx.modelUri)
-  if (model) {
-    if (model.getValue() !== readonlyContent) {
-      model.setValue(readonlyContent)
-    }
-  } else {
-    // model 还没创建（monaco-editor connectedCallback 尚未完成），
-    // 走原路径以只读模式创建并打开。
-    await workspace.openTextDocument(filename, readonlyContent)
+  if (!containerRef.value) return
+  ed = monaco.editor.create(containerRef.value, {
+    readOnly: true,
+    theme: 'vitesse-dark',
+    minimap: { enabled: false },
+    automaticLayout: true
+  })
+  // 首次同步：路由进入时 useSyncCodePanel 已经把当前 demo 的 files / triggersJson
+  // 推进 useCodePanel，App.vue 的 props 此时已有值。
+  for (const file of props.files) {
+    ensureModel(file.filename, file.content)
   }
-}
-
-// 显式把编辑器切到指定文件的 model。
-// 切换 editor 是「用户点了 tab」或「路由切换」时的意图动作，
-// 不在 safeOpen 里做，避免 sync 多个文件时最后一同步停留在错误的 model。
-async function switchTo(filename: string) {
-  const ctx = await resolveMonaco(filename)
-  if (!ctx) return
-  const model = ctx.monaco.editor.getModel(ctx.modelUri)
-  if (!model) return
-  const editor = ctx.monaco.editor.getEditors()[0]
-  if (editor && editor.getModel() !== model) {
-    editor.setModel(model)
+  if (props.triggersJson != null) {
+    ensureModel(JSON_FILENAME, JSON.stringify(props.triggersJson, null, 2), 'json')
   }
-}
-
-// 高层动作：同步文件到 model 并切换到该 model。
-// watch(active) / watch(jsonActive) / watch(props.files) / handleUpdateActive
-// 都需要「open + switch」两步，抽取到这里统一调用。
-async function openAndFocus(filename: string, content?: string) {
-  await safeOpen(filename, content)
-  await switchTo(filename)
-}
-
-function findFileContent(filename: string): string | undefined {
-  if (filename === JSON_FILENAME) return formatJson(props.triggersJson)
-  for (const f of props.files) {
-    if (f.filename === filename) return f.content
-  }
-  return undefined
-}
-
-// 防止 handleUpdateActive 同时触发 active 和 jsonActive 两个 watcher
-let skipJsonWatch = false
-
-watch(active, async (i) => {
-  if (jsonActive.value) return
-  const file = props.files[i]
-  if (file) {
-    await openAndFocus(file.filename, file.content)
-  }
+  showCurrent()
 })
 
-watch(jsonActive, async (next) => {
-  if (skipJsonWatch) {
-    skipJsonWatch = false
-    return
-  }
-  if (next) {
-    await openAndFocus(JSON_FILENAME, formatJson(props.triggersJson))
-  } else {
-    const file = props.files[active.value]
-    if (file) {
-      await openAndFocus(file.filename, file.content)
-    }
-  }
-})
-
-watch(
-  () => props.triggersJson,
-  async (next) => {
-    if (jsonActive.value) {
-      await safeOpen(JSON_FILENAME, formatJson(next))
-    }
-  }
-)
-
-// 路由切换 / 首次加载：初始化 workspace，或直接把新内容同步进已有 model。
-// 后续导航不走 fs.writeFile，避免 watcher 异步链的旧内容覆盖。
+// 路由切换 → props.files 引用变 → 同步新 demo 的文件、重置到 setup.ts
 watch(
   () => props.files,
-  async (newFiles) => {
-    if (!newFiles.length) return
-
-    if (!workspace) {
-      // 首次：构造时会写 IndexedDB，但 monaco-editor 尚未连接、model 未创建，
-      // 不会注册 watcher，无副作用。
-      await initWorkspace(newFiles, props.triggersJson)
-    } else {
-      // 循环里只调 safeOpen（只同步内容、不切 model）。
-      // 如果在循环里切换 model，最后一次 openAndFocus(JSON_FILENAME) 会把
-      // 编辑器切到 triggers.json；随后 switchTo(entry) / watch(active) 再切回
-      // 入口，三者竞争时编辑器可能停留在 JSON 文件上。
-      for (const file of newFiles) {
-        await safeOpen(file.filename, file.content)
-      }
-      await safeOpen(JSON_FILENAME, formatJson(props.triggersJson))
+  (next) => {
+    if (!monaco) return
+    for (const file of next) {
+      ensureModel(file.filename, file.content)
     }
-    // 重置 tab 状态
+    jsonActive.value = false
     active.value = 0
-    // 路由切换后主动把编辑器切回入口文件。
-    // watch(active) 也会触发，但它是 microtask 调度，这里 await 之后更可控。
-    const entry = newFiles[0]?.filename
-    if (entry) {
-      await switchTo(entry)
-    }
-    if (jsonActive.value) {
-      skipJsonWatch = true
-      jsonActive.value = false
-    }
+    showCurrent()
   },
-  { deep: true, immediate: true }
+  { deep: true }
 )
 
+// triggersJson 变化（用户在 TriggerEditor 编辑）→ 只更新 JSON model，不切 tab
+watch(
+  () => props.triggersJson,
+  (next) => {
+    if (!monaco || next == null) return
+    ensureModel(JSON_FILENAME, JSON.stringify(next, null, 2), 'json')
+  },
+  { deep: true }
+)
+
+// 用户切 tab / JSON
+watch(active, showCurrent)
+watch(jsonActive, showCurrent)
+
 function handleUpdateActive(i: number) {
-  if (jsonActive.value) {
-    skipJsonWatch = true
-    jsonActive.value = false
-    if (active.value === i) {
-      // active 值不变，watcher 不会触发，手动打开文件
-      const file = props.files[i]
-      if (file) {
-        openAndFocus(file.filename, file.content)
-      }
-      return
-    }
-  }
   active.value = i
+  jsonActive.value = false
 }
 
 function handleToggleJson() {
@@ -220,18 +119,11 @@ function handleToggleJson() {
     <CodeTabs
       :tabs="files"
       :active="active"
-      :show-json-btn="showJsonBtn"
+      :show-json-btn="!!triggersJson"
       :json-active="jsonActive"
       @update:active="handleUpdateActive"
       @toggle-json="handleToggleJson"
     />
-    <div class="flex-1 min-h-0 relative overflow-hidden">
-      <monaco-editor
-        theme="vitesse-dark"
-        readOnly="true"
-        minimap="false"
-        class="absolute inset-0 block w-full h-full"
-      />
-    </div>
+    <div ref="container" class="flex-1 min-h-0 relative overflow-hidden" />
   </div>
 </template>

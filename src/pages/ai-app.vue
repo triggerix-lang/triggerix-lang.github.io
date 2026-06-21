@@ -2,8 +2,8 @@
 /**
  * AI 餐饮点餐 app 编排层。
  *
- * 组合 useFoodApp（业务数据）+ buildAtomicTools（5 个原子工具 schema + UIBuilder）
- * + createBusinessHandlers（业务 action handler 池）+ useChatSession（聊天 + 工具执行）
+ * 组合 useFoodApp（业务数据）+ buildAtomicTools（5 个 builder atomic + 5 个 domain 工具 + UIBuilder）
+ * + createBusinessHandlers（11 个业务 action handler）+ useChatSession（聊天 + 工具执行）
  * 渲染：PC 双栏（手机 + 聊天面板）/ 移动单栏（手机 + FAB 抽屉）
  */
 
@@ -13,6 +13,7 @@ import { buildAtomicTools } from '../ai-app-shared/atomicTools'
 import { createBusinessHandlers, type ToastTone } from '../ai-app-shared/businessHandlers'
 import { useChatSession } from '../composables/useChatSession'
 import { MENU_DATA, type MenuItem } from '../ai-app-shared/menuData'
+import { COUPON_DATA, PAYMENT_METHODS } from '../ai-app-shared/couponData'
 import AiChatPanel from './ai-app/components/AiChatPanel.vue'
 import PhoneFrame from './ai-app/components/PhoneFrame.vue'
 import type { PhoneTab } from './ai-app/components/PhoneTabbar.vue'
@@ -39,7 +40,7 @@ const TAB_OPTIONS = [
   { value: 'profile', label: '我的' }
 ]
 
-// 原子工具集（5 个 addComponent / addTrigger / ... + 3 个 domain tool + UIBuilder + systemPrompt）
+// 原子工具集（5 个 addComponent / addTrigger / ... + 5 个 domain tool + UIBuilder + systemPrompt）
 const { toolDefinitions, builder, systemPrompt, executeCall } = buildAtomicTools({
   menu: () =>
     MENU_DATA.map((d: MenuItem) => ({
@@ -52,7 +53,15 @@ const { toolDefinitions, builder, systemPrompt, executeCall } = buildAtomicTools
   options: (field: string) => {
     if (field === 'user.gender') return GENDER_OPTIONS
     return undefined
-  }
+  },
+  coupons: () =>
+    COUPON_DATA.map((c) => ({
+      value: c.id,
+      label: c.label,
+      minSpend: c.minSpend,
+      description: c.description
+    })),
+  paymentMethods: () => [...PAYMENT_METHODS]
 })
 
 // Toast 主机 + pushToast 桥接
@@ -91,6 +100,7 @@ const { messages, thinking, error, send } = useChatSession({
     const field = path.split('.').pop()
     if (field === 'nickname') return foodApp.nickname.value
     if (field === 'gender') return foodApp.gender.value
+    if (field === 'appliedCouponId') return foodApp.appliedCouponId.value
     return undefined
   }
 })

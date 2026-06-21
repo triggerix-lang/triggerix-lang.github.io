@@ -35,7 +35,15 @@ export interface BusinessActionSpec {
   prompt?: string
 }
 
-/** 7 个业务 action 的元数据（无具体业务实例，prompt 只给通用提示） */
+/**
+ * 12 个 action 的元数据：
+ *  - 6 个普通业务 action（update_nickname / set_gender / add_to_order /
+ *    remove_from_order / clear_orders / switch_tab）
+ *  - 1 个特殊 action（emit_event —— 由 useChatSession 注册并处理卸载，不进 businessHandlers）
+ *  - 5 个订单状态机 + 优惠券 action（submit_order / pay_order / cancel_order / apply_coupon / clear_coupon）
+ *
+ * prompt 只给通用提示（取值来源 / 校验规则 / 与 domain 工具的联动），无具体业务实例。
+ */
 const BUSINESS_ACTIONS: BusinessActionSpec[] = [
   {
     type: 'update_nickname',
@@ -120,6 +128,69 @@ const BUSINESS_ACTIONS: BusinessActionSpec[] = [
       }
     },
     prompt: '关闭/取消场景固定传 event="editor.cancelled"。'
+  },
+  // ============================================================
+  // 订单状态机 + 优惠券（5 个）
+  // ============================================================
+  {
+    type: 'submit_order',
+    label: '提交订单',
+    description: '把当前购物车提交为待支付订单。',
+    prompt:
+      '无参数。购物车为空时直接报错。提交成功后 cart 清空、coupon 自动清除。' +
+      '成功返回 data.order_id 可在后续 pay_order 里引用。'
+  },
+  {
+    type: 'pay_order',
+    label: '支付订单',
+    description: '支付一个 pending_payment 订单。',
+    params: {
+      order_id: {
+        type: 'string',
+        description:
+          '订单 id；省略时自动取最新一笔 pending_payment。仅在 user message 明确指定某笔订单时才传。'
+      },
+      method: {
+        type: 'string',
+        required: true,
+        description:
+          '支付方式；构造 radio/select 之前**必须先调** get_payment_methods() 拿合法 value/label',
+        enum: ['wechat', 'alipay', 'card']
+      }
+    },
+    prompt:
+      'method 必填，enum: wechat / alipay / card。' +
+      '构造支付方式选择卡前**必须先调** get_payment_methods() 拿合法 value/label 数组。' +
+      'order_id 可省略，省略时自动取最新一笔 pending_payment。'
+  },
+  {
+    type: 'cancel_order',
+    label: '取消订单',
+    description: '取消一个 pending_payment 订单。已支付/已取消的不能再次取消。',
+    params: {
+      order_id: { type: 'string', required: true, description: '订单 id' }
+    }
+  },
+  {
+    type: 'apply_coupon',
+    label: '应用优惠券',
+    description: '应用一张优惠券到当前购物车。',
+    params: {
+      coupon_id: {
+        type: 'string',
+        required: true,
+        description: '优惠券 id；构造选择表单前先调 get_coupons()'
+      }
+    },
+    prompt:
+      '构造优惠券选择表单前**必须先调** get_coupons() 拿合法 coupon_id。' +
+      '会校验购物车非空 + 满足 minSpend，不满足时报错，coupon 不会被应用。'
+  },
+  {
+    type: 'clear_coupon',
+    label: '清除优惠券',
+    description: '清除当前已应用的优惠券。',
+    prompt: '无参数。'
   }
 ]
 
@@ -147,10 +218,15 @@ export interface DomainDataSources {
    * key 不存在 → 返回 undefined；LLM 会收到 options: null。
    */
   options: (field: string) => ReadonlyArray<OptionItem> | undefined
+  /** 所有可用优惠券（id + label + minSpend + description） */
+  coupons: () => ReadonlyArray<OptionItem & { minSpend: number; description?: string }>
+  /** 合法支付方式列表（value + label） */
+  paymentMethods: () => ReadonlyArray<OptionItem>
 }
 
 /**
- * 把 DomainDataSources 包成 3 个 domain tool，统一进 defineAtomicTools。
+ * 把 DomainDataSources 包成 5 个 domain tool，统一进 defineAtomicTools。
+ * （get_options / get_menu / get_tabs / get_coupons / get_payment_methods）
  */
 function createDomainTools(src: DomainDataSources): ReadonlyArray<DomainTool> {
   return [
@@ -186,6 +262,22 @@ function createDomainTools(src: DomainDataSources): ReadonlyArray<DomainTool> {
       params: {},
       handler: () => src.tabs(),
       parallel: true
+    },
+    {
+      name: 'get_coupons',
+      description:
+        '取所有可用优惠券（id + label + minSpend + description）。构造优惠券选择表单前**必须先调**这个工具。',
+      params: {},
+      handler: () => src.coupons(),
+      parallel: true
+    },
+    {
+      name: 'get_payment_methods',
+      description:
+        '取合法支付方式列表（value + label）。构造支付方式选择卡（radio/select）前**必须先调**这个工具。',
+      params: {},
+      handler: () => src.paymentMethods(),
+      parallel: true
     }
   ]
 }
@@ -214,7 +306,7 @@ export interface AtomicToolsBundle {
   systemPrompt: string
   toolDefinitions: ReturnType<typeof defineAtomicTools>['toolDefinitions']
   builder: UIBuilder
-  /** 5 个 atomic + domain 工具的统一 executeCall 入口 */
+  /** 5 个 builder atomic + 5 个 domain 工具的统一 executeCall 入口（submit 不走这里） */
   executeCall: ReturnType<typeof defineAtomicTools>['executeCall']
 }
 

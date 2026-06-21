@@ -101,7 +101,8 @@ watch(
       <div v-if="visibleMessages.length === 0" class="ai-chat-empty">
         <p class="ai-chat-empty-title">你好，我是点餐助手</p>
         <p class="ai-chat-empty-hint">试试说：「我要点餐」「我要修改昵称」「我要修改性别」</p>
-        <p class="ai-chat-empty-hint">「我要取消订单」「我要支付」</p>
+        <p class="ai-chat-empty-hint">「看看有什么优惠券」「用满200减30券」「清除优惠券」</p>
+        <p class="ai-chat-empty-hint">「提交订单」「用微信支付」「用支付宝支付」「取消订单」</p>
       </div>
 
       <MessageBubble

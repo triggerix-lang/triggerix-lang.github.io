@@ -144,6 +144,7 @@ export function useChatSession(opts: UseChatSessionOptions) {
   /** emit_event 处理：用户点"取消"按钮 → runtime 派发 emit_event → unmount */
   const cancelHandler = () => {
     unmountUI()
+    opts.pushToast?.('已关闭', 'info')
   }
   runtime.registerAction('emit_event', async (params?: Record<string, unknown>) => {
     const raw = (params ?? {}).event
@@ -333,6 +334,10 @@ export function useChatSession(opts: UseChatSessionOptions) {
   async function runAtomicCall(call: ToolCall, msgId: number): Promise<ToolResult> {
     // submit 是关键路径：builder.submit() 返回 mountTarget，立即挂到消息气泡
     if (call.name === 'submit') return submitAndMount(msgId)
+
+    // clear 走 builder.clear() 只重置草稿，**不**卸载已挂载的 UI；
+    // 旧模板留在气泡里就成了"幽灵"。所以在派发之前主动卸载一次。
+    if (call.name === 'clear') unmountUI()
 
     // 其他 atomic + domain 工具全部走 executeCall 统一派发
     const r = await opts.executeCall(call.name, call.args ?? {})

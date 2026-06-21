@@ -11,7 +11,8 @@ import { ref, useTemplateRef } from 'vue'
 import { useFoodApp } from '../composables/useFoodApp'
 import { buildAtomicTools } from '../ai-app-shared/atomicTools'
 import { createBusinessHandlers, type ToastTone } from '../ai-app-shared/businessHandlers'
-import { useChatSession, type PropRefResolver } from '../composables/useChatSession'
+import { useChatSession } from '../composables/useChatSession'
+import { MENU_DATA, type MenuItem } from '../ai-app-shared/menuData'
 import AiChatPanel from './ai-app/components/AiChatPanel.vue'
 import PhoneFrame from './ai-app/components/PhoneFrame.vue'
 import type { PhoneTab } from './ai-app/components/PhoneTabbar.vue'
@@ -25,8 +26,34 @@ import Profile from './ai-app/business/Profile.vue'
 const foodApp = useFoodApp()
 const phoneTab = ref<PhoneTab>('menu')
 
-// 原子工具集（5 个 addComponent / addTrigger / ... + UIBuilder + systemPrompt）
-const { toolDefinitions, builder, systemPrompt } = buildAtomicTools()
+// 业务动态数据源（domain tool 的 handler 闭包捕获）
+// gender 选项固定，与 useFoodApp 的 Gender 类型一致
+const GENDER_OPTIONS = [
+  { value: 'male', label: '男' },
+  { value: 'female', label: '女' },
+  { value: 'other', label: '保密' }
+]
+const TAB_OPTIONS = [
+  { value: 'menu', label: '首页' },
+  { value: 'orders', label: '订单' },
+  { value: 'profile', label: '我的' }
+]
+
+// 原子工具集（5 个 addComponent / addTrigger / ... + 3 个 domain tool + UIBuilder + systemPrompt）
+const { toolDefinitions, builder, systemPrompt, executeCall } = buildAtomicTools({
+  menu: () =>
+    MENU_DATA.map((d: MenuItem) => ({
+      value: d.id,
+      label: d.name,
+      price: d.price,
+      category: d.category
+    })),
+  tabs: () => TAB_OPTIONS,
+  options: (field: string) => {
+    if (field === 'user.gender') return GENDER_OPTIONS
+    return undefined
+  }
+})
 
 // Toast 主机 + pushToast 桥接
 const toastRef = useTemplateRef<InstanceType<typeof ToastHost>>('toast')
@@ -48,19 +75,24 @@ const { messages, thinking, error, send } = useChatSession({
   tools: toolDefinitions,
   handlers,
   builder,
+  executeCall,
   getBubbleEl,
   modalSlot,
   pushToast,
   // 解析 AI 在 addComponent 的 props 里写的 `$ref:user.nickname` 之类字符串
   // → 挂载时替换成当前 app 状态（foodApp.nickname.value 等）
-  propRefResolver: ((path: string) => {
-    const [namespace, field] = path.split('.')
-    if (namespace === 'user') {
-      if (field === 'nickname') return foodApp.nickname.value
-      if (field === 'gender') return foodApp.gender.value
-    }
+  //
+  // 兼容多种 path 格式（LLM 输出不稳定）：
+  //   - "user.nickname" / "user.gender"        ← atomicTools prompt 推荐格式
+  //   - "nickname" / "gender"                  ← LLM 经常省略 user. 前缀
+  //   - "user.nickname.value" / "user.gender.value" ← LLM 看到 foodApp.xxx.value 误学
+  // 取 path 最后一段作为 field 即可
+  propRefResolver: (path: string) => {
+    const field = path.split('.').pop()
+    if (field === 'nickname') return foodApp.nickname.value
+    if (field === 'gender') return foodApp.gender.value
     return undefined
-  }) as PropRefResolver
+  }
 })
 
 // 移动端 FAB 抽屉

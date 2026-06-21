@@ -25,11 +25,14 @@ export default defineConfig({
   fmt: {
     singleQuote: true,
     semi: false,
-    trailingComma: 'none'
+    trailingComma: 'none',
+    // .claude/ 装 Claude Code 本地权限配置（settings.local.json），不参与项目 lint/fmt
+    ignorePatterns: ['.claude/**']
   },
   lint: {
     jsPlugins: [{ name: 'vite-plus', specifier: 'vite-plus/oxlint-plugin' }],
     rules: { 'vite-plus/prefer-vite-plus-imports': 'error' },
-    options: { typeAware: true, typeCheck: true }
+    options: { typeAware: true, typeCheck: true },
+    ignorePatterns: ['.claude/**', 'dist/**']
   }
 })

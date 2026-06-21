@@ -40,6 +40,7 @@ export function setup(editor: War3Editor) {
       id: 'button_click',
       label: '按钮点击',
       template: '${button}被点击',
+      sourceSlot: 'button',
       slots: {
         button: { label: '按钮', tools: ['button_picker'] }
       }

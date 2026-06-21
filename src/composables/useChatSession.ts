@@ -16,11 +16,11 @@
 
 import destr from 'destr'
 import { ref, type Ref } from 'vue'
-import { createRuntime } from '@triggerix/runtime'
+import { createRuntime, type RefResolver } from '@triggerix/runtime'
 import { mountNative, components as nativeComponents } from 'triggerix-ai-component-native'
 import { button, checkbox, input, select, uploadButton } from 'triggerix-ai-component-native'
 import type { ComponentDef } from '@triggerix-ai/component'
-import type { BuiltUI, UIBuilder } from '@triggerix-ai/builder'
+import type { BuiltUI, ExecuteCallResult, UIBuilder } from '@triggerix-ai/builder'
 import type { ToolDefinition } from '@triggerix-ai/fn'
 import { createParser } from 'eventsource-parser'
 
@@ -50,27 +50,6 @@ export interface ToolCall {
   args: Record<string, unknown>
 }
 
-/**
- * 把 props 树里所有 `$ref:xxx` 字符串替换成 resolver 返回的真实值（递归处理对象/数组）。
- * 例：`{ value: "$ref:user.nickname" }` → `{ value: "游客" }`
- *     `{ options: [{ value: "$ref:user.x" }] }` → 同样递归
- */
-function resolvePropRefs(value: unknown, resolver: PropRefResolver): unknown {
-  if (typeof value === 'string') {
-    if (value.startsWith('$ref:')) return resolver(value.slice(5))
-    return value
-  }
-  if (Array.isArray(value)) return value.map((v) => resolvePropRefs(v, resolver))
-  if (value && typeof value === 'object') {
-    const out: Record<string, unknown> = {}
-    for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
-      out[k] = resolvePropRefs(v, resolver)
-    }
-    return out
-  }
-  return value
-}
-
 export interface ToolResult {
   ok: boolean
   message?: string
@@ -96,16 +75,23 @@ export type ToolHandler<TArgs = any> = (args: TArgs, ctx: ToolCtx) => Promise<To
 // useChatSession
 // ============================================================
 
-/** 解析 component props 里的 `$ref:user.nickname` 等字符串 → 当前 app 状态的实际值 */
-export type PropRefResolver = (path: string) => unknown
-
 export interface UseChatSessionOptions {
-  /** LLM 的工具定义（atomic 工具：addComponent / addTrigger / ...） */
+  /** LLM 的工具定义（atomic + domain 工具 schema） */
   tools: ReadonlyArray<ToolDefinition>
   /** 业务 handler 池（action 名 → handler） */
   handlers: Map<string, ToolHandler>
-  /** UIBuilder 实例（AI 调 atomic 工具时 apply 到它；submit 时取 mountTarget） */
+  /** UIBuilder 实例（submit 时取 mountTarget） */
   builder: UIBuilder
+  /**
+   * atomic + domain 工具的统一 executeCall 入口（来自 buildAtomicTools()）。
+   * 所有非 submit 工具调用都走这里：
+   *  - atomic 工具 → 修改 builder
+   *  - domain 工具 → 调 handler，data 字段回喂给 LLM
+   */
+  executeCall: (
+    name: string,
+    args: Record<string, unknown>
+  ) => Promise<ExecuteCallResult> | ExecuteCallResult
   /** 找到 assistant 消息气泡的 DOM 元素（用于挂 BuiltUI） */
   getBubbleEl?: (msgId: number) => HTMLElement | null
   /** 兜底挂载点（找不到 bubble 时用） */
@@ -113,11 +99,17 @@ export interface UseChatSessionOptions {
   /** 业务侧弹 toast 的方法 */
   pushToast: (message: string, tone?: ToastTone) => void
   /**
-   * 解析 props 里的 `$ref:xxx` 字符串（如 `$ref:user.nickname` → 当前用户昵称）。
-   * 挂载前 useChatSession 会调这个，替换所有 `$ref:xxx` 为真实值。
-   * 不传则 props 里的 `$ref:xxx` 保持原样不替换。
+   * 解析 component props 里的 `"$ref:user.nickname"` 字符串。
+   * Forwarded directly to `mountNative` as `refResolver`, which delegates to
+   * the runtime's `resolveRefsDeep` after normalising the string form to
+   * `{ $ref: 'user.nickname' }`. Without this, component props containing
+   * `$ref:...` strings are left as-is.
+   *
+   * Distinct from the runtime's own `refResolver` (which resolves names of
+   * mounted DOM elements in action params); this one points at host-app
+   * state (e.g. `user.nickname` → `foodApp.nickname.value`).
    */
-  propRefResolver?: PropRefResolver
+  propRefResolver?: RefResolver
   /** LLM API 端点，默认 `/api/ai`（Netlify Function） */
   endpoint?: string
   /** 多轮 tool calling 最大轮数（防无限循环），默认 5 */
@@ -154,7 +146,8 @@ export function useChatSession(opts: UseChatSessionOptions) {
     unmountUI()
   }
   runtime.registerAction('emit_event', async (params?: Record<string, unknown>) => {
-    const event = asString((params ?? {}).event)
+    const raw = (params ?? {}).event
+    const event = typeof raw === 'string' ? raw : ''
     if (event === 'editor.cancelled') {
       cancelHandler()
     }
@@ -210,23 +203,18 @@ export function useChatSession(opts: UseChatSessionOptions) {
     slot.appendChild(wrapper)
     currentWrapper = wrapper
 
-    // 挂载前 resolve 组件 props 里的 `$ref:xxx` 字符串（如 `$ref:user.nickname` → '游客'）
-    // 这样 AI 在 addComponent 的 props 里直接传 $ref:user.xxx 就能拿到当前 app 状态
-    const resolver = opts.propRefResolver
-    const resolvedComponents = resolver
-      ? built.components.map((c) => ({
-          ...c,
-          props: resolvePropRefs(c.props ?? {}, resolver) as Record<string, unknown>
-        }))
-      : built.components
-
+    // mountNative normalises any "$ref:xxx" strings inside component props
+    // to the runtime's { $ref: 'xxx' } object form and then resolves them
+    // against the supplied refResolver (typically reading from host-app
+    // state such as foodApp.nickname.value).
     currentScope = mountNative(
-      { components: resolvedComponents, triggers: built.triggers as never },
+      { components: built.components, triggers: built.triggers as never },
       wrapper,
       nativeComponents as unknown as ReadonlyArray<ComponentDef<HTMLElement>>,
       (eventId, source, payload) => {
         void runtime.emit(eventId, source, payload)
-      }
+      },
+      opts.propRefResolver
     )
 
     // 给 wrapper 内的 native 元素加 BEM 类（统一外部样式）
@@ -259,18 +247,18 @@ export function useChatSession(opts: UseChatSessionOptions) {
       }
     }
 
-    // a11y：给 form 元素加 id/name、给 label 加 for 关联
-    const formEls = wrapper.querySelectorAll<HTMLElement>('input, textarea, select')
-    const ids: string[] = []
-    formEls.forEach((el, i) => {
-      const id = `ai-tpl-${msgId}-${i}`
-      el.id = id
-      el.setAttribute('name', `ai-tpl-${msgId}-${i}`)
-      ids.push(id)
-    })
-    wrapper.querySelectorAll<HTMLLabelElement>('label').forEach((label, i) => {
-      if (ids[i]) label.setAttribute('for', ids[i])
-    })
+    // a11y：给独立的表单控件（input / textarea / select）补 name 属性。
+    // 跳过 radio group 内部的 input——它们的 name 由 radio 组件自己设置成共享值，
+    // 一旦被这里覆盖就会破坏单选分组（每个变成独立 radio）。
+    // input 已经有 name（如 radio / select 组件自己设的）也不动。
+    wrapper
+      .querySelectorAll<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>(
+        'input, textarea, select'
+      )
+      .forEach((el, i) => {
+        if (el.closest('[data-component-type="radio"]')) return
+        if (!el.name) el.name = `ai-tpl-${msgId}-${i}`
+      })
 
     for (const t of built.triggers) {
       try {
@@ -299,79 +287,58 @@ export function useChatSession(opts: UseChatSessionOptions) {
   }
 
   // ============== 工具调用 ==============
-  /** 工具参数里任意 unknown → string（安全：null/undefined/object 都不爆） */
-  function asString(v: unknown): string {
-    if (typeof v === 'string') return v
-    if (v == null) return ''
-    if (typeof v === 'number' || typeof v === 'boolean') return String(v)
-    return JSON.stringify(v)
+  /**
+   * 递归把 `{ item: [...] }` 这种 XML-RPC / struct-wrapped 数组解包成裸数组。
+   *
+   * 部分上游 LLM（例如当前用的 MiniMax-M3）会按 XML-RPC 协议把 tool call 里的
+   * 数组字段（如 select / radio 的 `options`）序列化成 `{ item: [...] }` 对象。
+   * 我们的组件 schema 声明的是 `array`，渲染层拿到 `object` 会直接 `Array.isArray(...)` 失败
+   * 退化成空数组 → 页面上 select 是空的。
+   *
+   * 只解包符合"恰好是 `{ item: [...] }`"形态的 object（避免误伤真正的 option 对象等）；
+   * 已经为数组的值原样返回；其余值递归处理（数组/对象都遍历）。
+   */
+  function unwrapStructArrays<T>(v: T): T {
+    if (Array.isArray(v)) {
+      return v.map((item) => unwrapStructArrays(item)) as unknown as T
+    }
+    if (v !== null && typeof v === 'object') {
+      const obj = v as Record<string, unknown>
+      const keys = Object.keys(obj)
+      if (keys.length === 1 && keys[0] === 'item' && Array.isArray(obj.item)) {
+        return unwrapStructArrays(obj.item) as unknown as T
+      }
+      const out: Record<string, unknown> = {}
+      for (const k of keys) out[k] = unwrapStructArrays(obj[k])
+      return out as unknown as T
+    }
+    return v
   }
 
   /**
-   * 5 个 atomic 工具在 builder 上的入口（直接在 useChatSession 里写，
-   * 避免把 executeCall 桥接接口漏出去给 caller 增加复杂度）。
+   * submit + mount 的统一入口。任何"草稿已完成，挂到指定 assistant 气泡"的场景都走这里
+   * （正常 submit 工具调用、AI 忘 submit 的兜底都共用）。
+   *
+   * submit 不走 executeCall——它的语义是"返回 mountTarget 并 mount"，
+   * executeCall 只能返回 ExecuteCallResult，没有 mount 副作用。
    */
-  function applyAtomicCall(
-    name: string,
-    args: Record<string, unknown>
-  ): { ok: true } | { ok: false; errors: string[] } {
-    switch (name) {
-      case 'addComponent': {
-        const t = asString(args.type)
-        const n = asString(args.name)
-        const p = (args.props && typeof args.props === 'object' ? args.props : undefined) as
-          | Record<string, unknown>
-          | undefined
-        return opts.builder.addComponent(t, n, p)
-      }
-      case 'updateComponentProp': {
-        const n = asString(args.name)
-        const pn = asString(args.propName)
-        // value 是 JSON 字符串（builder schema 限 type:string），parse 回来给 builder
-        let parsed: unknown = args.value
-        if (typeof args.value === 'string') {
-          try {
-            parsed = JSON.parse(args.value)
-          } catch {
-            parsed = args.value
-          }
-        }
-        return opts.builder.updateComponentProp(n, pn, parsed)
-      }
-      case 'addTrigger': {
-        const et = asString(args.eventType)
-        const es = asString(args.eventSource)
-        const at = asString(args.actionType)
-        const ap = (
-          args.actionParams && typeof args.actionParams === 'object' ? args.actionParams : {}
-        ) as Record<string, unknown>
-        return opts.builder.addTrigger(et, es, at, ap)
-      }
-      case 'clear':
-        return opts.builder.clear()
-      case 'submit': {
-        const r = opts.builder.submit()
-        return r.ok ? { ok: true } : { ok: false, errors: r.errors }
-      }
-      default:
-        return { ok: false, errors: [`Unknown atomic tool: "${name}"`] }
-    }
+  function submitAndMount(msgId: number): ToolResult {
+    const sr = opts.builder.submit()
+    if (!sr.ok) return { ok: false, message: sr.errors.join('; ') }
+    return mountUI(sr.mountTarget, msgId)
+      ? { ok: true, message: 'UI mounted' }
+      : { ok: false, message: 'Failed to mount UI (no container)' }
   }
 
   async function runAtomicCall(call: ToolCall, msgId: number): Promise<ToolResult> {
     // submit 是关键路径：builder.submit() 返回 mountTarget，立即挂到消息气泡
-    if (call.name === 'submit') {
-      const sr = opts.builder.submit()
-      if (!sr.ok) return { ok: false, message: sr.errors.join('; ') }
-      const ok = mountUI(sr.mountTarget, msgId)
-      return ok
-        ? { ok: true, message: 'UI mounted' }
-        : { ok: false, message: 'Failed to mount UI (no container)' }
-    }
+    if (call.name === 'submit') return submitAndMount(msgId)
 
-    const r = applyAtomicCall(call.name, call.args ?? {})
+    // 其他 atomic + domain 工具全部走 executeCall 统一派发
+    const r = await opts.executeCall(call.name, call.args ?? {})
     if (!r.ok) return { ok: false, message: r.errors.join('; ') }
-    return { ok: true }
+    // domain 工具的 data 字段会作为 tool message 的内容回喂给 LLM 下一轮
+    return { ok: true, data: r.data }
   }
 
   // ============== SSE 解析 ==============
@@ -460,7 +427,7 @@ export function useChatSession(opts: UseChatSessionOptions) {
       toolCalls.push({
         id: acc.id ?? `call_${Math.random().toString(36).slice(2)}`,
         name: acc.name,
-        args
+        args: unwrapStructArrays(args) as Record<string, unknown>
       })
     }
 
@@ -479,45 +446,71 @@ export function useChatSession(opts: UseChatSessionOptions) {
     return messages.value[idx]!
   }
 
+  /**
+   * 单轮 stream + 处理 tool calls。返回 true 表示本轮触发了 submit（外层应停止）。
+   */
+  async function runOneRound(): Promise<boolean> {
+    const aiMsg = pushMsg({ role: 'assistant', content: '', streaming: true })
+
+    try {
+      const { content, toolCalls } = await streamOnce()
+      aiMsg.content = content
+      aiMsg.streaming = false
+
+      if (toolCalls.length === 0) return false
+
+      aiMsg.tool_calls = toolCalls
+
+      // 处理每一个工具调用
+      // submit 工具调用是同步的：handler 内部 mount 后立即完成
+      for (const call of toolCalls) {
+        const result = await runAtomicCall(call, aiMsg.id)
+        pushMsg({
+          role: 'tool',
+          content: JSON.stringify(result),
+          tool_call_id: call.id,
+          name: call.name
+        })
+        // submit 成功后立即跳出整个 chat loop：AI 不需要再发一个"好的"气泡，
+        // round 1 的 aiMsg.content 已经是 AI 的唯一一句话回复
+        if (call.name === 'submit' && result.ok) return true
+      }
+      return false
+    } catch (err) {
+      aiMsg.streaming = false
+      const msg = err instanceof Error ? err.message : String(err)
+      aiMsg.content = aiMsg.content ? `${aiMsg.content}\n\n[错误: ${msg}]` : `[错误: ${msg}]`
+      throw err
+    }
+  }
+
+  /** 多轮 driver：任一轮 submit 成功则提前终止。 */
+  async function runRounds(): Promise<void> {
+    const maxRounds = opts.maxRounds ?? 5
+    for (let i = 0; i < maxRounds; i++) {
+      if (await runOneRound()) return
+    }
+  }
+
+  /**
+   * 兜底：AI 调了很多 addComponent / addTrigger 但忘了调 submit（或被 maxRounds 卡住），
+   * 自动把已构建的草稿挂到最后一个 assistant 气泡。
+   */
+  function autoMountDraft(): void {
+    if (opts.builder.components.length === 0) return
+    const lastAssistant = [...messages.value].reverse().find((m) => m.role === 'assistant')
+    if (!lastAssistant) return
+    submitAndMount(lastAssistant.id)
+  }
+
   async function send(text: string): Promise<void> {
     pushMsg({ role: 'user', content: text })
     thinking.value = true
     error.value = null
 
-    const maxRounds = opts.maxRounds ?? 5
-    let round = 0
-
     try {
-      while (round++ < maxRounds) {
-        const aiMsg = pushMsg({ role: 'assistant', content: '', streaming: true })
-
-        try {
-          const { content, toolCalls } = await streamOnce()
-          aiMsg.content = content
-          aiMsg.streaming = false
-
-          if (toolCalls.length === 0) break
-
-          aiMsg.tool_calls = toolCalls
-
-          // 处理每一个工具调用
-          // submit 工具调用是同步的：handler 内部 mount 后立即完成
-          for (const call of toolCalls) {
-            const result = await runAtomicCall(call, aiMsg.id)
-            pushMsg({
-              role: 'tool',
-              content: JSON.stringify(result),
-              tool_call_id: call.id,
-              name: call.name
-            })
-          }
-        } catch (err) {
-          aiMsg.streaming = false
-          const msg = err instanceof Error ? err.message : String(err)
-          aiMsg.content = aiMsg.content ? `${aiMsg.content}\n\n[错误: ${msg}]` : `[错误: ${msg}]`
-          throw err
-        }
-      }
+      await runRounds()
+      autoMountDraft()
     } catch (err) {
       error.value = err instanceof Error ? err.message : String(err)
     } finally {

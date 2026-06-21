@@ -1,10 +1,14 @@
 <script setup lang="ts">
 import { useLocalStorage } from '@vueuse/core'
-import { onBeforeUnmount, useTemplateRef, watch } from 'vue'
+import { defineAsyncComponent, onBeforeUnmount, useTemplateRef, watch } from 'vue'
 import { RouterLink, RouterView, useRoute } from 'vue-router'
-import CodeViewer from './components/code-viewer/CodeViewer.vue'
 import NavDropdown from './components/NavDropdown.vue'
 import { useCodePanel } from './composables/useCodePanel'
+
+// Monaco is ~2MB of WebAssembly + JS. Defer the import until the viewer is
+// actually mounted (i.e. the right-hand drawer is open on a demo route) so
+// the homepage, ai-app and any non-demo navigation don't pay the cost.
+const CodeViewer = defineAsyncComponent(() => import('./components/code-viewer/CodeViewer.vue'))
 
 const demos = [
   { to: '/demo/button-click', label: '按钮点击' },
@@ -119,9 +123,11 @@ onBeforeUnmount(() => {
         <RouterView />
       </main>
 
-      <!-- 持久化底部面板：v-show 保证 DOM 不销毁，monaco-editor 实例长存 -->
+      <!-- 底部代码面板：v-if 让 Monaco 仅在用户打开面板时才加载，
+           避免首页 / ai-app 等无关路由背上 ~2MB 的 monaco 包。
+           关闭面板后编辑器实例会销毁，再次打开会重新初始化。 -->
       <div
-        v-show="visible"
+        v-if="visible"
         class="shrink-0 border-t border-#2a2a2a flex flex-col"
         :style="{ height: `${drawerHeight}px` }"
       >

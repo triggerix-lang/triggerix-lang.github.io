@@ -40,6 +40,7 @@ export function setup(editor: War3Editor) {
       id: 'carousel_switch',
       label: '轮播组件切换',
       template: '${carousel}切换',
+      sourceSlot: 'carousel',
       slots: {
         carousel: { label: '轮播', tools: ['carousel_picker'] }
       }

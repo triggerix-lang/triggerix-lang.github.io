@@ -88,13 +88,13 @@ const currentIndex = ref(0)
 
 useSyncCodePanel(codeFiles, triggersJson)
 
-function onTrigger(eventType: string, payload: Record<string, unknown>) {
+function onTrigger(eventType: string, source: string, payload?: Record<string, unknown>) {
   // PlayCarousel emits "carousel_change", but the registered event is "carousel_switch".
   if (eventType === 'carousel_change') {
-    emit('carousel_switch', { ...payload, carousel: payload.source })
+    emit('carousel_switch', source, { ...payload, carousel: source })
     return
   }
-  emit(eventType, payload)
+  emit(eventType, source, payload)
 }
 </script>
 

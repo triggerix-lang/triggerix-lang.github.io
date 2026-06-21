@@ -1,4 +1,4 @@
-import { defineAtomicTools, UIBuilder } from '@triggerix-ai/builder'
+import { defineAtomicTools, UIBuilder, type DomainTool } from '@triggerix-ai/builder'
 import type { ComponentDef } from '@triggerix-ai/component'
 import {
   components as nativeComponents,
@@ -8,7 +8,6 @@ import {
   select,
   uploadButton
 } from 'triggerix-ai-component-native'
-import { MENU_DATA } from './menuData'
 
 // ============================================================
 // 业务 action 元数据（每个 handler 自带 type / label / description / params / prompt）
@@ -36,7 +35,7 @@ export interface BusinessActionSpec {
   prompt?: string
 }
 
-/** 7 个业务 action 的元数据 */
+/** 7 个业务 action 的元数据（无具体业务实例，prompt 只给通用提示） */
 const BUSINESS_ACTIONS: BusinessActionSpec[] = [
   {
     type: 'update_nickname',
@@ -44,7 +43,8 @@ const BUSINESS_ACTIONS: BusinessActionSpec[] = [
     description: '把用户的昵称改成 params.nickname 字符串。',
     params: {
       nickname: { type: 'string', required: true, description: '新的昵称（非空）' }
-    }
+    },
+    prompt: 'params.nickname 必填且非空字符串。'
   },
   {
     type: 'set_gender',
@@ -54,32 +54,46 @@ const BUSINESS_ACTIONS: BusinessActionSpec[] = [
       gender: {
         type: 'string',
         required: true,
-        enum: ['male', 'female', 'other'],
-        description: 'male=男，female=女，other=保密'
+        description:
+          '性别取值；构造表单前先用 get_options(<field>) 拉取合法 value/label 列表，gender 取对应选项的 value'
       }
-    }
+    },
+    prompt:
+      '构造表单前**必须**先调 `get_options("<field>")` 拿到合法 value/label 列表，' +
+      'radio/select 的 options 直接用返回的数组。params.gender 取对应选项的 value 字段。'
   },
   {
     type: 'add_to_order',
     label: '加入订单',
     description: '把一道菜加入当前订单（已有则累加数量）。',
     params: {
-      dish_id: { type: 'string', required: true, description: '菜品 ID（见下方"报菜名菜单"）' },
+      dish_id: {
+        type: 'string',
+        required: true,
+        description: '菜品 ID；不确定时先用 get_menu() 查'
+      },
       qty: { type: 'number', description: '数量，默认 1' }
-    }
+    },
+    prompt: '不确定 dish_id 时**先调** `get_menu()` 查当前菜单，不要凭空编造。'
   },
   {
     type: 'remove_from_order',
     label: '从订单移除',
     description: '从订单中移除某道菜（按 dish_id 整条删除）。',
     params: {
-      dish_id: { type: 'string', required: true, description: '菜品 ID（见下方"报菜名菜单"）' }
-    }
+      dish_id: {
+        type: 'string',
+        required: true,
+        description: '菜品 ID；不确定时先用 get_menu() 查'
+      }
+    },
+    prompt: '不确定 dish_id 时**先调** `get_menu()` 查当前菜单。'
   },
   {
     type: 'clear_orders',
     label: '清空订单',
-    description: '清空整个订单（一键取消所有菜品）。'
+    description: '清空整个订单（一键取消所有菜品）。',
+    prompt: '无参数。一键清空整个订单。'
   },
   {
     type: 'switch_tab',
@@ -89,10 +103,10 @@ const BUSINESS_ACTIONS: BusinessActionSpec[] = [
       tab: {
         type: 'string',
         required: true,
-        enum: ['menu', 'orders', 'profile'],
-        description: 'menu=菜单，orders=订单，profile=我的'
+        description: 'tab id（合法值由 get_tabs() 返回）'
       }
-    }
+    },
+    prompt: 'params.tab 必填，可选值由 `get_tabs()` 工具返回。'
   },
   {
     type: 'emit_event',
@@ -104,9 +118,77 @@ const BUSINESS_ACTIONS: BusinessActionSpec[] = [
         required: true,
         description: '事件名，关闭场景固定传 "editor.cancelled"'
       }
-    }
+    },
+    prompt: '关闭/取消场景固定传 event="editor.cancelled"。'
   }
 ]
+
+// ============================================================
+// Domain 工具（业务动态数据源，由调用方在 buildAtomicTools 里注入）
+// ============================================================
+
+/** 给 LLM 用的下拉选项形态（与 radio / select 组件 options 字段兼容） */
+export interface OptionItem {
+  value: string
+  label: string
+}
+
+/**
+ * Domain 工具集合的运行时数据源。
+ * 调用方在 buildAtomicTools 时注入，保证 builder 库不绑死任何业务数据。
+ */
+export interface DomainDataSources {
+  /** 当前菜单（dish_id 列表 + 名称 + 价格等） */
+  menu: () => ReadonlyArray<OptionItem & { price?: number; category?: string }>
+  /** 当前 tab 列表 */
+  tabs: () => ReadonlyArray<OptionItem>
+  /**
+   * 按"字段 key"（如 "user.gender"）提供的下拉选项。
+   * key 不存在 → 返回 undefined；LLM 会收到 options: null。
+   */
+  options: (field: string) => ReadonlyArray<OptionItem> | undefined
+}
+
+/**
+ * 把 DomainDataSources 包成 3 个 domain tool，统一进 defineAtomicTools。
+ */
+function createDomainTools(src: DomainDataSources): ReadonlyArray<DomainTool> {
+  return [
+    {
+      name: 'get_options',
+      description:
+        '取指定字段的合法 value/label 列表。radio / select 组件需要 options 时**必须先调**这个工具。',
+      params: {
+        field: {
+          type: 'string',
+          required: true,
+          description: '字段 key（如 "user.gender"），与业务 action 的字段名一致'
+        }
+      },
+      handler: (args) => {
+        const field = typeof args.field === 'string' ? args.field : ''
+        const opts = src.options(field)
+        return opts ?? null
+      },
+      parallel: true
+    },
+    {
+      name: 'get_menu',
+      description:
+        '取当前菜单菜品列表（id + 名称 + 价格 + 分类）。add_to_order / remove_from_order 不确定 dish_id 时**必须先调**这个工具。',
+      params: {},
+      handler: () => src.menu()
+    },
+    {
+      name: 'get_tabs',
+      description:
+        '取当前 app 的 tab 列表（id + 显示名）。switch_tab 不确定 tab 取值时**必须先调**这个工具。',
+      params: {},
+      handler: () => src.tabs(),
+      parallel: true
+    }
+  ]
+}
 
 // ============================================================
 // Native 组件事件绑定（事件是 schema/契约，需要在 buildAtomicTools() 调之前绑好，
@@ -132,20 +214,18 @@ export interface AtomicToolsBundle {
   systemPrompt: string
   toolDefinitions: ReturnType<typeof defineAtomicTools>['toolDefinitions']
   builder: UIBuilder
+  /** 5 个 atomic + domain 工具的统一 executeCall 入口 */
+  executeCall: ReturnType<typeof defineAtomicTools>['executeCall']
 }
-
-/** 报菜名菜单的人类可读字符串 */
-const MENU_FLAT_STRING = MENU_DATA.map(
-  (d) => `- ${d.id}: ${d.name} (¥${d.price}, 分类: ${d.category})`
-).join('\n')
 
 /**
  * 构造 demo 用的 atomic tool bundle：
  *  - 收集 native 组件 + 业务 action 的元数据
+ *  - 业务动态数据源（菜单 / tabs / options）包成 domain tools
  *  - 拼成 system prompt 喂给 builder
- *  - 5 个 atomic tool schema + UIBuilder 由 builder 提供
+ *  - atomic + domain tool schema + UIBuilder 由 builder 提供
  */
-export function buildAtomicTools(): AtomicToolsBundle {
+export function buildAtomicTools(src: DomainDataSources): AtomicToolsBundle {
   ensureNativeEventsBound()
   const builder = new UIBuilder()
 
@@ -153,19 +233,21 @@ export function buildAtomicTools(): AtomicToolsBundle {
     (c) => c.type
   )
   const actionTypes = BUSINESS_ACTIONS.map((a) => a.type)
+  const domainTools = createDomainTools(src)
 
   const appendix = renderAppendix(
     nativeComponents as ReadonlyArray<ComponentDef<HTMLElement>>,
     BUSINESS_ACTIONS
   )
 
-  const { systemPrompt, toolDefinitions } = defineAtomicTools(builder, {
+  const { systemPrompt, toolDefinitions, executeCall } = defineAtomicTools(builder, {
     componentTypes,
     actionTypes,
+    domainTools,
     systemPromptAppendix: appendix
   })
 
-  return { systemPrompt, toolDefinitions, builder }
+  return { systemPrompt, toolDefinitions, builder, executeCall }
 }
 
 // ============================================================
@@ -177,14 +259,6 @@ function renderAppendix(
   actions: BusinessActionSpec[]
 ): string {
   const lines: string[] = []
-
-  lines.push('## 当前 app 业务上下文', '')
-  lines.push('你运行在一个手机点餐 app 里，三个 tab：', '')
-  lines.push('- menu（首页菜单）：展示菜品', '')
-  lines.push('- orders（订单）：展示用户当前已点的菜', '')
-  lines.push('- profile（我的）：展示昵称、性别', '')
-  lines.push('', '**报菜名菜单**（dish_id 取值）：', '')
-  lines.push(MENU_FLAT_STRING, '')
 
   lines.push('## 可用组件', '')
   for (const c of components) {
@@ -223,29 +297,28 @@ function renderAppendix(
     }
   }
 
-  lines.push('## props 用 `$ref` 引用当前用户数据', '')
+  lines.push('## props 用 `$ref` 引用运行时值', '')
   lines.push(
-    '在 `addComponent` 的 props 里，`value` 字段可以用 `"$ref:user.<field>"` 引用当前 app 状态，' +
-      '挂载时前端会自动替换成真实值。',
+    '在 `addComponent` 或 `updateComponentProp` 的 props / value 里，可以用字符串 **"$ref:<source>.<field>"** 引用运行时状态。',
+    '挂载时前端会自动解析成真实值再传给组件 create()。',
+    '',
+    '两种典型用法：',
+    '',
+    '1. **设置组件初始值** —— 构造表单时，凡是有 `value` 字段的组件（input / radio / select ...），' +
+      '都应当用 `"$ref:user.<field>"` 引用当前状态，让用户打开表单就看到自己当前的数据，而不是空白。',
+    '2. **trigger 引用同草稿内的组件值** —— `addTrigger` 的 `actionParams` 里，用 `"$ref:<componentName>.<path>"** ' +
+      '指向本草稿内其他已添加组件的值（如某 input 的当前 value）。',
+    '',
+    '通用语法：',
+    '',
+    '```',
+    'value: "$ref:user.<field>"         // 当前用户态字段（具体可用字段由调用方在附录说明）',
+    'value: "$ref:<componentName>.<path>" // 同草稿内另一个已添加组件的值（如 "$ref:nickInput.value"）',
+    '```',
+    '',
+    '$ref 是字面字符串协议，不参与 JSON.parse。',
     ''
   )
-  lines.push('例：', '')
-  lines.push('```', '')
-  lines.push('addComponent({')
-  lines.push('  type: "input",')
-  lines.push('  name: "nick",')
-  lines.push('  props: { value: "$ref:user.nickname", placeholder: "新昵称" }')
-  lines.push('})')
-  lines.push('')
-  lines.push('addComponent({')
-  lines.push('  type: "radio",')
-  lines.push('  name: "gen",')
-  lines.push('  props: { options: ["male", "female", "other"], value: "$ref:user.gender" }')
-  lines.push('})')
-  lines.push('```', '')
-  lines.push('当前支持的 source：', '')
-  lines.push('- `user.nickname` → 当前用户昵称')
-  lines.push('- `user.gender` → 当前用户性别（male / female / other）', '')
 
   return lines.join('\n')
 }

@@ -1,4 +1,4 @@
-import type { ActionHandler } from '@triggerix/runtime'
+import type { ActionHandler, TriggerixRuntime } from '@triggerix/runtime'
 import type { War3Editor, War3EditorState } from 'triggerix-editor-preset-war3'
 import { createRuntime } from '@triggerix/runtime'
 import { useEditor } from 'triggerix-editor-vue'
@@ -34,24 +34,16 @@ export function useDemoRuntime(options: DemoRuntimeOptions) {
   // 1. Create runtime
   const runtime = createRuntime()
 
-  // 2. Create one War3Editor per trigger; apply shared setup and per-trigger initial state.
+  // 2. Create one War3Editor per trigger; apply shared setup and per-trigger
+  //    initial state. Delegate subscribe / dispose / provide entirely to
+  //    useEditor by passing in our own shallowRef so the consumer can keep a
+  //    stable reference to the same reactive state.
   const triggers: InternalTrigger[] = options.triggers.map((def) => {
     const editor = createWar3Editor()
     options.setup(editor)
-    // Use `useEditor` for its provide/dispose side-effects, but ignore its
-    // `state` ref — that ref only calls `triggerRef` without reassigning
-    // `.value`, so it always exposes the same object reference and breaks
-    // prop-based reactivity in child components.
-    const { toTrigger } = useEditor(editor)
 
-    // Maintain our own shallowRef whose `.value` is reassigned to the latest
-    // state object on every mutation. The state manager performs immutable
-    // updates, so each `getState()` call returns a fresh reference, which
-    // correctly invalidates downstream `props.state` consumers.
     const state = shallowRef<War3EditorState>(editor.getState())
-    editor.onChange(() => {
-      state.value = editor.getState()
-    })
+    const { toTrigger } = useEditor(editor, { state })
 
     // Apply initial state immediately (synchronously) so the first
     // computed/watch evaluation already sees the populated trigger.
@@ -80,7 +72,7 @@ export function useDemoRuntime(options: DemoRuntimeOptions) {
 
   // 4. Reactive triggers JSON used by the JsonDrawer.
   //    Touch each `state.value` so the computed re-runs whenever any editor
-  // state changes (state is a shallowRef + triggerRef internally).
+  //    state changes (state is a shallowRef + triggerRef internally).
   const triggersJson = computed(() => {
     return triggers
       .map((t) => {
@@ -91,6 +83,9 @@ export function useDemoRuntime(options: DemoRuntimeOptions) {
   })
 
   // 5. Sync all triggers into runtime by replacing the trigger set.
+  //    No injectSourceCondition workaround needed — the war3 serializer now
+  //    populates event.source from the event def's sourceSlot field, so the
+  //    runtime's source-matching filter works out of the box.
   function syncTriggers() {
     for (const trigger of runtime.listTriggers()) {
       runtime.removeTrigger(trigger.id)
@@ -98,76 +93,32 @@ export function useDemoRuntime(options: DemoRuntimeOptions) {
     for (const t of triggers) {
       const trigger = t.toTrigger(t.id) as Record<string, unknown> | null | undefined
       if (trigger) {
-        // The runtime only matches by event type — it doesn't filter by
-        // event.payload.  We inject conditions so that triggers are only triggered
-        // when the payload's `source` field matches the selected component id.
-        injectSourceCondition(trigger)
         runtime.addTrigger(trigger as unknown as Parameters<typeof runtime.addTrigger>[0])
       }
     }
   }
 
-  /**
-   * Convert the first string-valued event payload field into a runtime
-   * condition that checks `payload.source === value`.  This bridges the gap
-   * between the editor's event payload and the playground's payload shape.
-   *
-   * Mutates `trigger.conditions` (a flat `ConditionItem[]`) by appending the
-   * source condition. Multiple events may carry payload — we inject one
-   * condition per event so each is bound to its own source value.
-   */
-  function injectSourceCondition(trigger: Record<string, unknown>) {
-    const events =
-      (trigger.events as Array<{ payload?: Record<string, unknown> }> | undefined) ?? []
-    const newConditions: unknown[] = []
-
-    for (const event of events) {
-      const payload = event?.payload
-      if (!payload) continue
-      const sourceValue = Object.values(payload).find((v) => typeof v === 'string')
-      if (sourceValue === undefined) continue
-
-      newConditions.push({
-        left: { $ref: 'source' },
-        operator: 'eq',
-        right: sourceValue
-      })
-    }
-
-    if (newConditions.length === 0) return
-
-    const existing = Array.isArray(trigger.conditions) ? (trigger.conditions as unknown[]) : []
-    trigger.conditions = [...existing, ...newConditions]
-  }
-
   // Watch each trigger's state independently.
   for (const t of triggers) {
+    // useEditor already subscribes to editor.onChange; watching the shared
+    // shallowRef gives us a single point of reactivity for JSON sync.
     watch(t.state, syncTriggers)
   }
   // Initial sync after all triggers have applied their initial state.
   syncTriggers()
 
-  // 6. Expose emit() so playgrounds can fire events at the runtime.
-  //    The runtime's signature is `emit(type, source?, payload?)`. Playgrounds
-  //    call this wrapper as `emit(type, payload)` where `payload` typically
-  //    carries a `source` field — pull it out so the runtime can match events
-  //    by source as designed.
-  function emit(eventType: string, payload?: Record<string, unknown>) {
-    if (!payload) {
-      return runtime.emit(eventType)
-    }
-    const { source, ...rest } = payload
-    return runtime.emit(eventType, typeof source === 'string' ? source : undefined, rest)
-  }
-
-  // Cast to the public TriggerInstance[] (hides toTrigger).
-  const publicTriggers: TriggerInstance[] = triggers
-
   return {
-    triggers: publicTriggers,
+    triggers: triggers as TriggerInstance[],
     triggersJson,
-    runtime,
-    emit
+    runtime: runtime as TriggerixRuntime,
+    /**
+     * Forward event emission to the runtime's native 3-arg signature
+     * `(type, source?, payload?)`. The runtime filters triggers by
+     * `event.source` (set by the war3 serializer from the event def's
+     * sourceSlot), so passing the component id here is enough to disambiguate
+     * which trigger should fire.
+     */
+    emit: runtime.emit.bind(runtime)
   }
 }
 

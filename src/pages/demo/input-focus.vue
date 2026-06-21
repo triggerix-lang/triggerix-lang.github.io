@@ -82,8 +82,8 @@ const password = ref('')
 
 useSyncCodePanel(codeFiles, triggersJson)
 
-function onTrigger(eventType: string, payload: Record<string, unknown>) {
-  emit(eventType, payload)
+function onTrigger(eventType: string, source: string, payload?: Record<string, unknown>) {
+  emit(eventType, source, payload)
 }
 </script>
 

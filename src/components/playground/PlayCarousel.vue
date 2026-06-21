@@ -9,7 +9,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   'update:modelValue': [value: number]
-  trigger: [eventType: string, payload: Record<string, unknown>]
+  trigger: [eventType: string, source: string, payload?: Record<string, unknown>]
 }>()
 
 const current = computed(() => props.items[props.modelValue] ?? '')
@@ -19,7 +19,7 @@ function go(delta: number) {
   if (total.value === 0) return
   const next = (props.modelValue + delta + total.value) % total.value
   emit('update:modelValue', next)
-  emit('trigger', 'carousel_change', { source: props.id, index: next })
+  emit('trigger', 'carousel_change', props.id, { index: next })
 }
 
 function setIndex(index: number) {

@@ -109,17 +109,16 @@ function syncRight(v: number) {
 
 useSyncCodePanel(codeFiles, triggersJson)
 
-function onTrigger(eventType: string, payload: Record<string, unknown>) {
+function onTrigger(eventType: string, source: string, payload?: Record<string, unknown>) {
   if (eventType === 'carousel_change') {
-    const source = String(payload.source ?? '')
     if (source && source in indexMap) {
-      indexMap[source] = Number(payload.index ?? 0)
+      indexMap[source] = Number(payload?.index ?? 0)
     }
-    lastEmittedIndex.value = payload.index
-    emit('carousel_switch', { ...payload, carousel: source })
+    lastEmittedIndex.value = payload?.index
+    emit('carousel_switch', source, { ...payload, carousel: source })
     return
   }
-  emit(eventType, payload)
+  emit(eventType, source, payload)
 }
 </script>
 

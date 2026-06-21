@@ -114,6 +114,7 @@ watch(
             <span v-if="m.streaming && !m.content" class="ai-chat-streaming-dots">···</span>
             <template v-else>
               <MarkdownRender
+                v-if="m.content"
                 mode="chat"
                 :content="m.content"
                 :final="!m.streaming"
@@ -343,9 +344,6 @@ watch(
   flex-wrap: wrap;
   gap: 4px;
   align-items: center;
-  margin-top: 6px;
-  padding-top: 6px;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
   font-size: 11px;
 }
 .ai-chat-toolcalls-label {
@@ -412,6 +410,12 @@ watch(
   display: flex;
   flex-direction: column;
   gap: 6px;
+}
+// 所有非首个子元素画分割线：未来加任何新元素（image / future block / 复制按钮 / etc）
+// 都自动获得与上方内容的视觉分隔，不需要改 CSS
+.ai-bubble-content > *:not(:first-child) {
+  padding-top: 6px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
 // 异步工具的 UI 模板外层包装（mountTemplate 时动态创建）
 // 样式从 src/ai-app-shared/templateStyles.scss 引入

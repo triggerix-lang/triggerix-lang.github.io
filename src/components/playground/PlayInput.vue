@@ -9,23 +9,23 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   'update:modelValue': [value: string]
-  trigger: [eventType: string, payload: Record<string, unknown>]
+  trigger: [eventType: string, source: string, payload?: Record<string, unknown>]
 }>()
 
 const inputRef = ref<HTMLInputElement | null>(null)
 
 function handleFocus() {
-  emit('trigger', 'input_focus', { source: props.id })
+  emit('trigger', 'input_focus', props.id)
 }
 
 function handleBlur() {
-  emit('trigger', 'input_blur', { source: props.id, value: props.modelValue })
+  emit('trigger', 'input_blur', props.id, { value: props.modelValue })
 }
 
 function handleInput(e: Event) {
   const value = (e.target as HTMLInputElement).value
   emit('update:modelValue', value)
-  emit('trigger', 'input_change', { source: props.id, value })
+  emit('trigger', 'input_change', props.id, { value })
 }
 
 function setValue(val: string) {

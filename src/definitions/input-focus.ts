@@ -26,6 +26,7 @@ export function setup(editor: War3Editor) {
       id: 'input_focus',
       label: '输入框聚焦',
       template: '${input}获得焦点',
+      sourceSlot: 'input',
       slots: {
         input: { label: '输入框', tools: ['input_picker'] }
       }
@@ -37,6 +38,7 @@ export function setup(editor: War3Editor) {
       id: 'input_blur',
       label: '输入框失焦',
       template: '${input}失去焦点',
+      sourceSlot: 'input',
       slots: {
         input: { label: '输入框', tools: ['input_picker'] }
       }

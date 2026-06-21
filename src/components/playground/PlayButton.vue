@@ -5,11 +5,11 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  trigger: [eventType: string, payload: Record<string, unknown>]
+  trigger: [eventType: string, source: string, payload?: Record<string, unknown>]
 }>()
 
 function handleClick() {
-  emit('trigger', 'button_click', { source: props.id })
+  emit('trigger', 'button_click', props.id)
 }
 </script>
 

@@ -129,4 +129,78 @@
     width: 100%;
     box-sizing: border-box;
   }
+
+  // ============================================================
+  // 用 data-component-type 选中的容器型组件（库不带任何样式，全部由这里控制）
+  // ============================================================
+
+  // radio 组（[data-component-type="radio"] 内含多个 <label><input type="radio">）
+  // 视觉上要像"一个组"：每个 label 是 chip，未选中 → 透明边，选中 → 金色边 + 淡背景
+  [data-component-type='radio'] {
+    display: inline-flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5em;
+    max-width: 100%;
+
+    // 单选 radio：自定义 dot 颜色，淡化默认 focus outline（label 的视觉反馈已经够明显）
+    input[type='radio'] {
+      accent-color: #c9a84c;
+      cursor: pointer;
+      margin: 0;
+      outline: none;
+    }
+
+    // 每个 option 的 chip
+    > label {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4em;
+      padding: 5px 12px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.02);
+      white-space: nowrap;
+      cursor: pointer;
+      font-size: 13px;
+      color: #aab3c4;
+      transition:
+        border-color 0.15s,
+        background 0.15s,
+        color 0.15s;
+
+      &:hover {
+        border-color: rgba(255, 255, 255, 0.25);
+        color: #e6edf3;
+      }
+
+      // 选中态：内部 radio :checked 时整 chip 高亮（金色边 + 淡背景 + 金色字）
+      &:has(input[type='radio']:checked) {
+        border-color: #c9a84c;
+        background: rgba(201, 168, 76, 0.12);
+        color: #c9a84c;
+      }
+    }
+  }
+
+  // checkbox wrapper（库只设 data-component-type）
+  [data-component-type='checkbox'] {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5em;
+    cursor: pointer;
+    font-size: 13px;
+    color: #e6edf3;
+  }
+
+  // uploadButton wrapper（库不隐藏 input，由 scss 隐藏）
+  [data-component-type='uploadButton'] {
+    display: inline-flex;
+    cursor: pointer;
+
+    > input[type='file'] {
+      display: none;
+    }
+  }
 }

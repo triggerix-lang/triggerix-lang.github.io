@@ -1,45 +1,79 @@
 minimumReleaseAgeExclude:
   - '@triggerix/core'
   - '@triggerix/editor'
-  - '@triggerix/runtime'
-  - triggerix-editor-vue
-  - triggerix-editor-preset-war3
   - '@triggerix/registry'
+  - '@triggerix/runtime'
+  - '@triggerix-ai/builder'
   - '@triggerix-ai/component'
-  - '@triggerix-ai/registry'
   - '@triggerix-ai/fn'
+  - '@triggerix-ai/registry'
   - triggerix-ai
   - triggerix-ai-component-native
-  - '@triggerix-ai/builder'
-  - '@triggerix-ai/builder'
+  - triggerix-editor-preset-war3
+  - triggerix-editor-vue
 
 shellEmulator: true
 
 trustPolicy: no-downgrade
+trustPolicyExclude:
+  - nanoid
 
-overrides:
-  vite: 'catalog:'
-  vitest: 'catalog:'
+# Named catalogs（按依赖域分组，对应 package.json 的 `catalog:<tag>` 引用）
+# 新加 triggerix-* 包时，只改对应 tag 即可；其它项目引用同 tag 也能复用。
+catalogs:
+  # @triggerix-ai/* — LLM 原子工具协议栈（fn / component / builder / registry / meta）
+  triggerix-ai:
+    '@triggerix-ai/builder': ^0.0.9
+    '@triggerix-ai/component': ^0.0.9
+    '@triggerix-ai/fn': ^0.0.9
+    '@triggerix-ai/registry': ^0.0.9
+    triggerix-ai: ^0.0.9
 
-catalog:
-  '@triggerix-ai/builder': ^0.0.6
-  '@triggerix-ai/component': ^0.0.8
-  '@triggerix-ai/fn': ^0.0.8
-  '@triggerix-ai/registry': ^0.0.8
-  '@triggerix/runtime': ^0.0.11
-  '@unocss/reset': ^66.7.2
-  '@vitejs/plugin-vue': ^6.0.7
-  triggerix-ai: ^0.0.8
-  triggerix-ai-component-native: ^0.0.2
-  triggerix-editor-vue: ^0.0.11
-  triggerix-editor-preset-war3: ^0.0.8
-  typescript: ^6.0.3
-  unocss: ^66.7.2
-  vite: npm:@voidzero-dev/vite-plus-core@^0.2.1
-  vite-plus: ^0.2.1
-  vitest: npm:@voidzero-dev/vite-plus-test@^0.1.24
-  vue: ^3.5.38
-  vue-router: ^5.1.0
+  # @triggerix/* — 底层 runtime / editor / registry（triggerix 主 monorepo）
+  triggerix-core:
+    '@triggerix/runtime': ^0.0.11
+
+  # triggerix-ai-component-native + triggerix-editor-* — UI preset / renderer
+  triggerix-preset:
+    triggerix-ai-component-native: ^0.0.4
+    triggerix-editor-preset-war3: ^0.0.9
+    triggerix-editor-vue: ^0.0.12
+
+  # 前端框架 + 路由 + 状态工具
+  frontend:
+    vue: ^3.5.38
+    vue-router: ^5.1.0
+    '@vueuse/core': ^14.3.0
+
+  # SSE / JSON 解析（chat 流式响应处理）
+  streaming:
+    destr: ^2.0.5
+    eventsource-parser: ^3.1.0
+
+  # 代码编辑器 + markdown 渲染
+  monaco:
+    modern-monaco: ^0.4.2
+    markstream-vue: ^1.0.3
+
+  # 自定义滚动条
+  scroll:
+    overlayscrollbars: ^2.16.0
+    overlayscrollbars-vue: ^0.5.10
+
+  # 样式 / CSS 工具链
+  styles:
+    sass: ^1.101.0
+    unocss: ^66.7.2
+    '@unocss/reset': ^66.7.2
+    uno-colors: ^0.1.0
+
+  # 构建工具链（vite / typescript / 测试）
+  build:
+    typescript: ^6.0.3
+    vite: npm:@voidzero-dev/vite-plus-core@^0.2.1
+    vite-plus: ^0.2.1
+    vitest: npm:@voidzero-dev/vite-plus-test@^0.1.24
+    '@vitejs/plugin-vue': ^6.0.7
 
 peerDependencyRules:
   allowAny:
@@ -51,3 +85,23 @@ peerDependencyRules:
 
 allowBuilds:
   '@parcel/watcher': true
+  '@voidzero-dev/vite-plus': true
+  esbuild: true
+
+# vite-plus 的 platform-specific native binding (`@voidzero-dev/vite-plus-win32-x64-msvc`
+# / `...-linux-x64-gnu` / `...-darwin-arm64` 等) 在 vite-plus 的 `optionalDependencies`
+# 列表里。pnpm 11 会用 `engines.node` 字段做 compatibility check —— 当前的
+# `win32-x64-msvc@0.2.1` binding 声明 `engines.node: ">=24.11.0"`，但 dev 环境
+# 通常是 Node 24.4.x（不满足），pnpm 会直接 skip 这个 optional dep →
+# `vp config` / `vp dev` / `vp build` 跑起来时报
+# "Cannot find native binding. npm has a bug related to optional dependencies"。
+#
+# 解决：把 `nodeVersion` 设为满足 binding 要求的最低版本（24.11.0），
+# 蒙混过 pnpm 的 engine check。实际 binding 加载走的是 `.node` 二进制 require，
+# 不依赖 node 引擎检查，运行时在 24.4.x 上工作正常。
+#
+# 该 binding 是 dev tooling (vite-plus 内部用 oxc / oxlint / oxfmt 的 native 加速器)，
+# 不会进入 production bundle —— 切到 production 部署时可以删除此配置。
+nodeVersion: 24.11.0
+public-hoist-pattern:
+  - '*@voidzero-dev/*'

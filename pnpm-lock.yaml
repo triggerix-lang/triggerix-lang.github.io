@@ -5,145 +5,176 @@ settings:
   excludeLinksFromLockfile: false
 
 catalogs:
-  default:
-    '@triggerix-ai/builder':
-      specifier: ^0.0.6
-      version: 0.0.6
-    '@triggerix-ai/component':
-      specifier: ^0.0.8
-      version: 0.0.8
-    '@triggerix-ai/fn':
-      specifier: ^0.0.8
-      version: 0.0.8
-    '@triggerix-ai/registry':
-      specifier: ^0.0.8
-      version: 0.0.8
-    '@triggerix/runtime':
-      specifier: ^0.0.11
-      version: 0.0.11
-    '@unocss/reset':
-      specifier: ^66.7.2
-      version: 66.7.2
+  build:
     '@vitejs/plugin-vue':
       specifier: ^6.0.7
       version: 6.0.7
-    triggerix-ai:
-      specifier: ^0.0.8
-      version: 0.0.8
-    triggerix-ai-component-native:
-      specifier: ^0.0.2
-      version: 0.0.2
-    triggerix-editor-preset-war3:
-      specifier: ^0.0.8
-      version: 0.0.8
-    triggerix-editor-vue:
-      specifier: ^0.0.11
-      version: 0.0.11
     typescript:
       specifier: ^6.0.3
       version: 6.0.3
-    unocss:
-      specifier: ^66.7.2
-      version: 66.7.2
+    vite:
+      specifier: npm:@voidzero-dev/vite-plus-core@^0.2.1
+      version: 0.2.1
     vite-plus:
       specifier: ^0.2.1
       version: 0.2.1
+  frontend:
+    '@vueuse/core':
+      specifier: ^14.3.0
+      version: 14.3.0
     vue:
       specifier: ^3.5.38
       version: 3.5.38
     vue-router:
       specifier: ^5.1.0
       version: 5.1.0
-
-overrides:
-  vite: npm:@voidzero-dev/vite-plus-core@^0.2.1
-  vitest: npm:@voidzero-dev/vite-plus-test@^0.1.24
+  monaco:
+    markstream-vue:
+      specifier: ^1.0.3
+      version: 1.0.3
+    modern-monaco:
+      specifier: ^0.4.2
+      version: 0.4.2
+  scroll:
+    overlayscrollbars:
+      specifier: ^2.16.0
+      version: 2.16.0
+    overlayscrollbars-vue:
+      specifier: ^0.5.10
+      version: 0.5.10
+  streaming:
+    destr:
+      specifier: ^2.0.5
+      version: 2.0.5
+    eventsource-parser:
+      specifier: ^3.1.0
+      version: 3.1.0
+  styles:
+    '@unocss/reset':
+      specifier: ^66.7.2
+      version: 66.7.2
+    sass:
+      specifier: ^1.101.0
+      version: 1.101.0
+    uno-colors:
+      specifier: ^0.1.0
+      version: 0.1.0
+    unocss:
+      specifier: ^66.7.2
+      version: 66.7.2
+  triggerix-ai:
+    '@triggerix-ai/builder':
+      specifier: ^0.0.9
+      version: 0.0.9
+    '@triggerix-ai/component':
+      specifier: ^0.0.9
+      version: 0.0.9
+    '@triggerix-ai/fn':
+      specifier: ^0.0.9
+      version: 0.0.9
+    '@triggerix-ai/registry':
+      specifier: ^0.0.9
+      version: 0.0.9
+    triggerix-ai:
+      specifier: ^0.0.9
+      version: 0.0.9
+  triggerix-core:
+    '@triggerix/runtime':
+      specifier: ^0.0.11
+      version: 0.0.11
+  triggerix-preset:
+    triggerix-ai-component-native:
+      specifier: ^0.0.4
+      version: 0.0.4
+    triggerix-editor-preset-war3:
+      specifier: ^0.0.9
+      version: 0.0.9
+    triggerix-editor-vue:
+      specifier: ^0.0.12
+      version: 0.0.12
 
 importers:
 
   .:
     dependencies:
       '@triggerix-ai/builder':
-        specifier: 'catalog:'
-        version: 0.0.6
+        specifier: catalog:triggerix-ai
+        version: 0.0.9
       '@triggerix-ai/component':
-        specifier: 'catalog:'
-        version: 0.0.8
+        specifier: catalog:triggerix-ai
+        version: 0.0.9
       '@triggerix-ai/fn':
-        specifier: 'catalog:'
-        version: 0.0.8
+        specifier: catalog:triggerix-ai
+        version: 0.0.9
       '@triggerix-ai/registry':
-        specifier: 'catalog:'
-        version: 0.0.8
-      '@triggerix/core':
-        specifier: ^0.0.11
-        version: 0.0.11
+        specifier: catalog:triggerix-ai
+        version: 0.0.9
       '@triggerix/runtime':
-        specifier: 'catalog:'
+        specifier: catalog:triggerix-core
         version: 0.0.11
       '@vueuse/core':
-        specifier: ^14.3.0
+        specifier: catalog:frontend
         version: 14.3.0(vue@3.5.38(typescript@6.0.3))
       destr:
-        specifier: ^2.0.5
+        specifier: catalog:streaming
         version: 2.0.5
       eventsource-parser:
-        specifier: ^3.1.0
+        specifier: catalog:streaming
         version: 3.1.0
       markstream-vue:
-        specifier: ^1.0.3
+        specifier: catalog:monaco
         version: 1.0.3(vue@3.5.38(typescript@6.0.3))
       modern-monaco:
-        specifier: ^0.4.2
+        specifier: catalog:monaco
         version: 0.4.2(typescript@6.0.3)
       overlayscrollbars:
-        specifier: ^2.16.0
+        specifier: catalog:scroll
         version: 2.16.0
       overlayscrollbars-vue:
-        specifier: ^0.5.10
+        specifier: catalog:scroll
         version: 0.5.10(overlayscrollbars@2.16.0)(vue@3.5.38(typescript@6.0.3))
       triggerix-ai:
-        specifier: 'catalog:'
-        version: 0.0.8
+        specifier: catalog:triggerix-ai
+        version: 0.0.9
       triggerix-ai-component-native:
-        specifier: 'catalog:'
-        version: 0.0.2
+        specifier: catalog:triggerix-preset
+        version: 0.0.4
       triggerix-editor-preset-war3:
-        specifier: 'catalog:'
-        version: 0.0.8
+        specifier: catalog:triggerix-preset
+        version: 0.0.9
       triggerix-editor-vue:
-        specifier: 'catalog:'
-        version: 0.0.11(vue@3.5.38(typescript@6.0.3))
+        specifier: catalog:triggerix-preset
+        version: 0.0.12(vue@3.5.38(typescript@6.0.3))
       vue:
-        specifier: 'catalog:'
+        specifier: catalog:frontend
         version: 3.5.38(typescript@6.0.3)
       vue-router:
-        specifier: 'catalog:'
+        specifier: catalog:frontend
         version: 5.1.0(@voidzero-dev/vite-plus-core@0.2.1(jiti@2.7.0)(sass@1.101.0)(typescript@6.0.3)(yaml@2.9.0))(@vue/compiler-sfc@3.5.38)(vue@3.5.38(typescript@6.0.3))
     devDependencies:
       '@unocss/reset':
-        specifier: 'catalog:'
+        specifier: catalog:styles
         version: 66.7.2
       '@vitejs/plugin-vue':
-        specifier: 'catalog:'
+        specifier: catalog:build
         version: 6.0.7(@voidzero-dev/vite-plus-core@0.2.1(jiti@2.7.0)(sass@1.101.0)(typescript@6.0.3)(yaml@2.9.0))(vue@3.5.38(typescript@6.0.3))
       sass:
-        specifier: ^1.101.0
+        specifier: catalog:styles
         version: 1.101.0
       typescript:
-        specifier: 'catalog:'
+        specifier: catalog:build
         version: 6.0.3
       uno-colors:
-        specifier: ^0.1.0
+        specifier: catalog:styles
         version: 0.1.0
       unocss:
-        specifier: 'catalog:'
+        specifier: catalog:styles
         version: 66.7.2(@voidzero-dev/vite-plus-core@0.2.1(jiti@2.7.0)(sass@1.101.0)(typescript@6.0.3)(yaml@2.9.0))
       vite:
-        specifier: npm:@voidzero-dev/vite-plus-core@^0.2.1
+        specifier: catalog:build
         version: '@voidzero-dev/vite-plus-core@0.2.1(jiti@2.7.0)(sass@1.101.0)(typescript@6.0.3)(yaml@2.9.0)'
       vite-plus:
-        specifier: 'catalog:'
+        specifier: catalog:build
         version: 0.2.1(@voidzero-dev/vite-plus-core@0.2.1(jiti@2.7.0)(sass@1.101.0)(typescript@6.0.3)(yaml@2.9.0))(jiti@2.7.0)(sass@1.101.0)(typescript@6.0.3)(yaml@2.9.0)
 
 packages:
@@ -376,19 +407,12 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@oxc-project/runtime@0.133.0':
-    resolution: {integrity: sha512-PkvjA1Lq5++V5S1E6Patr92ZVcieE6EalDr1VJTqv4BnjZdOUC4W3p8k1wMXSd5/2aFP4b/A6N5sg2Bkzcr9vQ==}
-    engines: {node: ^20.19.0 || >=22.12.0}
-
   '@oxc-project/runtime@0.136.0':
     resolution: {integrity: sha512-u0EutjK5y6NHJkl5jNJCs8zbup1z6A/UEWgajrYzqcEU3UX05HjqybhMQOLhSM0eKGISyM6WfSMMuklYSmH2wA==}
     engines: {node: ^20.19.0 || >=22.12.0}
 
   '@oxc-project/types@0.131.0':
     resolution: {integrity: sha512-PgnWDfV0h+b16XNKbXU7Daib/BFSt/J2mEzfYIBu6JB/wNdlU+kVYXCkGA1A9fWkTbOgbjh4e6NhPeQOYvFhEA==}
-
-  '@oxc-project/types@0.133.0':
-    resolution: {integrity: sha512-KzkdCd6Uxqnf6l3HOw1xfatAlUURA0g14cvBYFyJ5SaNOQbOUvBr9PKArcPcrNIeRsBdgcUzOGrhKveVpvOIGA==}
 
   '@oxc-project/types@0.136.0':
     resolution: {integrity: sha512-39Al/B3v9esnHCX7S8l9Se2+s2tb9b2jcMd+bZ2L659VG73kNyGPpPrL5Zi/p0ty7p4pTTU2/Dd+g27hv94XCg==}
@@ -781,38 +805,23 @@ packages:
     peerDependencies:
       '@testing-library/dom': '>=7.21.4'
 
-  '@triggerix-ai/builder@0.0.6':
-    resolution: {integrity: sha512-dGs1qxaZwgKFz2bkL2uRtWG4RcIN0S77ghii5YLK9Ns9srwpFP59Asjkxu7XZhGAviEceq6iERq+I7DyX5cc+A==}
+  '@triggerix-ai/builder@0.0.9':
+    resolution: {integrity: sha512-j1+jWGdOn6TFOpJihNPRNwbcDzzdF8jTecPJKVtaGCi20M1CtQvdf+BZ8SwI+QPheLYK8r+TkpGuYxAJAnRMGw==}
 
-  '@triggerix-ai/builder@0.0.8':
-    resolution: {integrity: sha512-T5QXfR+0gEqtoD0cHJ5W6Pw9GLXrQO1Haj5eTNJkyhUVxkor/tqgKqQln/oaJKr2T3Sa/rYFEgOVnf51aqtRVQ==}
+  '@triggerix-ai/component@0.0.9':
+    resolution: {integrity: sha512-avNQhtTH9eHnCjNujsalCU7Sbt1OWA5uLHVPWdumKnuBUzt80/GFLEoOddpRLNjMncd5e7XAYru3GxIaviigzQ==}
 
-  '@triggerix-ai/component@0.0.6':
-    resolution: {integrity: sha512-A9F28MFpXD8RNnAxPSHBKplhhJGVMG4c8v2vLdQDSCNBNJDnZVisFqiG8t/6N0sYExPvYyqWU/wC4oGJx6hrMg==}
+  '@triggerix-ai/fn@0.0.9':
+    resolution: {integrity: sha512-RFBqpXU0Bn73lccmOZeXPq32PDqF2D2Yxuc0KoVdaKy8NtbJJWXjY5gwK4XLmwgdjx1HYbzQ/BKZpi8xGG1upw==}
 
-  '@triggerix-ai/component@0.0.8':
-    resolution: {integrity: sha512-Nxd1fi/ugZwet4L6T0ILLOWj/WnWMMmglheU3+15Ua5lJ9Irqu7eDoW8uOYp53oUcESrK5/Lf5r7BwBA26ud7w==}
-
-  '@triggerix-ai/fn@0.0.6':
-    resolution: {integrity: sha512-EWOwQS3co2ZynIh2i5FNpGHeiDhQZFnCNt+nVKrl24Or5aPt2OI9o6v0SJhxbEAZ6Jk8znx3UHawkvvLSiNBzA==}
-
-  '@triggerix-ai/fn@0.0.8':
-    resolution: {integrity: sha512-a/WUk4872z7xaeXhEGUITvQQtdur71VFf2HSNu/FFXMqCJdrHIQMDcT4PI/x4q4jgNxBUjigyic8z4VmXmkSYg==}
-
-  '@triggerix-ai/registry@0.0.8':
-    resolution: {integrity: sha512-SAmX0tUvWGK7dDVBQ1Wie42psLCr2Kh+mmdTEvnEqloZqMiEjzYt+48AjQ8vBUcVq+6mh0kmSNX3wr8mBKn0GA==}
-
-  '@triggerix/core@0.0.10':
-    resolution: {integrity: sha512-cIXeyZLoW+i3Wqc+UWOZzPtNAhbmp9uZAdXAFaVnIh+iK0n8/SZXP3WPmDdakJWgcrBgPIVuZjz3ubyHximajA==}
+  '@triggerix-ai/registry@0.0.9':
+    resolution: {integrity: sha512-Z2Ot5A0TLK0e/dF6gSJRMcs0a8Z3Z2OwfuKw32qCelM/F1hwQdjMxqrXyksLmj3lx1iaHApoDhxvKM5ORLZ30g==}
 
   '@triggerix/core@0.0.11':
     resolution: {integrity: sha512-SsQESeU2M4ZBHUBjYG/52776TXjKfNdTWQKR3YvqLhKr8C5KFbsKaF12WHCP8vD7rBZMe186dV9VAK9aXrfRcw==}
 
-  '@triggerix/editor@0.0.10':
-    resolution: {integrity: sha512-wVwArtTC89gliq+0a2jzxDLWRfZHNYqUPnqL6KFvF7Zr3nE9ewHNCTWLuVKx+V2KkJaBOqP/lU2WTzBsTjhW/A==}
-
-  '@triggerix/registry@0.0.10':
-    resolution: {integrity: sha512-MJZcKeIWE6wSMMC7QVj+1l6hGuXaTXZ2PZIoCR3Gql++z0i1KYO1fMZwpxtd7uf8wTZU9DihwmBkIGFeNwQgzA==}
+  '@triggerix/editor@0.0.11':
+    resolution: {integrity: sha512-1U7GIhm6w4oVavXQUyYp0vX7FzSw2aV2xp1beekpNkIqUUjMVyLlSltq9g4gpspx2KeASMWi7krxm6tCYuhZoA==}
 
   '@triggerix/registry@0.0.11':
     resolution: {integrity: sha512-lxXPREySn7B8Ve0Kk9KtgU9+KgK83Jg3f19FLL90J9Lg3zyOegdpLf6RAQg8OgUZqcREVthunMtsLvl5w+1b9w==}
@@ -962,69 +971,6 @@ packages:
   '@vitest/utils@4.1.9':
     resolution: {integrity: sha512-A51o8ymO5PpqlWNnBP9ZHPXDIpuMtTLlGSjN7la4US+LJzoUMyhwjA5QXlm39JexgwHKW4Xjs8Z2d3dLCXOeuA==}
 
-  '@voidzero-dev/vite-plus-core@0.1.24':
-    resolution: {integrity: sha512-iXPGBABnQnrDMx89H6MOCGcTZp+QW+3rY4YMVKdE6ydchSvPk2O3MI2vgaRVfOtWJ2IjnxSnf1n2yjP67ZBRFQ==}
-    engines: {node: ^20.19.0 || >=22.12.0}
-    peerDependencies:
-      '@arethetypeswrong/core': ^0.18.1
-      '@tsdown/css': 0.22.1
-      '@tsdown/exe': 0.22.1
-      '@types/node': ^20.19.0 || >=22.12.0
-      '@vitejs/devtools': ^0.1.18
-      esbuild: ^0.27.0 || ^0.28.0
-      jiti: '>=1.21.0'
-      less: ^4.0.0
-      publint: ^0.3.8
-      sass: ^1.70.0
-      sass-embedded: ^1.70.0
-      stylus: '>=0.54.8'
-      sugarss: ^5.0.0
-      terser: ^5.16.0
-      tsx: ^4.8.1
-      typescript: ^5.0.0 || ^6.0.0
-      unplugin-unused: ^0.5.0
-      unrun: '*'
-      yaml: ^2.4.2
-    peerDependenciesMeta:
-      '@arethetypeswrong/core':
-        optional: true
-      '@tsdown/css':
-        optional: true
-      '@tsdown/exe':
-        optional: true
-      '@types/node':
-        optional: true
-      '@vitejs/devtools':
-        optional: true
-      esbuild:
-        optional: true
-      jiti:
-        optional: true
-      less:
-        optional: true
-      publint:
-        optional: true
-      sass:
-        optional: true
-      sass-embedded:
-        optional: true
-      stylus:
-        optional: true
-      sugarss:
-        optional: true
-      terser:
-        optional: true
-      tsx:
-        optional: true
-      typescript:
-        optional: true
-      unplugin-unused:
-        optional: true
-      unrun:
-        optional: true
-      yaml:
-        optional: true
-
   '@voidzero-dev/vite-plus-core@0.2.1':
     resolution: {integrity: sha512-iWdtOlLezgYcDqIzxZx1yOUhY93vUB+ob+mRYBNr7/3Hf80uRyTQbqVD1WtsYaANbzeUi81SQ1ZoUraXHO+u8A==}
     engines: {node: ^20.19.0 || ^22.18.0 || >=24.11.0}
@@ -1127,37 +1073,6 @@ packages:
     cpu: [x64]
     os: [linux]
     libc: [musl]
-
-  '@voidzero-dev/vite-plus-test@0.1.24':
-    resolution: {integrity: sha512-9NiG6UadG0iOaPL1AMsO5sDKkx6MADHw4/mMOmHWZUhhUwqzfVtnnptMK37vD71e6KyR7yAscx19FrtOWWtjvA==}
-    engines: {node: ^20.0.0 || ^22.0.0 || >=24.0.0}
-    peerDependencies:
-      '@edge-runtime/vm': '*'
-      '@opentelemetry/api': ^1.9.0
-      '@types/node': ^20.0.0 || ^22.0.0 || >=24.0.0
-      '@vitest/coverage-istanbul': 4.1.8
-      '@vitest/coverage-v8': 4.1.8
-      '@vitest/ui': 4.1.8
-      happy-dom: '*'
-      jsdom: '*'
-      vite: ^6.0.0 || ^7.0.0 || ^8.0.0
-    peerDependenciesMeta:
-      '@edge-runtime/vm':
-        optional: true
-      '@opentelemetry/api':
-        optional: true
-      '@types/node':
-        optional: true
-      '@vitest/coverage-istanbul':
-        optional: true
-      '@vitest/coverage-v8':
-        optional: true
-      '@vitest/ui':
-        optional: true
-      happy-dom:
-        optional: true
-      jsdom:
-        optional: true
 
   '@voidzero-dev/vite-plus-win32-arm64-msvc@0.2.1':
     resolution: {integrity: sha512-3+5FJYhi9SqBszjngI2LBmvoiqEwxJWyQ5UsOUtNz6/d+yDrDw+tOgHLl4OKIh5aVNZeIGXzxvP6h24kcEqIyg==}
@@ -1325,8 +1240,8 @@ packages:
     resolution: {integrity: sha512-TWrgLOFUQTH994YUyl1yT4uyavY5nNB5muff+RtWaqNVCAK408b5ZnnbNAUEWLTCpum9w6arT70i1XdQ4UeOPA==}
     engines: {node: '>=0.12'}
 
-  es-module-lexer@1.7.0:
-    resolution: {integrity: sha512-jEQoCwk8hyb2AZziIOLhDqpm5+2ww5uIE6lkO/6jcOCusfk6LhMHpXXfBLXTZ7Ydyt0j4VoUQv6uGNYbdW+kBA==}
+  es-module-lexer@2.1.0:
+    resolution: {integrity: sha512-n27zTYMjYu1aj4MjCWzSP7G9r75utsaoc8m61weK+W8JMBGGQybd43GstCXZ3WNmSFtGT9wi59qQTW6mhTR5LQ==}
 
   estree-walker@2.0.2:
     resolution: {integrity: sha512-Rfkk/Mp/DL7JVje3u18FxFujQlTNR2q6QfMSMB7AvCBx91NGj/ba3kCfza0f6dVDbw7YlRf/nDrn7pQrCCyQ/w==}
@@ -1337,6 +1252,10 @@ packages:
   eventsource-parser@3.1.0:
     resolution: {integrity: sha512-kJezFj9YFAMLeORyi7aCLxLbD5/qWMQnoMVlVPyHIll7lgRJCc3JVln9Vgl9nwQi0YkMnhdGTMNn7CkRRAptMg==}
     engines: {node: '>=18.0.0'}
+
+  expect-type@1.3.0:
+    resolution: {integrity: sha512-knvyeauYhqjOYvQ66MznSMs83wmHrCycNEN6Ao+2AeYEfxUIkuiVxdEa1qlGEPK+We3n0THiDciYSsCcgW/DoA==}
+    engines: {node: '>=12.0.0'}
 
   exsolve@1.0.8:
     resolution: {integrity: sha512-LmDxfWXwcTArk8fUEnOfSZpHOJ6zOMUJKOtFLFqJLoKJetuQG874Uc7/Kki7zFLzYybmZhp1M7+98pfMqeX8yA==}
@@ -1564,8 +1483,8 @@ packages:
   muggle-string@0.4.1:
     resolution: {integrity: sha512-VNTrAak/KhO2i8dqqnqnAHOa3cYBwXEZe9h+D5h/1ZqFSTEFHdM65lR7RoIqq3tBBYavsOXV84NoHXZ0AkPyqQ==}
 
-  nanoid@3.3.13:
-    resolution: {integrity: sha512-sPdqC6ByMVVGvF1ynvvMo0/o+oD1VX7DaHhijt1bFgjvBkHBib4t49GoNDhf2NDta4oeUNlaGbSt5K7qjZ955Q==}
+  nanoid@3.3.14:
+    resolution: {integrity: sha512-U9kYi5bpVMEI31yC8iw4bJJp0avcHXA0W8/wNfLfnvJYzihQo2ZRPYPvpAAd570HAcCBjCTN7vnr+v4StKl1IQ==}
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
 
@@ -1646,10 +1565,6 @@ packages:
     resolution: {integrity: sha512-QP88BAKvMam/3NxH6vj2o21R6MjxZUAd6nlwAS/pnGvN9IVLocLHxGYIzFhg6fUQ+5th6P4dv4eW9jX3DSIj7A==}
     engines: {node: '>=12'}
 
-  pixelmatch@7.2.0:
-    resolution: {integrity: sha512-xhcb4yHu9sM/G7foGzoLtXYcC0zHEaOXXjRKhGup0fw78Nf2Tkiapv4EQyMzrbcmQPsllAI7DbFY2UT7PlI9Pg==}
-    hasBin: true
-
   pkg-types@1.3.1:
     resolution: {integrity: sha512-/Jm5M4RvtBFVkKWRu2BLUTNP8/M2a+UwuAX+ae4770q1qVGtfjG+WTCupoZixokjmHiry8uI+dlY8KXYV5HVVQ==}
 
@@ -1697,6 +1612,9 @@ packages:
   scule@1.3.0:
     resolution: {integrity: sha512-6FtHJEvt+pVMIB9IBY+IcCJ6Z5f1iQnytgyfKMhDKgmzYG+TeH/wx1y3l27rshSbLiSanrR9ffZDrEsmjlQF2g==}
 
+  siginfo@2.0.0:
+    resolution: {integrity: sha512-ybx0WO1/8bSBLEWXZvEd7gMW3Sn3JFlW3TvX1nREbDLRNQNaeNN8WK0meBwPdAaOI7TtRRRJn/Es1zhrrCHu7g==}
+
   sirv@3.0.2:
     resolution: {integrity: sha512-2wcC/oGxHis/BoHkkPwldgiPSYcpZK3JU28WoMVv55yHJgcZ8rlXvuG9iZggz+sU1d4bRgIGASwyWqjxu3FM0g==}
     engines: {node: '>=18'}
@@ -1704,6 +1622,9 @@ packages:
   source-map-js@1.2.1:
     resolution: {integrity: sha512-UXWMKhLOwVKb728IUtQPXxfYU+usdybtUrK/8uGE8CQMvrhOpwvzDBwj0QhSL7MQc7vIsISBG8VQ8+IDQxpfQA==}
     engines: {node: '>=0.10.0'}
+
+  stackback@0.0.2:
+    resolution: {integrity: sha512-1XMJE5fQo1jGH6Y/7ebnwPOBEkIEnT4QF32d5R1+VXdXveM0IBMJt8zfaxX1P3QhVwrYe+576+jkANtSS2mBbw==}
 
   std-env@4.1.0:
     resolution: {integrity: sha512-Rq7ybcX2RuC55r9oaPVEW7/xu3tj8u4GeBYHBWCychFtzMIr86A7e3PPEBPT37sHStKX3+TiX/Fr/ACmJLVlLQ==}
@@ -1734,17 +1655,17 @@ packages:
     resolution: {integrity: sha512-sf4i37nQ2LBx4m3wB74y+ubopq6W/dIzXg0FDGjsYnZHVa1Da8FH853wlL2gtUhg+xJXjfk3kUZS3BRoQeoQBQ==}
     engines: {node: '>=6'}
 
-  triggerix-ai-component-native@0.0.2:
-    resolution: {integrity: sha512-YfdC5bLE8L5JO3MgRZJ2HZydjHvMBFTQmJ1yPSJ+IgcxcWflF0TsTgadeHkilldi2ZS0nAovippe9c13iUyhog==}
+  triggerix-ai-component-native@0.0.4:
+    resolution: {integrity: sha512-xuLty4wtOXPGBEO1Cxq6E2TdxzqgbrGAisLe7hlatKOffCkudIp/0bNgOcSc4jXyYf+uznhbgoOpBEIS68gduA==}
 
-  triggerix-ai@0.0.8:
-    resolution: {integrity: sha512-bUQW/T62hyrrEbVAgmALeZ+G2l7ecuRQ9s7pqueJX1CfRkBx6UQXEf4MV3gcD82NfNTNfDAW5MJaXKoSoOvPbA==}
+  triggerix-ai@0.0.9:
+    resolution: {integrity: sha512-qCzgzAbqt6Ds8YMiYViY0hiW19EpGC1pxfhGjzH9fNJz6dFt4xYPEzKWzqm+F4Epz8GkVBwe5X+CsclSjToPSw==}
 
-  triggerix-editor-preset-war3@0.0.8:
-    resolution: {integrity: sha512-bvifHYU1qAGBPiEs/pfkz60/3e0Pw+eSWmfms0EHpY+8o2IN57uZ9NRowBi1/dLevnK5CfQ0ZjemQqom2AyKZA==}
+  triggerix-editor-preset-war3@0.0.9:
+    resolution: {integrity: sha512-IP1yvzsi5tmOCM/NY1eVCGZW3zL/nM6KsqGzOP2pu+mf/btGpf4zD8aNLamxplS8aH41jRPWO97o1Y75UIb1eA==}
 
-  triggerix-editor-vue@0.0.11:
-    resolution: {integrity: sha512-WM1Y7FqOUMCBVhDMvarS+ik+ha/bwu8oCcbVVGNM7gITmrXvXpx3dOZynLP6Neiv8iIMVMdLrEJzdHyRay2KEA==}
+  triggerix-editor-vue@0.0.12:
+    resolution: {integrity: sha512-GSiFhkfZyfP8bigz+WgVKVXRlSMpwC2LvFvZx4g4CWE/T/MaKwosj2ba/AxaXF2LvMJ7DhnOr0L2Pb+Rj5iTZw==}
     peerDependencies:
       vue: ^3.5.0
 
@@ -1813,6 +1734,47 @@ packages:
       '@vitest/browser-webdriverio':
         optional: true
 
+  vitest@4.1.9:
+    resolution: {integrity: sha512-nE3/LEyc0z87uHYLZebqCUOaJr2hdtuPp7BQ4BosVFnfltxgAvMG08NyrSGlPpOUWvR27c5flSmYFTNr78L9GQ==}
+    engines: {node: ^20.0.0 || ^22.0.0 || >=24.0.0}
+    hasBin: true
+    peerDependencies:
+      '@edge-runtime/vm': '*'
+      '@opentelemetry/api': ^1.9.0
+      '@types/node': ^20.0.0 || ^22.0.0 || >=24.0.0
+      '@vitest/browser-playwright': 4.1.9
+      '@vitest/browser-preview': 4.1.9
+      '@vitest/browser-webdriverio': 4.1.9
+      '@vitest/coverage-istanbul': 4.1.9
+      '@vitest/coverage-v8': 4.1.9
+      '@vitest/ui': 4.1.9
+      happy-dom: '*'
+      jsdom: '*'
+      vite: ^6.0.0 || ^7.0.0 || ^8.0.0
+    peerDependenciesMeta:
+      '@edge-runtime/vm':
+        optional: true
+      '@opentelemetry/api':
+        optional: true
+      '@types/node':
+        optional: true
+      '@vitest/browser-playwright':
+        optional: true
+      '@vitest/browser-preview':
+        optional: true
+      '@vitest/browser-webdriverio':
+        optional: true
+      '@vitest/coverage-istanbul':
+        optional: true
+      '@vitest/coverage-v8':
+        optional: true
+      '@vitest/ui':
+        optional: true
+      happy-dom:
+        optional: true
+      jsdom:
+        optional: true
+
   vue-router@5.1.0:
     resolution: {integrity: sha512-HAbiLzLEHQwxPgvsbOJDAwtavszEgLwri6XfyrsPECIFez8+59xc9LofWVdc/HEaSRT822lJ8H9Ns38VVond5g==}
     peerDependencies:
@@ -1841,6 +1803,11 @@ packages:
 
   webpack-virtual-modules@0.6.2:
     resolution: {integrity: sha512-66/V2i5hQanC51vBQKPH4aI8NMAcBW59FVBs+rC7eGHupMyfn34q7rZIE+ETlJ+XTevqfUhVVBgSUNSW2flEUQ==}
+
+  why-is-node-running@2.3.0:
+    resolution: {integrity: sha512-hUrmaWBdVDcxvYqnyh09zunKzROWjbZTiNy8dBEjkS7ehEDQibXJ7XvlmtbwuTclUiIyN+CyXQD4Vmko8fNm8w==}
+    engines: {node: '>=8'}
+    hasBin: true
 
   ws@8.21.0:
     resolution: {integrity: sha512-Vsp28b7DRcimFQvrqu2Wek3z1iYxDCWqHYB8Qsnk/S4RfaCQzPGPyBNuVjJV3cd6UiKtUtp6sNM77gWvzcCH+g==}
@@ -2038,13 +2005,9 @@ snapshots:
   '@oxc-parser/binding-win32-x64-msvc@0.131.0':
     optional: true
 
-  '@oxc-project/runtime@0.133.0': {}
-
   '@oxc-project/runtime@0.136.0': {}
 
   '@oxc-project/types@0.131.0': {}
-
-  '@oxc-project/types@0.133.0': {}
 
   '@oxc-project/types@0.136.0': {}
 
@@ -2268,42 +2231,29 @@ snapshots:
     dependencies:
       '@testing-library/dom': 10.4.1
 
-  '@triggerix-ai/builder@0.0.6':
+  '@triggerix-ai/builder@0.0.9':
     dependencies:
-      '@triggerix-ai/component': 0.0.6
-      '@triggerix-ai/fn': 0.0.6
+      '@triggerix-ai/component': 0.0.9
+      '@triggerix-ai/fn': 0.0.9
       '@triggerix/core': 0.0.11
       '@triggerix/runtime': 0.0.11
 
-  '@triggerix-ai/builder@0.0.8':
+  '@triggerix-ai/component@0.0.9':
     dependencies:
-      '@triggerix-ai/component': 0.0.8
-      '@triggerix-ai/fn': 0.0.8
-      '@triggerix/core': 0.0.11
       '@triggerix/runtime': 0.0.11
 
-  '@triggerix-ai/component@0.0.6': {}
+  '@triggerix-ai/fn@0.0.9': {}
 
-  '@triggerix-ai/component@0.0.8': {}
-
-  '@triggerix-ai/fn@0.0.6': {}
-
-  '@triggerix-ai/fn@0.0.8': {}
-
-  '@triggerix-ai/registry@0.0.8':
+  '@triggerix-ai/registry@0.0.9':
     dependencies:
       '@triggerix/registry': 0.0.11
 
-  '@triggerix/core@0.0.10': {}
-
   '@triggerix/core@0.0.11': {}
 
-  '@triggerix/editor@0.0.10':
+  '@triggerix/editor@0.0.11':
     dependencies:
-      '@triggerix/core': 0.0.10
-      '@triggerix/registry': 0.0.10
-
-  '@triggerix/registry@0.0.10': {}
+      '@triggerix/core': 0.0.11
+      '@triggerix/registry': 0.0.11
 
   '@triggerix/registry@0.0.11': {}
 
@@ -2472,19 +2422,19 @@ snapshots:
       vite: '@voidzero-dev/vite-plus-core@0.2.1(jiti@2.7.0)(sass@1.101.0)(typescript@6.0.3)(yaml@2.9.0)'
       vue: 3.5.38(typescript@6.0.3)
 
-  '@vitest/browser-preview@4.1.9(@voidzero-dev/vite-plus-core@0.2.1(jiti@2.7.0)(sass@1.101.0)(typescript@6.0.3)(yaml@2.9.0))(@voidzero-dev/vite-plus-test@0.1.24(@voidzero-dev/vite-plus-core@0.2.1(jiti@2.7.0)(sass@1.101.0)(typescript@6.0.3)(yaml@2.9.0))(jiti@2.7.0)(sass@1.101.0)(typescript@6.0.3)(yaml@2.9.0))':
+  '@vitest/browser-preview@4.1.9(@voidzero-dev/vite-plus-core@0.2.1(jiti@2.7.0)(sass@1.101.0)(typescript@6.0.3)(yaml@2.9.0))(vitest@4.1.9)':
     dependencies:
       '@testing-library/dom': 10.4.1
       '@testing-library/user-event': 14.6.1(@testing-library/dom@10.4.1)
-      '@vitest/browser': 4.1.9(@voidzero-dev/vite-plus-core@0.2.1(jiti@2.7.0)(sass@1.101.0)(typescript@6.0.3)(yaml@2.9.0))(@voidzero-dev/vite-plus-test@0.1.24(@voidzero-dev/vite-plus-core@0.2.1(jiti@2.7.0)(sass@1.101.0)(typescript@6.0.3)(yaml@2.9.0))(jiti@2.7.0)(sass@1.101.0)(typescript@6.0.3)(yaml@2.9.0))
-      vitest: '@voidzero-dev/vite-plus-test@0.1.24(@voidzero-dev/vite-plus-core@0.2.1(jiti@2.7.0)(sass@1.101.0)(typescript@6.0.3)(yaml@2.9.0))(jiti@2.7.0)(sass@1.101.0)(typescript@6.0.3)(yaml@2.9.0)'
+      '@vitest/browser': 4.1.9(@voidzero-dev/vite-plus-core@0.2.1(jiti@2.7.0)(sass@1.101.0)(typescript@6.0.3)(yaml@2.9.0))(vitest@4.1.9)
+      vitest: 4.1.9(@vitest/browser-preview@4.1.9)(@voidzero-dev/vite-plus-core@0.2.1(jiti@2.7.0)(sass@1.101.0)(typescript@6.0.3)(yaml@2.9.0))
     transitivePeerDependencies:
       - bufferutil
       - msw
       - utf-8-validate
       - vite
 
-  '@vitest/browser@4.1.9(@voidzero-dev/vite-plus-core@0.2.1(jiti@2.7.0)(sass@1.101.0)(typescript@6.0.3)(yaml@2.9.0))(@voidzero-dev/vite-plus-test@0.1.24(@voidzero-dev/vite-plus-core@0.2.1(jiti@2.7.0)(sass@1.101.0)(typescript@6.0.3)(yaml@2.9.0))(jiti@2.7.0)(sass@1.101.0)(typescript@6.0.3)(yaml@2.9.0))':
+  '@vitest/browser@4.1.9(@voidzero-dev/vite-plus-core@0.2.1(jiti@2.7.0)(sass@1.101.0)(typescript@6.0.3)(yaml@2.9.0))(vitest@4.1.9)':
     dependencies:
       '@blazediff/core': 1.9.1
       '@vitest/mocker': 4.1.9(@voidzero-dev/vite-plus-core@0.2.1(jiti@2.7.0)(sass@1.101.0)(typescript@6.0.3)(yaml@2.9.0))
@@ -2493,7 +2443,7 @@ snapshots:
       pngjs: 7.0.0
       sirv: 3.0.2
       tinyrainbow: 3.1.0
-      vitest: '@voidzero-dev/vite-plus-test@0.1.24(@voidzero-dev/vite-plus-core@0.2.1(jiti@2.7.0)(sass@1.101.0)(typescript@6.0.3)(yaml@2.9.0))(jiti@2.7.0)(sass@1.101.0)(typescript@6.0.3)(yaml@2.9.0)'
+      vitest: 4.1.9(@vitest/browser-preview@4.1.9)(@voidzero-dev/vite-plus-core@0.2.1(jiti@2.7.0)(sass@1.101.0)(typescript@6.0.3)(yaml@2.9.0))
       ws: 8.21.0
     transitivePeerDependencies:
       - bufferutil
@@ -2542,19 +2492,6 @@ snapshots:
       convert-source-map: 2.0.0
       tinyrainbow: 3.1.0
 
-  '@voidzero-dev/vite-plus-core@0.1.24(jiti@2.7.0)(sass@1.101.0)(typescript@6.0.3)(yaml@2.9.0)':
-    dependencies:
-      '@oxc-project/runtime': 0.133.0
-      '@oxc-project/types': 0.133.0
-      lightningcss: 1.32.0
-      postcss: 8.5.15
-    optionalDependencies:
-      fsevents: 2.3.3
-      jiti: 2.7.0
-      sass: 1.101.0
-      typescript: 6.0.3
-      yaml: 2.9.0
-
   '@voidzero-dev/vite-plus-core@0.2.1(jiti@2.7.0)(sass@1.101.0)(typescript@6.0.3)(yaml@2.9.0)':
     dependencies:
       '@oxc-project/runtime': 0.136.0
@@ -2585,44 +2522,6 @@ snapshots:
 
   '@voidzero-dev/vite-plus-linux-x64-musl@0.2.1':
     optional: true
-
-  '@voidzero-dev/vite-plus-test@0.1.24(@voidzero-dev/vite-plus-core@0.2.1(jiti@2.7.0)(sass@1.101.0)(typescript@6.0.3)(yaml@2.9.0))(jiti@2.7.0)(sass@1.101.0)(typescript@6.0.3)(yaml@2.9.0)':
-    dependencies:
-      '@standard-schema/spec': 1.1.0
-      '@types/chai': 5.2.3
-      '@voidzero-dev/vite-plus-core': 0.1.24(jiti@2.7.0)(sass@1.101.0)(typescript@6.0.3)(yaml@2.9.0)
-      es-module-lexer: 1.7.0
-      obug: 2.1.3
-      pixelmatch: 7.2.0
-      pngjs: 7.0.0
-      sirv: 3.0.2
-      std-env: 4.1.0
-      tinybench: 2.9.0
-      tinyexec: 1.2.4
-      tinyglobby: 0.2.17
-      vite: '@voidzero-dev/vite-plus-core@0.2.1(jiti@2.7.0)(sass@1.101.0)(typescript@6.0.3)(yaml@2.9.0)'
-      ws: 8.21.0
-    transitivePeerDependencies:
-      - '@arethetypeswrong/core'
-      - '@tsdown/css'
-      - '@tsdown/exe'
-      - '@vitejs/devtools'
-      - bufferutil
-      - esbuild
-      - jiti
-      - less
-      - publint
-      - sass
-      - sass-embedded
-      - stylus
-      - sugarss
-      - terser
-      - tsx
-      - typescript
-      - unplugin-unused
-      - unrun
-      - utf-8-validate
-      - yaml
 
   '@voidzero-dev/vite-plus-win32-arm64-msvc@0.2.1':
     optional: true
@@ -2786,7 +2685,7 @@ snapshots:
 
   entities@7.0.1: {}
 
-  es-module-lexer@1.7.0: {}
+  es-module-lexer@2.1.0: {}
 
   estree-walker@2.0.2: {}
 
@@ -2795,6 +2694,8 @@ snapshots:
       '@types/estree': 1.0.9
 
   eventsource-parser@3.1.0: {}
+
+  expect-type@1.3.0: {}
 
   exsolve@1.0.8: {}
 
@@ -2963,7 +2864,7 @@ snapshots:
 
   muggle-string@0.4.1: {}
 
-  nanoid@3.3.13: {}
+  nanoid@3.3.14: {}
 
   node-addon-api@7.1.1:
     optional: true
@@ -3083,10 +2984,6 @@ snapshots:
 
   picomatch@4.0.4: {}
 
-  pixelmatch@7.2.0:
-    dependencies:
-      pngjs: 7.0.0
-
   pkg-types@1.3.1:
     dependencies:
       confbox: 0.1.8
@@ -3103,7 +3000,7 @@ snapshots:
 
   postcss@8.5.15:
     dependencies:
-      nanoid: 3.3.13
+      nanoid: 3.3.14
       picocolors: 1.1.1
       source-map-js: 1.2.1
 
@@ -3135,6 +3032,8 @@ snapshots:
 
   scule@1.3.0: {}
 
+  siginfo@2.0.0: {}
+
   sirv@3.0.2:
     dependencies:
       '@polka/url': 1.0.0-next.29
@@ -3142,6 +3041,8 @@ snapshots:
       totalist: 3.0.1
 
   source-map-js@1.2.1: {}
+
+  stackback@0.0.2: {}
 
   std-env@4.1.0: {}
 
@@ -3171,26 +3072,27 @@ snapshots:
 
   totalist@3.0.1: {}
 
-  triggerix-ai-component-native@0.0.2:
+  triggerix-ai-component-native@0.0.4:
     dependencies:
-      '@triggerix-ai/component': 0.0.8
+      '@triggerix-ai/component': 0.0.9
       '@triggerix/core': 0.0.11
+      '@triggerix/runtime': 0.0.11
 
-  triggerix-ai@0.0.8:
+  triggerix-ai@0.0.9:
     dependencies:
-      '@triggerix-ai/builder': 0.0.8
-      '@triggerix-ai/component': 0.0.8
-      '@triggerix-ai/fn': 0.0.8
-      '@triggerix-ai/registry': 0.0.8
+      '@triggerix-ai/builder': 0.0.9
+      '@triggerix-ai/component': 0.0.9
+      '@triggerix-ai/fn': 0.0.9
+      '@triggerix-ai/registry': 0.0.9
 
-  triggerix-editor-preset-war3@0.0.8:
+  triggerix-editor-preset-war3@0.0.9:
     dependencies:
-      '@triggerix/core': 0.0.10
-      '@triggerix/editor': 0.0.10
+      '@triggerix/core': 0.0.11
+      '@triggerix/editor': 0.0.11
 
-  triggerix-editor-vue@0.0.11(vue@3.5.38(typescript@6.0.3)):
+  triggerix-editor-vue@0.0.12(vue@3.5.38(typescript@6.0.3)):
     dependencies:
-      '@triggerix/editor': 0.0.10
+      '@triggerix/editor': 0.0.11
       vue: 3.5.38(typescript@6.0.3)
 
   tslib@2.8.1:
@@ -3263,8 +3165,8 @@ snapshots:
     dependencies:
       '@oxc-project/types': 0.136.0
       '@oxlint/plugins': 1.68.0
-      '@vitest/browser': 4.1.9(@voidzero-dev/vite-plus-core@0.2.1(jiti@2.7.0)(sass@1.101.0)(typescript@6.0.3)(yaml@2.9.0))(@voidzero-dev/vite-plus-test@0.1.24(@voidzero-dev/vite-plus-core@0.2.1(jiti@2.7.0)(sass@1.101.0)(typescript@6.0.3)(yaml@2.9.0))(jiti@2.7.0)(sass@1.101.0)(typescript@6.0.3)(yaml@2.9.0))
-      '@vitest/browser-preview': 4.1.9(@voidzero-dev/vite-plus-core@0.2.1(jiti@2.7.0)(sass@1.101.0)(typescript@6.0.3)(yaml@2.9.0))(@voidzero-dev/vite-plus-test@0.1.24(@voidzero-dev/vite-plus-core@0.2.1(jiti@2.7.0)(sass@1.101.0)(typescript@6.0.3)(yaml@2.9.0))(jiti@2.7.0)(sass@1.101.0)(typescript@6.0.3)(yaml@2.9.0))
+      '@vitest/browser': 4.1.9(@voidzero-dev/vite-plus-core@0.2.1(jiti@2.7.0)(sass@1.101.0)(typescript@6.0.3)(yaml@2.9.0))(vitest@4.1.9)
+      '@vitest/browser-preview': 4.1.9(@voidzero-dev/vite-plus-core@0.2.1(jiti@2.7.0)(sass@1.101.0)(typescript@6.0.3)(yaml@2.9.0))(vitest@4.1.9)
       '@vitest/expect': 4.1.9
       '@vitest/mocker': 4.1.9(@voidzero-dev/vite-plus-core@0.2.1(jiti@2.7.0)(sass@1.101.0)(typescript@6.0.3)(yaml@2.9.0))
       '@vitest/pretty-format': 4.1.9
@@ -3276,7 +3178,7 @@ snapshots:
       oxfmt: 0.55.0(vite-plus@0.2.1(@voidzero-dev/vite-plus-core@0.2.1(jiti@2.7.0)(sass@1.101.0)(typescript@6.0.3)(yaml@2.9.0))(jiti@2.7.0)(sass@1.101.0)(typescript@6.0.3)(yaml@2.9.0))
       oxlint: 1.70.0(oxlint-tsgolint@0.23.0)(vite-plus@0.2.1(@voidzero-dev/vite-plus-core@0.2.1(jiti@2.7.0)(sass@1.101.0)(typescript@6.0.3)(yaml@2.9.0))(jiti@2.7.0)(sass@1.101.0)(typescript@6.0.3)(yaml@2.9.0))
       oxlint-tsgolint: 0.23.0
-      vitest: '@voidzero-dev/vite-plus-test@0.1.24(@voidzero-dev/vite-plus-core@0.2.1(jiti@2.7.0)(sass@1.101.0)(typescript@6.0.3)(yaml@2.9.0))(jiti@2.7.0)(sass@1.101.0)(typescript@6.0.3)(yaml@2.9.0)'
+      vitest: 4.1.9(@vitest/browser-preview@4.1.9)(@voidzero-dev/vite-plus-core@0.2.1(jiti@2.7.0)(sass@1.101.0)(typescript@6.0.3)(yaml@2.9.0))
     optionalDependencies:
       '@voidzero-dev/vite-plus-darwin-arm64': 0.2.1
       '@voidzero-dev/vite-plus-darwin-x64': 0.2.1
@@ -3319,6 +3221,33 @@ snapshots:
       - vite
       - yaml
 
+  vitest@4.1.9(@vitest/browser-preview@4.1.9)(@voidzero-dev/vite-plus-core@0.2.1(jiti@2.7.0)(sass@1.101.0)(typescript@6.0.3)(yaml@2.9.0)):
+    dependencies:
+      '@vitest/expect': 4.1.9
+      '@vitest/mocker': 4.1.9(@voidzero-dev/vite-plus-core@0.2.1(jiti@2.7.0)(sass@1.101.0)(typescript@6.0.3)(yaml@2.9.0))
+      '@vitest/pretty-format': 4.1.9
+      '@vitest/runner': 4.1.9
+      '@vitest/snapshot': 4.1.9
+      '@vitest/spy': 4.1.9
+      '@vitest/utils': 4.1.9
+      es-module-lexer: 2.1.0
+      expect-type: 1.3.0
+      magic-string: 0.30.21
+      obug: 2.1.3
+      pathe: 2.0.3
+      picomatch: 4.0.4
+      std-env: 4.1.0
+      tinybench: 2.9.0
+      tinyexec: 1.2.4
+      tinyglobby: 0.2.17
+      tinyrainbow: 3.1.0
+      vite: '@voidzero-dev/vite-plus-core@0.2.1(jiti@2.7.0)(sass@1.101.0)(typescript@6.0.3)(yaml@2.9.0)'
+      why-is-node-running: 2.3.0
+    optionalDependencies:
+      '@vitest/browser-preview': 4.1.9(@voidzero-dev/vite-plus-core@0.2.1(jiti@2.7.0)(sass@1.101.0)(typescript@6.0.3)(yaml@2.9.0))(vitest@4.1.9)
+    transitivePeerDependencies:
+      - msw
+
   vue-router@5.1.0(@voidzero-dev/vite-plus-core@0.2.1(jiti@2.7.0)(sass@1.101.0)(typescript@6.0.3)(yaml@2.9.0))(@vue/compiler-sfc@3.5.38)(vue@3.5.38(typescript@6.0.3)):
     dependencies:
       '@babel/generator': 8.0.0
@@ -3354,6 +3283,11 @@ snapshots:
       typescript: 6.0.3
 
   webpack-virtual-modules@0.6.2: {}
+
+  why-is-node-running@2.3.0:
+    dependencies:
+      siginfo: 2.0.0
+      stackback: 0.0.2
 
   ws@8.21.0: {}
 

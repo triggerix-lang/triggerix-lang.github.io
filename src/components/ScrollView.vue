@@ -36,7 +36,20 @@ const options = {
 
 defineExpose({
   /** 暴露根 DOM，方便外部读取 scrollTop / scrollHeight 等 */
-  getEl: () => osRef.value?.getElement() ?? null
+  getEl: () => osRef.value?.getElement() ?? null,
+  /**
+   * 滚动到底部。默认平滑动画（用于聊天等场景）。
+   * 传 'auto' 可关闭动画（流式输出期间每帧都滚，避免动画互相打断）。
+   */
+  scrollToBottom(behavior: ScrollBehavior = 'smooth') {
+    const host = osRef.value?.getElement()
+    if (!host) return
+    // OverlayScrollbars v2 的实际滚动容器是 viewport 元素，
+    // host 自身不滚动，所以直接对 viewport 调 scrollTo
+    const viewport = host.querySelector<HTMLElement>('[data-overlayscrollbars-viewport]')
+    const target = viewport ?? host
+    target.scrollTo({ top: target.scrollHeight, behavior })
+  }
 })
 </script>
 

@@ -43,7 +43,7 @@ const emit = defineEmits<{
   (e: 'send', text: string): void
 }>()
 
-const scrollEl = ref<InstanceType<typeof ScrollView> | null>(null)
+const scroll = ref<InstanceType<typeof ScrollView> | null>(null)
 const inputText = ref('')
 const sending = ref(false)
 
@@ -72,18 +72,23 @@ function onKeydown(e: KeyboardEvent) {
   }
 }
 
-function scrollToBottom() {
-  const el = scrollEl.value?.getEl()
-  if (el) el.scrollTop = el.scrollHeight
+/**
+ * 滚动到底部。
+ * - 用户发送 / AI 新气泡（messages.length 变化）→ 平滑动画
+ * - AI 流式输出期间（content 频繁变化）→ 瞬时跳转，
+ *   避免连续 scrollTo({behavior:'smooth'}) 互相打断导致永远追不上文本
+ */
+function scrollToBottom(behavior: ScrollBehavior = 'smooth') {
+  scroll.value?.scrollToBottom(behavior)
 }
 
 watch(
   () => props.messages.length,
-  () => nextTick(scrollToBottom)
+  () => nextTick(() => scrollToBottom('smooth'))
 )
 watch(
   () => visibleMessages.value.at(-1)?.content,
-  () => nextTick(scrollToBottom)
+  () => nextTick(() => scrollToBottom('auto'))
 )
 </script>
 

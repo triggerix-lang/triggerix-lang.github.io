@@ -2,9 +2,13 @@
 /**
  * AI 餐饮点餐 app 编排层。
  *
- * 组合 useFoodApp（业务数据）+ buildAtomicTools（5 个 builder atomic + 5 个 domain 工具 + UIBuilder）
+ * 组合 useFoodApp（业务数据）+ buildAtomicTools（5 个 builder atomic + 5 个 domain 工具 +
+ * **11 个业务 action 直调工具** + UIBuilder + systemPrompt）
  * + createBusinessHandlers（11 个业务 action handler）+ useChatSession（聊天 + 工具执行）
  * 渲染：PC 双栏（手机 + 聊天面板）/ 移动单栏（手机 + FAB 抽屉）
+ *
+ * 关键：业务 handler 池同时透传给 buildAtomicTools（包成 DomainTool 让 LLM 直接调）
+ * 和 useChatSession（注册为 triggerix runtime action 让 UI 表单按钮触发）。
  */
 
 import { ref, useTemplateRef } from 'vue'
@@ -40,7 +44,17 @@ const TAB_OPTIONS = [
   { value: 'profile', label: '我的' }
 ]
 
-// 原子工具集（5 个 addComponent / addTrigger / ... + 5 个 domain tool + UIBuilder + systemPrompt）
+// Toast 主机 + pushToast 桥接
+const toastRef = useTemplateRef<InstanceType<typeof ToastHost>>('toast')
+function pushToast(message: string, tone: ToastTone = 'info') {
+  toastRef.value?.push(message, tone)
+}
+
+// 业务 handler 池（声明在 buildAtomicTools 之前 —— 它要透传给后者，把业务 action 包成 DomainTool）
+const handlers = createBusinessHandlers({ foodApp, phoneTab, pushToast })
+
+// 原子工具集（5 个 addComponent / addTrigger / ... + 5 个 domain tool + 11 个业务 action 直调工具 + UIBuilder + systemPrompt）
+// 业务 handler 池透传给 buildAtomicTools → 包成 DomainTool 让 LLM 直接调
 const { toolDefinitions, builder, systemPrompt, executeCall } = buildAtomicTools({
   menu: () =>
     MENU_DATA.map((d: MenuItem) => ({
@@ -61,17 +75,11 @@ const { toolDefinitions, builder, systemPrompt, executeCall } = buildAtomicTools
       minSpend: c.minSpend,
       description: c.description
     })),
-  paymentMethods: () => [...PAYMENT_METHODS]
+  paymentMethods: () => [...PAYMENT_METHODS],
+  // 业务 action 注册为可直调的 DomainTool（emit_event 由 useChatSession 特殊处理）
+  businessHandlers: handlers,
+  pushToast
 })
-
-// Toast 主机 + pushToast 桥接
-const toastRef = useTemplateRef<InstanceType<typeof ToastHost>>('toast')
-function pushToast(message: string, tone: ToastTone = 'info') {
-  toastRef.value?.push(message, tone)
-}
-
-// 业务 handler 池
-const handlers = createBusinessHandlers({ foodApp, phoneTab, pushToast })
 
 // ChatPanel 暴露 bubbleElFor（AI 提交的 UI 挂到对应 assistant 消息气泡内）
 const chatPanelRef = useTemplateRef<InstanceType<typeof AiChatPanel>>('chatPanel')
@@ -82,6 +90,7 @@ const getBubbleEl = (msgId: number): HTMLElement | null =>
 // Chat session
 const { messages, thinking, error, send } = useChatSession({
   tools: toolDefinitions,
+  systemPrompt,
   handlers,
   builder,
   executeCall,

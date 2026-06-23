@@ -76,8 +76,13 @@ export type ToolHandler<TArgs = any> = (args: TArgs, ctx: ToolCtx) => Promise<To
 // ============================================================
 
 export interface UseChatSessionOptions {
-  /** LLM 的工具定义（atomic + domain 工具 schema） */
+  /** LLM 的工具定义（atomic + domain 工具 schema），buildAtomicTools 的产物 */
   tools: ReadonlyArray<ToolDefinition>
+  /**
+   * 客户端已拼好的 system prompt（buildAtomicTools 的产物）。
+   * 客户端发 API 时一起发给 netlify function，function 不再自己拼。
+   */
+  systemPrompt: string
   /** 业务 handler 池（action 名 → handler） */
   handlers: Map<string, ToolHandler>
   /** UIBuilder 实例（submit 时取 mountTarget） */
@@ -112,7 +117,11 @@ export interface UseChatSessionOptions {
   propRefResolver?: RefResolver
   /** LLM API 端点，默认 `/api/ai`（Netlify Function） */
   endpoint?: string
-  /** 多轮 tool calling 最大轮数（防无限循环），默认 5 */
+  /**
+   * 多轮 tool calling 最大轮数（防无限循环），默认 3。
+   * 修复后空文本回复会立刻停，所以默认 3 足够覆盖
+   * getMenu → addComponent...addTrigger → submit 的完整链路。
+   */
   maxRounds?: number
 }
 
@@ -373,6 +382,7 @@ export function useChatSession(opts: UseChatSessionOptions) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
+        systemPrompt: opts.systemPrompt,
         messages: outbound,
         tools: opts.tools
       })
@@ -452,7 +462,14 @@ export function useChatSession(opts: UseChatSessionOptions) {
   }
 
   /**
-   * 单轮 stream + 处理 tool calls。返回 true 表示本轮触发了 submit（外层应停止）。
+   * 单轮 stream + 处理 tool calls。
+   * 返回 true 表示外层 loop 应停止，三种情况都返回 true：
+   *  1. LLM 调了 submit 并成功 → 已挂 UI，没理由再问
+   *  2. LLM 这一轮**没有 tool_call**（纯文本回复）→ LLM 认为已经答完，不应该再追问
+   *  3. 走到 for 循环末尾（所有 tool 跑完，但都不是 submit）→ 让外层决定下一轮
+   *
+   * 第 2 点是关键修复：之前 `return false` 导致 LLM 在没工具可调时连续生成 3-5 条
+   * 几乎相同的"好的，请告诉我..."气泡，用户体验炸裂。
    */
   async function runOneRound(): Promise<boolean> {
     const aiMsg = pushMsg({ role: 'assistant', content: '', streaming: true })
@@ -462,7 +479,7 @@ export function useChatSession(opts: UseChatSessionOptions) {
       aiMsg.content = content
       aiMsg.streaming = false
 
-      if (toolCalls.length === 0) return false
+      if (toolCalls.length === 0) return true
 
       aiMsg.tool_calls = toolCalls
 
@@ -489,9 +506,9 @@ export function useChatSession(opts: UseChatSessionOptions) {
     }
   }
 
-  /** 多轮 driver：任一轮 submit 成功则提前终止。 */
+  /** 多轮 driver：任一轮 submit 成功 / 空文本回复则提前终止。 */
   async function runRounds(): Promise<void> {
-    const maxRounds = opts.maxRounds ?? 5
+    const maxRounds = opts.maxRounds ?? 3
     for (let i = 0; i < maxRounds; i++) {
       if (await runOneRound()) return
     }

@@ -1,7 +1,6 @@
 // Netlify Functions 通过 esbuild 部署时打包，本地 vp check 类型校验跳过
 // @ts-nocheck
 import destr from 'destr'
-import { buildAtomicTools } from '../../src/ai-app-shared/atomicTools'
 import { createAnthropicProvider } from '../../src/ai-app-shared/ai/anthropic-provider'
 
 // ============================================================
@@ -17,15 +16,29 @@ interface FrontendMessage {
   name?: string
 }
 
+interface FrontendTool {
+  name: string
+  description?: string
+  parameters?: Record<string, unknown>
+}
+
 interface FrontendRequest {
+  /**
+   * 客户端已构造好的 system prompt（buildAtomicTools 产物）。
+   * 客户端负责把业务 handler 包成 DomainTool 再发上来，
+   * server 端拿不到 foodApp 状态，没法自己拼。
+   */
+  systemPrompt?: string
   messages: FrontendMessage[]
+  /** 客户端传来的 tool schema（buildAtomicTools.toolDefinitions 标准化后） */
+  tools?: FrontendTool[]
 }
 
 declare const process: { env: Record<string, string | undefined> }
 
 // ============================================================
-// 入口：只做路由 + body 解析 + 注入 systemPrompt/tools + 调 provider
-// （不包含任何 AI 协议代码，provider 自己负责）
+// 入口：只做路由 + body 解析 + 转发到 provider
+// systemPrompt / tools 完全由客户端提供（兼容旧请求的兜底见下）
 // ============================================================
 
 export default async (req: Request): Promise<Response> => {
@@ -61,12 +74,21 @@ export default async (req: Request): Promise<Response> => {
     })
   }
 
-  // system prompt + tools 由 buildAtomicTools 注入（不依赖前端传）
-  const { systemPrompt, toolDefinitions } = buildAtomicTools()
+  // 客户端必须发 systemPrompt（前端 useChatSession 已统一加）——
+  // 没有就拒绝，避免 server 用不一致的 prompt 调 LLM
+  if (typeof body.systemPrompt !== 'string' || body.systemPrompt.length === 0) {
+    return new Response(
+      JSON.stringify({ error: 'systemPrompt is required (must be built client-side)' }),
+      {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' }
+      }
+    )
+  }
 
   // 前端 snake_case → ChatRequest camelCase
   const chatRequest = {
-    systemPrompt,
+    systemPrompt: body.systemPrompt,
     messages: body.messages.map((m) => {
       if (m.role === 'tool') {
         return { role: 'tool', toolCallId: m.tool_call_id ?? '', name: m.name, content: m.content }
@@ -76,10 +98,13 @@ export default async (req: Request): Promise<Response> => {
       }
       return { role: 'user', content: m.content }
     }),
-    tools: toolDefinitions.map((t: any) => ({
-      name: t.function.name,
-      description: t.function.description ?? '',
-      parameters: t.function.parameters ?? { type: 'object', properties: {} }
+    // 前端 useChatSession 直传 defineAtomicTools 的 toolDefinitions（OpenAI 风格
+    // `{ type: 'function', function: { name, description, parameters } }`），
+    // 这里扁平化成 ChatTool 形态供 provider 用。
+    tools: (body.tools ?? []).map((t: any) => ({
+      name: t.function?.name ?? t.name ?? '',
+      description: t.function?.description ?? t.description ?? '',
+      parameters: t.function?.parameters ?? t.parameters ?? { type: 'object', properties: {} }
     }))
   }
 

@@ -43,6 +43,34 @@ const TAB_OPTIONS = [
   { value: 'orders', label: '订单' },
   { value: 'profile', label: '我的' }
 ]
+// 默认偏好（与 useFoodApp 的枚举类型一致）
+const DINING_MODE_OPTIONS = [
+  { value: 'dine_in', label: '堂食' },
+  { value: 'takeaway', label: '外带' },
+  { value: 'delivery', label: '配送' }
+]
+const UTENSIL_COUNT_OPTIONS = [
+  { value: '0', label: '0 份（无需餐具）' },
+  { value: '1', label: '1 份' },
+  { value: '2', label: '2 份' },
+  { value: '3', label: '3 份' }
+]
+const DIETARY_PREFERENCE_OPTIONS = [
+  { value: 'meat', label: '荤' },
+  { value: 'vegetarian', label: '素' },
+  { value: 'halal', label: '清真' },
+  { value: 'unrestricted', label: '无忌口' }
+]
+const TASTE_PREFERENCE_OPTIONS = [
+  { value: 'none', label: '不辣' },
+  { value: 'mild', label: '微辣' },
+  { value: 'medium', label: '中辣' }
+]
+const DIETARY_RESTRICTION_OPTIONS = [
+  { value: 'none', label: '无' },
+  { value: 'green_onion_garlic', label: '葱蒜' },
+  { value: 'seafood', label: '海鲜' }
+]
 
 // Toast 主机 + pushToast 桥接
 const toastRef = useTemplateRef<InstanceType<typeof ToastHost>>('toast')
@@ -66,6 +94,11 @@ const { toolDefinitions, builder, systemPrompt, executeCall } = buildAtomicTools
   tabs: () => TAB_OPTIONS,
   options: (field: string) => {
     if (field === 'user.gender') return GENDER_OPTIONS
+    if (field === 'user.defaultDiningMode') return DINING_MODE_OPTIONS
+    if (field === 'user.defaultUtensilCount') return UTENSIL_COUNT_OPTIONS
+    if (field === 'user.dietaryPreference') return DIETARY_PREFERENCE_OPTIONS
+    if (field === 'user.tastePreference') return TASTE_PREFERENCE_OPTIONS
+    if (field === 'user.dietaryRestriction') return DIETARY_RESTRICTION_OPTIONS
     return undefined
   },
   coupons: () =>
@@ -110,6 +143,12 @@ const { messages, thinking, error, send } = useChatSession({
     if (field === 'nickname') return foodApp.nickname.value
     if (field === 'gender') return foodApp.gender.value
     if (field === 'appliedCouponId') return foodApp.appliedCouponId.value
+    if (field === 'defaultDiningMode') return foodApp.defaultDiningMode.value
+    if (field === 'defaultUtensilCount') return foodApp.defaultUtensilCount.value
+    if (field === 'defaultNotes') return foodApp.defaultNotes.value
+    if (field === 'dietaryPreference') return foodApp.dietaryPreference.value
+    if (field === 'tastePreference') return foodApp.tastePreference.value
+    if (field === 'dietaryRestriction') return foodApp.dietaryRestriction.value
     return undefined
   }
 })

@@ -11,6 +11,19 @@ export interface OrderItem {
 export type Gender = 'male' | 'female' | 'other'
 
 // ============================================================
+// 默认偏好（AI 可改；非隐私、订单 / 菜单页可联动展示）
+// ============================================================
+
+/** 默认就餐方式 */
+export type DiningMode = 'dine_in' | 'takeaway' | 'delivery'
+/** 饮食偏好（荤/素/清真/无忌口） */
+export type DietaryPreference = 'meat' | 'vegetarian' | 'halal' | 'unrestricted'
+/** 口味辣度（不辣/微辣/中辣） */
+export type TastePreference = 'none' | 'mild' | 'medium'
+/** 饮食禁忌（无/葱蒜/海鲜） */
+export type DietaryRestriction = 'none' | 'green_onion_garlic' | 'seafood'
+
+// ============================================================
 // 提交订单（订单状态机）
 // ============================================================
 
@@ -52,6 +65,16 @@ export function useFoodApp() {
   const gender = useLocalStorage<Gender>('ai-gender', 'other')
   const submittedOrders = useLocalStorage<SubmittedOrder[]>('ai-submitted-orders', [])
   const appliedCouponId = useLocalStorage<string | null>('ai-applied-coupon', null)
+  // 默认偏好（UserInfo 展示 + AI 可改）
+  const defaultDiningMode = useLocalStorage<DiningMode>('ai-default-dining-mode', 'delivery')
+  const defaultUtensilCount = useLocalStorage<number>('ai-default-utensil-count', 1)
+  const defaultNotes = useLocalStorage<string>('ai-default-notes', '')
+  const dietaryPreference = useLocalStorage<DietaryPreference>(
+    'ai-dietary-preference',
+    'unrestricted'
+  )
+  const tastePreference = useLocalStorage<TastePreference>('ai-taste-preference', 'none')
+  const dietaryRestriction = useLocalStorage<DietaryRestriction>('ai-dietary-restriction', 'none')
 
   // ============================================================
   // 购物车（cart）— 保持原状，与 add_to_order / remove_from_order / clear_orders 兼容
@@ -81,6 +104,35 @@ export function useFoodApp() {
 
   function setGender(g: Gender) {
     gender.value = g
+  }
+
+  // ============================================================
+  // 默认偏好 setter（被对应 business handler 调用）
+  // ============================================================
+
+  function setDefaultDiningMode(mode: DiningMode) {
+    defaultDiningMode.value = mode
+  }
+
+  function setDefaultUtensilCount(count: number) {
+    // 钳到 0-3
+    defaultUtensilCount.value = Math.max(0, Math.min(3, Math.floor(count)))
+  }
+
+  function setDefaultNotes(notes: string) {
+    defaultNotes.value = String(notes ?? '').trim()
+  }
+
+  function setDietaryPreference(pref: DietaryPreference) {
+    dietaryPreference.value = pref
+  }
+
+  function setTastePreference(pref: TastePreference) {
+    tastePreference.value = pref
+  }
+
+  function setDietaryRestriction(restriction: DietaryRestriction) {
+    dietaryRestriction.value = restriction
   }
 
   // ============================================================
@@ -225,12 +277,24 @@ export function useFoodApp() {
     gender,
     submittedOrders,
     appliedCouponId,
+    defaultDiningMode,
+    defaultUtensilCount,
+    defaultNotes,
+    dietaryPreference,
+    tastePreference,
+    dietaryRestriction,
     // 购物车
     addOrder,
     removeOrder,
     clearOrders,
     setNickname,
     setGender,
+    setDefaultDiningMode,
+    setDefaultUtensilCount,
+    setDefaultNotes,
+    setDietaryPreference,
+    setTastePreference,
+    setDietaryRestriction,
     // 金额
     getCartSubtotal,
     getAppliedCoupon,

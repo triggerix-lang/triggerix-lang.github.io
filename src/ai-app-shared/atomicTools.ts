@@ -30,9 +30,13 @@ export interface BusinessActionSpec {
 }
 
 /**
- * 12 个 action 的元数据：
- *  - 6 个普通业务 action（update_nickname / set_gender / add_to_order /
- *    remove_from_order / clear_orders / switch_tab）
+ * 18 个 action 的元数据：
+ *  - 2 个基础用户 action（update_nickname / set_gender）
+ *  - 6 个默认偏好 action（update_default_dining_mode / update_default_utensil_count /
+ *    update_default_notes / update_dietary_preference / update_taste_preference /
+ *    update_dietary_restriction）
+ *  - 3 个订单 CRUD action（add_to_order / remove_from_order / clear_orders）
+ *  - 1 个 tab action（switch_tab）
  *  - 1 个特殊 action（emit_event —— 由 useChatSession 注册并处理卸载，不进 businessHandlers）
  *  - 5 个订单状态机 + 优惠券 action（submit_order / pay_order / cancel_order / apply_coupon / clear_coupon）
  *
@@ -122,6 +126,92 @@ const BUSINESS_ACTIONS: BusinessActionSpec[] = [
       }
     },
     prompt: '关闭/取消场景固定传 event="editor.cancelled"。'
+  },
+  // ============================================================
+  // 默认偏好（6 个）—— 与 set_gender 同模式：enum 取值走 get_options(<field>)
+  // ============================================================
+  {
+    type: 'update_default_dining_mode',
+    label: '设置默认就餐方式',
+    description: '把默认就餐方式改成 params.mode。',
+    params: {
+      mode: {
+        type: 'string',
+        required: true,
+        description:
+          '就餐方式取值；构造表单前先用 get_options("user.defaultDiningMode") 拉取合法 value/label 列表'
+      }
+    },
+    prompt:
+      '构造表单前**必须**先调 `get_options("user.defaultDiningMode")` 拿到合法 value/label 列表。'
+  },
+  {
+    type: 'update_default_utensil_count',
+    label: '设置默认餐具数量',
+    description: '把默认餐具数量（0-3 份）改成 params.count。',
+    params: {
+      count: {
+        type: 'integer',
+        required: true,
+        description: '0-3 之间的整数；构造表单前先调 get_options("user.defaultUtensilCount")'
+      }
+    },
+    prompt:
+      'params.count 必填，0-3 之间的整数。构造表单前**必须**先调 `get_options("user.defaultUtensilCount")`。'
+  },
+  {
+    type: 'update_default_notes',
+    label: '设置默认备注',
+    description: '把默认下单备注改成 params.notes 字符串。',
+    params: {
+      notes: { type: 'string', required: true, description: '新的默认备注（非空）' }
+    },
+    prompt: 'params.notes 必填且非空字符串。'
+  },
+  {
+    type: 'update_dietary_preference',
+    label: '设置饮食偏好',
+    description: '把饮食偏好改成 params.preference。',
+    params: {
+      preference: {
+        type: 'string',
+        required: true,
+        description:
+          '饮食偏好取值；构造表单前先用 get_options("user.dietaryPreference") 拉取合法 value/label 列表'
+      }
+    },
+    prompt:
+      '构造表单前**必须**先调 `get_options("user.dietaryPreference")` 拿到合法 value/label 列表。'
+  },
+  {
+    type: 'update_taste_preference',
+    label: '设置口味偏好',
+    description: '把口味偏好改成 params.preference。',
+    params: {
+      preference: {
+        type: 'string',
+        required: true,
+        description:
+          '口味偏好取值；构造表单前先用 get_options("user.tastePreference") 拉取合法 value/label 列表'
+      }
+    },
+    prompt:
+      '构造表单前**必须**先调 `get_options("user.tastePreference")` 拿到合法 value/label 列表。'
+  },
+  {
+    type: 'update_dietary_restriction',
+    label: '设置饮食禁忌',
+    description: '把饮食禁忌改成 params.restriction。',
+    params: {
+      restriction: {
+        type: 'string',
+        required: true,
+        description:
+          '饮食禁忌取值；构造表单前先用 get_options("user.dietaryRestriction") 拉取合法 value/label 列表'
+      }
+    },
+    prompt:
+      '构造表单前**必须**先调 `get_options("user.dietaryRestriction")` 拿到合法 value/label 列表。'
   },
   // ============================================================
   // 订单状态机 + 优惠券（5 个）
@@ -301,7 +391,7 @@ export interface AtomicToolsBundle {
   toolDefinitions: ReturnType<typeof defineAtomicTools>['toolDefinitions']
   builder: UIBuilder
   /**
-   * 5 个 builder atomic + 5 个 domain + 11 个业务 action 的统一 executeCall 入口（submit 不走这里）。
+   * 5 个 builder atomic + 5 个 domain + 17 个业务 action 的统一 executeCall 入口（submit 不走这里）。
    *
    * 在 builder 库原生 executeCall 外面包了一层 `addComponent` 必填 props 校验：
    * button / radio / select / image / label 漏掉必填项时直接返 `{ok:false, errors}`,
@@ -381,7 +471,7 @@ export function buildAtomicTools(
 }
 
 /**
- * 把 11 个业务 action 包成 DomainTool（emit_event 由 useChatSession 特殊处理，跳过）。
+ * 把 17 个业务 action 包成 DomainTool（emit_event 由 useChatSession 特殊处理，跳过）。
  *
  * 关键设计：handler 的返回值会被 LLM 看到（作为 tool_result content），
  * 所以要按 DomainTool 的"data 优先 / 失败带 error"语义包装。
@@ -474,7 +564,7 @@ export function validateAddComponentArgs(args: Record<string, unknown>): string[
 /**
  * 注入"编辑表单单元完整性"校验到 UIBuilder.onBeforeSubmit。
  *
- * 校验 4 条通用规则（不绑死任何具体业务字段）：
+ * 校验 5 条通用规则（不绑死任何具体业务字段）：
  *  1. 草稿里有可编辑字段（input / radio / select / checkbox）→ 必须有 button
  *     否则用户改完没法提交
  *  2. 每个可编辑字段的 value 必须用 "$ref:user.<field>" 引用当前态
@@ -482,6 +572,7 @@ export function validateAddComponentArgs(args: Record<string, unknown>): string[
  *  3. radio / select 必须有非空 options 数组（addComponent 阶段已经会拦，
  *     这里再兜底防止 validator 在 addComponent 校验之前先跑）
  *  4. 草稿里有 button → 必须有 trigger 绑它，否则点了没反应
+ *  5. label 数量必须 ≥ 可编辑字段数量 —— 用户需要知道每个控件是改什么的
  *
  * 校验不通过时 submit 返回 errors，LLM 在下一轮补完再 submit。
  */
@@ -525,6 +616,14 @@ export function installFormCompletenessValidator(builder: UIBuilder): void {
     if (buttons.length > 0 && triggers.length === 0) {
       errors.push(
         '草稿里有 button 但没有任何 addTrigger —— 按钮点了没反应，调 addTrigger 把它绑到业务 action'
+      )
+    }
+
+    // 规则 5：每个可编辑字段必须有 1 个 label —— 用户需要知道每个控件是改什么的
+    const labels = components.filter((c) => c.type === 'label')
+    if (editables.length > labels.length) {
+      errors.push(
+        `草稿里有 ${editables.length} 个可编辑字段（input/radio/select/checkbox），但只有 ${labels.length} 个 label —— 每个可编辑字段必须有 1 个 label（props.text = 字段中文名，如"饮食偏好"），用户需要知道每个控件是改什么的`
       )
     }
 
@@ -629,6 +728,12 @@ function renderAppendix(
       '| "用满200减30券" | `apply_coupon({coupon_id: "man200jian30"})` |',
       '| "把昵称改成张三" | `update_nickname({nickname: "张三"})` |',
       '| "把性别改成女" | `set_gender({gender: "female"})` |',
+      '| "把默认就餐方式改成堂食" | `update_default_dining_mode({mode: "dine_in"})` |',
+      '| "把默认餐具改成 2 份" | `update_default_utensil_count({count: 2})` |',
+      '| "把默认备注改成少油少盐" | `update_default_notes({notes: "少油少盐"})` |',
+      '| "把饮食偏好改成素食" | `update_dietary_preference({preference: "vegetarian"})` |',
+      '| "把口味改成中辣" | `update_taste_preference({preference: "medium"})` |',
+      '| "把饮食禁忌改成海鲜" | `update_dietary_restriction({restriction: "seafood"})` |',
       '| "提交订单" | `submit_order()` |',
       '| "用微信支付" | `pay_order({method: "wechat"})` |',
       '',
@@ -637,11 +742,22 @@ function renderAppendix(
       '当用户说"修改/编辑/设置/改 X" 类意图，但当前消息没有给出所有参数值时，' +
         '构造一个**编辑表单逻辑单元**。这个单元由以下组件构成（缺一不可）：',
       '',
-      '**1. 输入控件 —— 每个待编辑字段 1 个**：',
+      '**1. 输入控件 + 字段标签 —— 每个待编辑字段一组（label + input/radio/select/checkbox）**：',
       '- 文本/数字/密码 → `input`',
       '- 2-4 个互斥选项 → `radio`（options 先用 `get_options("<field>")` 拿）',
       '- 5+ 个选项 → `select`（同上）',
       '- 布尔 → `checkbox`',
+      '- **每个可编辑字段前必须有 1 个 `label` 组件**（`props.text` = 字段中文名），用户需要知道每个控件是改什么的',
+      '- `user.<field>` → 中文名映射：',
+      '  - `user.nickname` → "昵称"',
+      '  - `user.gender` → "性别"',
+      '  - `user.defaultDiningMode` → "默认就餐方式"',
+      '  - `user.defaultUtensilCount` → "默认餐具数量"',
+      '  - `user.defaultNotes` → "默认备注"',
+      '  - `user.dietaryPreference` → "饮食偏好"',
+      '  - `user.tastePreference` → "口味偏好"',
+      '  - `user.dietaryRestriction` → "饮食禁忌"',
+      '- 推荐顺序：先 `label`，再对应 input/radio/select/checkbox；提交按钮放最后',
       '',
       '**2. 当前态回显 —— 每个输入控件的 `value` 用 `"$ref:user.<field>"`**：',
       '编辑场景下用户打开表单要看到自己现有的数据，value 字段必须用 `$ref` 字符串引用当前用户态（不是字面值）。',
@@ -662,6 +778,7 @@ function renderAppendix(
       '',
       '### 完整性自检（submit 之前必走）',
       '- 用户消息里每个待编辑字段都有对应输入控件？',
+      '- **每个可编辑字段前都有 1 个 label**（`props.text` = 字段中文名）？',
       '- 每个输入控件的 value 都用 `"$ref:user.<field>"`？',
       '- 至少有一个 button + 至少一个 addTrigger？',
       '- radio/select 的 options 来自 domain 工具（不是硬编码）？',

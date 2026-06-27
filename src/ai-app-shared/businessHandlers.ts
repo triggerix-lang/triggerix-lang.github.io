@@ -1,5 +1,12 @@
 import type { Ref } from 'vue'
-import type { FoodApp, PaymentMethod } from '../composables/useFoodApp'
+import type {
+  DiningMode,
+  DietaryPreference,
+  DietaryRestriction,
+  FoodApp,
+  PaymentMethod,
+  TastePreference
+} from '../composables/useFoodApp'
 import { MENU_DATA } from './menuData'
 
 // ============================================================
@@ -39,7 +46,11 @@ export interface CreateHandlersOptions {
 }
 
 /**
- * 创建 6 个业务 action handler（同步动作，无 UI 模板）。
+ * 创建 12 个业务 action handler（同步动作，无 UI 模板）：
+ *  - 2 个基础用户 action（update_nickname / set_gender）
+ *  - 6 个默认偏好 action（update_default_* / update_dietary_* / update_taste_*）
+ *  - 3 个订单 CRUD + tab（add_to_order / remove_from_order / clear_orders / switch_tab）
+ *  - 5 个订单状态机 + 优惠券（submit_order / pay_order / cancel_order / apply_coupon / clear_coupon）
  *
  * 移除 show_* 异步工具：UI 模板改由 UIBuilder 原子化构造后直接 mount，
  * 模板里的 button.click trigger 通过 triggerix runtime 派发到同名 action。
@@ -73,6 +84,106 @@ export function createBusinessHandlers(opts: CreateHandlersOptions): Map<string,
     pushToast(`性别已更新：${label}`, 'success')
     return { ok: true }
   })
+
+  // ============================================================
+  // 默认偏好（6 个）—— 与 set_gender 同模式：validate → setFoodApp → toast
+  // ============================================================
+
+  const DINING_LABEL: Record<DiningMode, string> = {
+    dine_in: '堂食',
+    takeaway: '外带',
+    delivery: '配送'
+  }
+
+  const DIETARY_PREF_LABEL: Record<DietaryPreference, string> = {
+    meat: '荤',
+    vegetarian: '素',
+    halal: '清真',
+    unrestricted: '无忌口'
+  }
+
+  const TASTE_PREF_LABEL: Record<TastePreference, string> = {
+    none: '不辣',
+    mild: '微辣',
+    medium: '中辣'
+  }
+
+  const DIETARY_RESTRICTION_LABEL: Record<DietaryRestriction, string> = {
+    none: '无',
+    green_onion_garlic: '葱蒜',
+    seafood: '海鲜'
+  }
+
+  handlers.set('update_default_dining_mode', async ({ mode }: { mode: DiningMode }) => {
+    if (!['dine_in', 'takeaway', 'delivery'].includes(mode)) {
+      pushToast('无效的就餐方式', 'error')
+      return { ok: false, message: '无效 mode' }
+    }
+    foodApp.setDefaultDiningMode(mode)
+    pushToast(`默认就餐方式已更新：${DINING_LABEL[mode]}`, 'success')
+    return { ok: true }
+  })
+
+  handlers.set('update_default_utensil_count', async ({ count }: { count: number | string }) => {
+    const n = Number(count)
+    if (!Number.isInteger(n) || n < 0 || n > 3) {
+      pushToast('餐具数量必须是 0-3 之间的整数', 'error')
+      return { ok: false, message: '无效 count' }
+    }
+    foodApp.setDefaultUtensilCount(n)
+    pushToast(`默认餐具数量已更新：${n} 份`, 'success')
+    return { ok: true }
+  })
+
+  handlers.set('update_default_notes', async ({ notes }: { notes: string }) => {
+    const text = String(notes ?? '').trim()
+    if (!text) {
+      pushToast('备注不能为空', 'error')
+      return { ok: false, message: '备注不能为空' }
+    }
+    foodApp.setDefaultNotes(text)
+    pushToast(`默认备注已更新：${text}`, 'success')
+    return { ok: true }
+  })
+
+  handlers.set(
+    'update_dietary_preference',
+    async ({ preference }: { preference: DietaryPreference }) => {
+      if (!['meat', 'vegetarian', 'halal', 'unrestricted'].includes(preference)) {
+        pushToast('无效的饮食偏好', 'error')
+        return { ok: false, message: '无效 preference' }
+      }
+      foodApp.setDietaryPreference(preference)
+      pushToast(`饮食偏好已更新：${DIETARY_PREF_LABEL[preference]}`, 'success')
+      return { ok: true }
+    }
+  )
+
+  handlers.set(
+    'update_taste_preference',
+    async ({ preference }: { preference: TastePreference }) => {
+      if (!['none', 'mild', 'medium'].includes(preference)) {
+        pushToast('无效的口味偏好', 'error')
+        return { ok: false, message: '无效 preference' }
+      }
+      foodApp.setTastePreference(preference)
+      pushToast(`口味偏好已更新：${TASTE_PREF_LABEL[preference]}`, 'success')
+      return { ok: true }
+    }
+  )
+
+  handlers.set(
+    'update_dietary_restriction',
+    async ({ restriction }: { restriction: DietaryRestriction }) => {
+      if (!['none', 'green_onion_garlic', 'seafood'].includes(restriction)) {
+        pushToast('无效的饮食禁忌', 'error')
+        return { ok: false, message: '无效 restriction' }
+      }
+      foodApp.setDietaryRestriction(restriction)
+      pushToast(`饮食禁忌已更新：${DIETARY_RESTRICTION_LABEL[restriction]}`, 'success')
+      return { ok: true }
+    }
+  )
 
   handlers.set('add_to_order', async ({ dish_id, qty = 1 }: { dish_id: string; qty?: number }) => {
     const dish = MENU_DATA.find((d) => d.id === dish_id)

@@ -19,7 +19,6 @@ import { ref, type Ref } from 'vue'
 import { createRuntime, type RefResolver } from '@triggerix/runtime'
 import { mountNative, components as nativeComponents } from 'triggerix-ai-component-native'
 import { button, checkbox, input, select, uploadButton } from 'triggerix-ai-component-native'
-import type { ComponentDef } from '@triggerix-ai/component'
 import type { BuiltUI, ExecuteCallResult, UIBuilder } from '@triggerix-ai/builder'
 import type { ToolDefinition } from '@triggerix-ai/fn'
 import { createParser } from 'eventsource-parser'
@@ -220,7 +219,7 @@ export function useChatSession(opts: UseChatSessionOptions) {
     currentScope = mountNative(
       { components: built.components, triggers: built.triggers as never },
       wrapper,
-      nativeComponents as unknown as ReadonlyArray<ComponentDef<HTMLElement>>,
+      nativeComponents,
       (eventId, source, payload) => {
         void runtime.emit(eventId, source, payload)
       },

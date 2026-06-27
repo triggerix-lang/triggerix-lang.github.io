@@ -335,9 +335,14 @@ export function buildAtomicTools(
   ensureNativeEventsBound()
   const builder = new UIBuilder()
 
-  const componentTypes = (nativeComponents as ReadonlyArray<ComponentDef<HTMLElement>>).map(
-    (c) => c.type
-  )
+  // 注入编辑表单单元完整性校验：UIBuilder.submit() 时触发，
+  // 任何返回的非空 errors 直接返给 LLM，让它在下一轮补完再 submit。
+  // 这里只放"通用编辑表单"规则，不绑死任何具体业务字段。
+  installFormCompletenessValidator(builder)
+
+  const componentTypes = (
+    nativeComponents as unknown as ReadonlyArray<ComponentDef<HTMLElement>>
+  ).map((c) => c.type)
   const actionTypes = BUSINESS_ACTIONS.map((a) => a.type)
   const baseDomainTools = createDomainTools(src)
   const businessDomainTools = src.businessHandlers
@@ -346,7 +351,7 @@ export function buildAtomicTools(
   const domainTools = [...baseDomainTools, ...businessDomainTools]
 
   const appendix = renderAppendix(
-    nativeComponents as ReadonlyArray<ComponentDef<HTMLElement>>,
+    nativeComponents as unknown as ReadonlyArray<ComponentDef<HTMLElement>>,
     BUSINESS_ACTIONS,
     Boolean(src.businessHandlers)
   )
@@ -452,17 +457,79 @@ export function validateAddComponentArgs(args: Record<string, unknown>): string[
       errors.push(`Component "${name}" (label) 必填 props.text（标签文字）`)
     }
   }
-  // input / radio / select：value 应当用 "$ref:user.<field>" 引用当前状态（强烈建议，不是强制）
-  if ((type === 'input' || type === 'radio' || type === 'select') && props.value !== undefined) {
+  // input / radio / select：value 必填，且必须是 "$ref:user.<field>" 字符串。
+  // 编辑表单语义下，value 表示"用户当前的数据"，必须回显给用户；留空会让用户看到空表单。
+  if (type === 'input' || type === 'radio' || type === 'select') {
     const v = props.value
-    if (typeof v === 'string' && !v.startsWith('$ref:')) {
+    if (typeof v !== 'string' || !v.startsWith('$ref:')) {
       errors.push(
-        `Component "${name}" (${type}) 的 props.value 建议用 "$ref:user.<field>" 引用当前状态，让用户打开表单就看到自己当前的数据`
+        `Component "${name}" (${type}) 必填 props.value，且必须是 "$ref:user.<field>" 字符串 —— 引用当前用户态，让用户打开表单看到自己的数据`
       )
     }
   }
 
   return errors.length === 0 ? null : errors
+}
+
+/**
+ * 注入"编辑表单单元完整性"校验到 UIBuilder.onBeforeSubmit。
+ *
+ * 校验 4 条通用规则（不绑死任何具体业务字段）：
+ *  1. 草稿里有可编辑字段（input / radio / select / checkbox）→ 必须有 button
+ *     否则用户改完没法提交
+ *  2. 每个可编辑字段的 value 必须用 "$ref:user.<field>" 引用当前态
+ *     否则用户打开表单看到的是空值，违反"修改"语义
+ *  3. radio / select 必须有非空 options 数组（addComponent 阶段已经会拦，
+ *     这里再兜底防止 validator 在 addComponent 校验之前先跑）
+ *  4. 草稿里有 button → 必须有 trigger 绑它，否则点了没反应
+ *
+ * 校验不通过时 submit 返回 errors，LLM 在下一轮补完再 submit。
+ */
+export function installFormCompletenessValidator(builder: UIBuilder): void {
+  builder.onBeforeSubmit((components, triggers) => {
+    const errors: string[] = []
+    const editables = components.filter((c) =>
+      ['input', 'radio', 'select', 'checkbox'].includes(c.type)
+    )
+    const buttons = components.filter((c) => c.type === 'button')
+
+    // 规则 1：可编辑字段 ↔ 提交按钮
+    if (editables.length > 0 && buttons.length === 0) {
+      errors.push(
+        '草稿里有可编辑字段但没有提交按钮：加一个 button（label 用动词如"保存/修改/更新"）' +
+          ' + addTrigger 绑定到对应的业务 action'
+      )
+    }
+
+    // 规则 2：每个可编辑字段的 value 必须用 $ref:user.<field>
+    for (const c of editables) {
+      const v = (c.props ?? {}).value
+      if (typeof v !== 'string' || !v.startsWith('$ref:')) {
+        errors.push(
+          `组件 "${c.name}" (${c.type}) 的 props.value 必须用 "$ref:user.<field>" 字符串 —— 编辑表单要让用户打开就看到自己现有的数据`
+        )
+      }
+    }
+
+    // 规则 3：radio / select 的 options 必须是非空数组（兜底，正常 addComponent 已拦）
+    for (const c of components.filter((x) => x.type === 'radio' || x.type === 'select')) {
+      const opts = (c.props ?? {}).options
+      if (!Array.isArray(opts) || opts.length === 0) {
+        errors.push(
+          `组件 "${c.name}" (${c.type}) 缺 props.options —— 先调 get_options("<field>") / get_menu() / get_coupons() / get_payment_methods() 拿数据`
+        )
+      }
+    }
+
+    // 规则 4：有 button 必须有 trigger
+    if (buttons.length > 0 && triggers.length === 0) {
+      errors.push(
+        '草稿里有 button 但没有任何 addTrigger —— 按钮点了没反应，调 addTrigger 把它绑到业务 action'
+      )
+    }
+
+    return errors
+  })
 }
 
 // ============================================================
@@ -565,54 +632,47 @@ function renderAppendix(
       '| "提交订单" | `submit_order()` |',
       '| "用微信支付" | `pay_order({method: "wechat"})` |',
       '',
-      '### 方式 B — 构造 UI 表单（用户表达了意图但**没给完整参数**）',
+      '### 方式 B — 构造"编辑表单"逻辑单元（用户表达了意图但**没给完整参数**）',
       '',
-      '**典型场景**：用户说"我要修改昵称和性别"但没说改成什么 —— 必须让用户在 app 里填。',
+      '当用户说"修改/编辑/设置/改 X" 类意图，但当前消息没有给出所有参数值时，' +
+        '构造一个**编辑表单逻辑单元**。这个单元由以下组件构成（缺一不可）：',
       '',
-      '**完整的多字段表单示例**（注意每一项都不能漏）：',
+      '**1. 输入控件 —— 每个待编辑字段 1 个**：',
+      '- 文本/数字/密码 → `input`',
+      '- 2-4 个互斥选项 → `radio`（options 先用 `get_options("<field>")` 拿）',
+      '- 5+ 个选项 → `select`（同上）',
+      '- 布尔 → `checkbox`',
       '',
-      '```',
-      '// 1. 表单控件（每个必填 props 都一次性传齐）',
-      'addComponent("input", "nickInput", {',
-      '  value: "$ref:user.nickname",       // ← 用 $ref 引用当前状态，用户打开就看到自己现有昵称',
-      '  placeholder: "新昵称"',
-      '})',
-      'addComponent("radio", "genderRadio", {',
-      '  options: [...],                   // ← radio.options 必填，从 get_options("user.gender") 拿',
-      '  value: "$ref:user.gender"         // ← 用 $ref 引用当前选中的性别',
-      '})',
+      '**2. 当前态回显 —— 每个输入控件的 `value` 用 `"$ref:user.<field>"`**：',
+      '编辑场景下用户打开表单要看到自己现有的数据，value 字段必须用 `$ref` 字符串引用当前用户态（不是字面值）。',
+      '新建场景（无当前态）才用字面默认值。',
       '',
-      '// 2. 提交按钮',
-      'addComponent("button", "saveBtn", { label: "保存" })  // ← button.label 必填',
+      '**3. 数据源前置 —— radio/select 必须先调 domain 工具**：',
+      'addComponent radio/select 之前，**必须**先调对应的 domain 工具' +
+        '（`get_options("<field>")` / `get_menu()` / `get_coupons()` / `get_payment_methods()`）' +
+        '拿到合法 value/label 数组，再传给 `props.options`。硬编码或瞎填会被校验拦截。',
       '',
-      '// 3. 把提交按钮的 click 绑定到业务 action（actionParams 用 $ref 读组件当前值）',
-      'addTrigger("button.click", "saveBtn", "update_nickname", {',
-      '  nickname: "$ref:nickInput.value"  // ← 注意是 "$ref:<name>.value" 不是 "$ref:<name>"',
-      '})',
-      'addTrigger("button.click", "saveBtn", "set_gender", {',
-      '  gender: "$ref:genderRadio.value"',
-      '})',
+      '**4. 提交按钮 + addTrigger 绑定**：',
+      '- 1 个 `button`，`label` 用动词（保存/修改/更新/应用）',
+      '- 通过 `addTrigger("button.click", "<按钮名>", "<actionType>", { ... })` 把它的 click 事件绑到对应的业务 action',
+      '- 多字段表单调多次 `addTrigger`（eventType/eventSource 相同会自动 sequence 串行执行）',
+      '- `actionParams` 里引用组件当前值用 `"$ref:<componentName>.value"`（注意是 `.value`，不要省略）',
       '',
-      '// 4. 最后必须调 submit —— 不调就只是草稿，不会显示',
-      'submit',
-      '```',
+      '**5. 最后必须调 `submit`**：不调 submit 只是草稿，不会显示。submit 时会跑完整性校验（缺组件 / 缺 trigger / value 不规范），错误信息直接告诉你具体缺什么，**补完再 submit**。',
       '',
-      '### ⚠️ 构造 UI 表单的强制要求（漏一个就跑不通）',
+      '### 完整性自检（submit 之前必走）',
+      '- 用户消息里每个待编辑字段都有对应输入控件？',
+      '- 每个输入控件的 value 都用 `"$ref:user.<field>"`？',
+      '- 至少有一个 button + 至少一个 addTrigger？',
+      '- radio/select 的 options 来自 domain 工具（不是硬编码）？',
       '',
-      '1. **必填 props 一次性传齐**（否则会被校验拦下返错）：',
-      '   - `button` / `uploadButton` 必填 `label`',
-      '   - `radio` / `select` 必填 `options`（**非空数组**，从 get_options / get_menu / get_coupons / get_payment_methods 拿）',
-      '   - `image` 必填 `src`，`label` 必填 `text`',
-      '2. **input / radio / select 的 `value` 用 `"$ref:user.<field>"`** 引用当前状态（让用户看到自己当前的数据）',
-      '3. **actionParams 引用组件值用 `"$ref:<name>.value"`**（不要省略 `.value`，不要写 `{$ref: "..."}` 对象形式）',
-      '4. **多字段表单必须有一个提交按钮** + addTrigger 绑到最终 action',
-      '5. **最后必须调 `submit`** —— 不调就是草稿，不会显示出来',
+      '任何一项不满足 → 补完再 submit。**残缺草稿会被校验拦截**，用户看到空表单没法救。',
       '',
       '### 不要两者都做（会重复执行）',
       '',
       '判断标准：**当前这条 user message 里有没有给出所有必需参数？**',
       '- 是 → 方式 A（直接调）',
-      '- 否 → 方式 B（构造表单）',
+      '- 否 → 方式 B（编辑表单单元）',
       '',
       '调完 action 后只用 1 句话告诉用户结果（如"好的，已加蒸羊羔 × 1"），不要再问下一句。',
       ''

@@ -31,11 +31,13 @@ To make this possible, we decompose an application into three layers:
 
 **Example scenario:**
 
-> The user says: "I'd like to change my avatar."
+> The user says: "I want to modify my dietary preferences."
 >
-> The AI generates a card component—the current avatar on the left, the prompt text "Click to upload an image" on the right, and a confirm button below. The component's structure, styling, and interaction events are entirely produced by the AI based on semantics, with no manual coding required.
+> The AI generates a preference form component with multiple options: dietary preference (meat / vegetarian / halal / unrestricted), taste level (none / mild / medium), and dietary restrictions (none / garlic & onion / seafood). Developers define the business logic handlers (e.g., validating inputs, saving preferences), while Triggerix and AI orchestrate the UI structure, styling, and interaction events that wire everything together at runtime.
 
 At the current stage, Triggerix has achieved the ability to describe arbitrary interaction events using JSON Schema and drive their execution at runtime.
+
+![Triggerix Example](.github/images/example.png)
 
 ### Related Projects
 

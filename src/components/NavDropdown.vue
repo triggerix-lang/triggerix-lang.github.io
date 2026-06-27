@@ -4,6 +4,7 @@ import { ref } from 'vue'
 
 defineProps<{
   label: string
+  active?: boolean
 }>()
 
 const isOpen = ref(false)
@@ -37,7 +38,8 @@ function onMouseLeave() {
     @mouseleave="onMouseLeave"
   >
     <div
-      class="cursor-pointer flex items-center gap-1 text-#aaa no-underline transition-colors hover:text-primary"
+      class="cursor-pointer flex items-center gap-1 no-underline transition-colors hover:text-primary"
+      :class="active ? 'text-primary' : 'text-#aaa'"
     >
       <span>{{ label }}</span>
       <svg

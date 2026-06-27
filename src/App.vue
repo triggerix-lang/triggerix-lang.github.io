@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { useLocalStorage } from '@vueuse/core'
 import { defineAsyncComponent, onBeforeUnmount, useTemplateRef, watch } from 'vue'
-import { RouterLink, RouterView, useRoute } from 'vue-router'
-import NavDropdown from './components/NavDropdown.vue'
+import { RouterView, useRoute } from 'vue-router'
+import AppHeader from './components/AppHeader.vue'
 import { useCodePanel } from './composables/useCodePanel'
 
 // Monaco is ~2MB of WebAssembly + JS. Defer the import until the viewer is
@@ -10,18 +10,11 @@ import { useCodePanel } from './composables/useCodePanel'
 // the homepage, ai-app and any non-demo navigation don't pay the cost.
 const CodeViewer = defineAsyncComponent(() => import('./components/code-viewer/CodeViewer.vue'))
 
-const demos = [
-  { to: '/demo/button-click', label: '按钮点击' },
-  { to: '/demo/input-focus', label: '输入聚焦' },
-  { to: '/demo/button-modify-input', label: '按钮改值' },
-  { to: '/demo/carousel-switch', label: '轮播切换' },
-  { to: '/demo/carousel-linkage', label: '轮播联动' }
-]
-
 const { files, triggersJson, visible } = useCodePanel()
 
-// 离开 demo 路由时隐藏面板（首页/未匹配路由）
 const route = useRoute()
+
+// 离开 demo 路由时隐藏面板（首页/未匹配路由）
 watch(
   () => route.path,
   (path) => {
@@ -86,38 +79,7 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="h-screen flex flex-col bg-#121212 text-#e0e0e0 overflow-hidden">
-    <header class="px-8 py-4 border-b border-#2a2a2a bg-#1a1a1a flex items-center gap-6">
-      <RouterLink to="/" class="text-primary font-semibold tracking-wide no-underline">
-        Triggerix
-      </RouterLink>
-      <nav class="flex gap-5 text-sm">
-        <RouterLink
-          to="/"
-          class="text-#aaa no-underline transition-colors hover:text-primary"
-          exact-active-class="text-primary"
-        >
-          首页
-        </RouterLink>
-        <NavDropdown label="触发器">
-          <RouterLink
-            v-for="d in demos"
-            :key="d.to"
-            :to="d.to"
-            class="block px-4 py-2 text-#aaa text-sm no-underline transition-colors hover:bg-#2a2a2a hover:text-primary"
-            active-class="text-primary"
-          >
-            {{ d.label }}
-          </RouterLink>
-        </NavDropdown>
-        <RouterLink
-          to="/ai-app"
-          class="text-#aaa no-underline transition-colors hover:text-primary"
-          active-class="text-primary"
-        >
-          AI 应用
-        </RouterLink>
-      </nav>
-    </header>
+    <AppHeader />
     <div ref="container" class="flex-1 min-h-0 flex flex-col">
       <main class="flex-1 min-h-0 flex flex-col">
         <RouterView />
